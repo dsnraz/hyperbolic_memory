@@ -1,0 +1,18 @@
+# Model checkpoints
+checkpoints/
+checkpoints2/
+checkpoints_locomo/
+
+# data/ 下名称包含 memory 的目录（如 hierarchical_memory*、memory_running 等）
+data/*memory*/
+data/*try_retriever2_test_built*/
+data/*vector_store*/
+*.json
+
+scripts/*job*/
+# 本地大体积 wheel，避免推送到远端
+*.whl
+
+# Python
+__pycache__/
+*.py[cod]

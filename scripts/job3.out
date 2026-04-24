@@ -1,0 +1,502 @@
+/share/home/leiyh5/Memory/model/retrievers/hyperbolic_retriver.py:345: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  checkpoint = torch.load(resolved_path, map_location="cpu")
+[计数器恢复] DOMAIN 层级: 已有 137 个节点，新节点 ID将从 137 开始
+[计数器恢复] CATEGORY 层级: 已有 332 个节点，新节点 ID将从 332 开始
+[计数器恢复] KEYWORD 层级: 已有 691 个节点，新节点 ID将从 691 开始
+[计数器恢复] DIALOGUE 层级: 已有 419 个节点，新节点 ID将从 419 开始
+正在加载嵌入模型: /share/home/leiyh5/.cache/huggingface/hub/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf
+嵌入模型加载完成，维度: 384
+欧式检索结果：
+--------------------------------
+该层level HierarchyLevel.DOMAIN
+该层候选数量 137
+domain_8 节点信息
+节点内容: Education and Career
+节点父节点: []
+节点子节点: ['category_7']
+节点得分: 0.4955300798501643
+domain_9 节点信息
+节点内容: Career Discussion
+节点父节点: []
+节点子节点: ['category_8']
+节点得分: 0.4021336144170142
+domain_38 节点信息
+节点内容: career choice
+节点父节点: []
+节点子节点: ['category_61']
+节点得分: 0.40118374153856423
+domain_25 节点信息
+节点内容: Education
+节点父节点: []
+节点子节点: ['category_33', 'category_76', 'category_82', 'category_89', 'category_119', 'category_120', 'category_155', 'category_253', 'category_294', 'category_327']
+节点得分: 0.3938371036143816
+domain_97 节点信息
+节点内容: Education and Parenting
+节点父节点: []
+节点子节点: ['category_187']
+节点得分: 0.3709088258434365
+domain_123 节点信息
+节点内容: Music and Arts
+节点父节点: []
+节点子节点: ['category_272']
+节点得分: 0.342759689641077
+domain_78 节点信息
+节点内容: Education and Youth
+节点父节点: []
+节点子节点: ['category_150']
+节点得分: 0.3348603547015514
+domain_26 节点信息
+节点内容: Gender Studies
+节点父节点: []
+节点子节点: ['category_35']
+节点得分: 0.33395538609236836
+domain_44 节点信息
+节点内容: Hobbies and Interests
+节点父节点: []
+节点子节点: ['category_73']
+节点得分: 0.3094023674626643
+domain_92 节点信息
+节点内容: astronomy
+节点父节点: []
+节点子节点: ['category_175']
+节点得分: 0.30638749479976063
+--------------------------------
+--------------------------------
+该层level HierarchyLevel.CATEGORY
+该层候选数量 19
+category_7 节点信息
+节点内容: Education Planning
+节点父节点: ['domain_8']
+节点子节点: ['keyword_22', 'keyword_23', 'keyword_24']
+节点得分: 0.40751497334464437
+category_253 节点信息
+节点内容: Student Engagement
+节点父节点: ['domain_25']
+节点子节点: ['keyword_343', 'keyword_550', 'keyword_551']
+节点得分: 0.3740095248845745
+category_76 节点信息
+节点内容: School Craft
+节点父节点: ['domain_25']
+节点子节点: ['keyword_174', 'keyword_177', 'keyword_178']
+节点得分: 0.35388069073930445
+category_119 节点信息
+节点内容: School Activity
+节点父节点: ['domain_25']
+节点子节点: ['keyword_3', 'keyword_181', 'keyword_172']
+节点得分: 0.34537592439101483
+category_89 节点信息
+节点内容: Childhood Books
+节点父节点: ['domain_25']
+节点子节点: ['keyword_214', 'keyword_215', 'keyword_216']
+节点得分: 0.30918642437875676
+category_155 节点信息
+节点内容: Mentorship
+节点父节点: ['domain_25']
+节点子节点: ['keyword_355', 'keyword_13', 'keyword_356']
+节点得分: 0.2890700464200129
+category_33 节点信息
+节点内容: School Event
+节点父节点: ['domain_25']
+节点子节点: ['keyword_78', 'keyword_79', 'keyword_80']
+节点得分: 0.2797564649974684
+category_61 节点信息
+节点内容: mental health profession
+节点父节点: ['domain_38']
+节点子节点: ['keyword_28', 'keyword_29', 'keyword_146']
+节点得分: 0.27974475213744526
+category_120 节点信息
+节点内容: Art Projects
+节点父节点: ['domain_25', 'domain_12']
+节点子节点: ['keyword_170', 'keyword_182', 'keyword_277', 'keyword_536', 'keyword_311', 'keyword_537']
+节点得分: 0.22791056455739797
+category_73 节点信息
+节点内容: Creative Activities
+节点父节点: ['domain_44']
+节点子节点: ['keyword_169', 'keyword_170', 'keyword_171']
+节点得分: 0.2078653505150866
+--------------------------------
+--------------------------------
+该层level HierarchyLevel.KEYWORD
+该层候选数量 32
+keyword_146 节点信息
+节点内容: career
+节点父节点: ['category_61']
+节点子节点: ['dialogue_68']
+节点得分: 0.38884845203665
+keyword_216 节点信息
+节点内容: educational books
+节点父节点: ['category_89']
+节点子节点: ['dialogue_100']
+节点得分: 0.38516313223778714
+keyword_23 节点信息
+节点内容: career options
+节点父节点: ['category_7']
+节点子节点: ['dialogue_8']
+节点得分: 0.3762663155113853
+keyword_80 节点信息
+节点内容: student involvement
+节点父节点: ['category_33']
+节点子节点: ['dialogue_35']
+节点得分: 0.33323234512916616
+keyword_22 节点信息
+节点内容: edu
+节点父节点: ['category_7']
+节点子节点: ['dialogue_8']
+节点得分: 0.31672688152426726
+keyword_214 节点信息
+节点内容: kids' books
+节点父节点: ['category_89']
+节点子节点: ['dialogue_100']
+节点得分: 0.28285644944929367
+keyword_537 节点信息
+节点内容: projects
+节点父节点: ['category_120', 'category_257']
+节点子节点: ['dialogue_302', 'dialogue_315']
+节点得分: 0.25846029181518976
+keyword_277 节点信息
+节点内容: personalities
+节点父节点: ['category_120']
+节点子节点: ['dialogue_139']
+节点得分: 0.24964821126458792
+keyword_177 节点信息
+节点内容: class
+节点父节点: ['category_76']
+节点子节点: ['dialogue_83']
+节点得分: 0.24051730042767186
+keyword_170 节点信息
+节点内容: pottery
+节点父节点: ['category_73', 'category_74', 'category_78', 'category_80', 'category_120', 'category_50', 'category_41', 'category_228', 'category_280', 'category_282', 'category_296']
+节点子节点: ['dialogue_80', 'dialogue_81', 'dialogue_85', 'dialogue_87', 'dialogue_139', 'dialogue_233', 'dialogue_234', 'dialogue_274', 'dialogue_341', 'dialogue_342', 'dialogue_344', 'dialogue_361']
+节点得分: 0.22277420636149714
+--------------------------------
+--------------------------------
+该层level HierarchyLevel.DIALOGUE
+该层候选数量 19
+dialogue_8 节点信息
+节点内容: 1:56 pm on 8 May, 2023
+Caroline: Gonna continue my edu and check out career options, which is pretty exciting!
+节点父节点: ['keyword_22', 'keyword_23', 'keyword_24']
+节点子节点: []
+节点得分: 0.5464613215593487
+dialogue_139 节点信息
+节点内容: 1:51 pm on 15 July, 2023
+Caroline: Aww, that's so sweet! That cup is so cute. It's awesome to see how kids show their personalities through art. What other creative projects do you do with them, besides pottery?
+节点父节点: ['keyword_170', 'keyword_182', 'keyword_277']
+节点子节点: []
+节点得分: 0.35109809860724656
+dialogue_68 节点信息
+节点内容: 10:37 am on 27 June, 2023
+Caroline: Lately, I've been looking into counseling and mental health as a career. I want to help people who have gone through the same things as me.
+节点父节点: ['keyword_28', 'keyword_29', 'keyword_146']
+节点子节点: []
+节点得分: 0.35058287453601167
+dialogue_315 节点信息
+节点内容: 3:19 pm on 28 August, 2023
+Melanie: That's great news, Caroline! Love seeing your dedication to helping others. Any specific projects or activities you're looking forward to there?
+节点父节点: ['keyword_151', 'keyword_152', 'keyword_537']
+节点子节点: []
+节点得分: 0.3485199933064728
+dialogue_80 节点信息
+节点内容: 1:36 pm on 3 July, 2023
+Caroline: Wow, Melanie! I'm getting creative too, just learning the piano. What made you try pottery?
+节点父节点: ['keyword_169', 'keyword_170', 'keyword_171']
+节点子节点: []
+节点得分: 0.3482727278504762
+dialogue_100 节点信息
+节点内容: 8:18 pm on 6 July, 2023
+Caroline: I've got lots of kids' books- classics, stories from different cultures, educational books, all of that. What's a favorite book you remember from your childhood?
+节点父节点: ['keyword_214', 'keyword_215', 'keyword_216']
+节点子节点: []
+节点得分: 0.32872698270134687
+dialogue_35 节点信息
+节点内容: 7:55 pm on 9 June, 2023
+Caroline: Hey Melanie! How's it going? I wanted to tell you about my school event last week. It was awesome! I talked about my transgender journey and encouraged students to get involved in the LGBTQ community. It was great to see their reactions. It made me reflect on how far I've come since I started transitioning three years ago.
+节点父节点: ['keyword_78', 'keyword_79', 'keyword_80']
+节点子节点: []
+节点得分: 0.3194956618896694
+dialogue_234 节点信息
+节点内容: 1:50 pm on 17 August, 2023
+Caroline: Sure thing, Melanie! Can't wait to see your pottery project.  I'm happy you found something that makes you happy. Show me when you can!
+节点父节点: ['keyword_170', 'keyword_436', 'keyword_119']
+节点子节点: []
+节点得分: 0.28051636808709923
+dialogue_87 节点信息
+节点内容: 1:36 pm on 3 July, 2023
+Melanie: Thanks, Caroline! I'm excited to see where pottery takes me. Anything coming up you're looking forward to?
+节点父节点: ['keyword_170', 'keyword_185', 'keyword_186']
+节点子节点: []
+节点得分: 0.27375129164912065
+dialogue_342 节点信息
+节点内容: 12:09 am on 13 September, 2023
+Caroline: Melanie, those bowls are amazing! They each have such cool designs. I love that you chose pottery for your art. Painting and drawing have helped me express my feelings and explore my gender identity. Creating art was really important to me during my transition - it helped me understand and accept myself. I'm so grateful.
+节点父节点: ['keyword_170', 'keyword_182', 'keyword_84']
+节点子节点: []
+节点得分: 0.25626035002225583
+--------------------------------
+双曲检索结果：
+--------------------------------
+该层level HierarchyLevel.DOMAIN
+该层候选数量 137
+domain_8 节点信息
+节点内容: Education and Career
+节点父节点: []
+节点子节点: ['category_7']
+节点得分: 0.6274700823259172
+domain_25 节点信息
+节点内容: Education
+节点父节点: []
+节点子节点: ['category_33', 'category_76', 'category_82', 'category_89', 'category_119', 'category_120', 'category_155', 'category_253', 'category_294', 'category_327']
+节点得分: 0.6151738409318137
+domain_9 节点信息
+节点内容: Career Discussion
+节点父节点: []
+节点子节点: ['category_8']
+节点得分: 0.6131263482658271
+domain_26 节点信息
+节点内容: Gender Studies
+节点父节点: []
+节点子节点: ['category_35']
+节点得分: 0.610819251091429
+domain_38 节点信息
+节点内容: career choice
+节点父节点: []
+节点子节点: ['category_61']
+节点得分: 0.6103054405354001
+domain_41 节点信息
+节点内容: Personal Achievement
+节点父节点: []
+节点子节点: ['category_68', 'category_198']
+节点得分: 0.6047220626563576
+domain_10 节点信息
+节点内容: Career Advice
+节点父节点: []
+节点子节点: ['category_10', 'category_27']
+节点得分: 0.603971378381955
+domain_133 节点信息
+节点内容: Child Psychology
+节点父节点: []
+节点子节点: ['category_313']
+节点得分: 0.6035588757681588
+domain_97 节点信息
+节点内容: Education and Parenting
+节点父节点: []
+节点子节点: ['category_187']
+节点得分: 0.6010371366453611
+domain_78 节点信息
+节点内容: Education and Youth
+节点父节点: []
+节点子节点: ['category_150']
+节点得分: 0.5969855624012324
+--------------------------------
+--------------------------------
+该层level HierarchyLevel.CATEGORY
+该层候选数量 21
+category_7 节点信息
+节点内容: Education Planning
+节点父节点: ['domain_8']
+节点子节点: ['keyword_22', 'keyword_23', 'keyword_24']
+节点得分: 0.625885067388566
+category_253 节点信息
+节点内容: Student Engagement
+节点父节点: ['domain_25']
+节点子节点: ['keyword_343', 'keyword_550', 'keyword_551']
+节点得分: 0.6188285903021288
+category_10 节点信息
+节点内容: Professional Skills
+节点父节点: ['domain_10']
+节点子节点: ['keyword_30', 'keyword_31', 'keyword_32']
+节点得分: 0.6105879693190865
+category_76 节点信息
+节点内容: School Craft
+节点父节点: ['domain_25']
+节点子节点: ['keyword_174', 'keyword_177', 'keyword_178']
+节点得分: 0.6073272032097102
+category_119 节点信息
+节点内容: School Activity
+节点父节点: ['domain_25']
+节点子节点: ['keyword_3', 'keyword_181', 'keyword_172']
+节点得分: 0.6066864469142633
+category_61 节点信息
+节点内容: mental health profession
+节点父节点: ['domain_38']
+节点子节点: ['keyword_28', 'keyword_29', 'keyword_146']
+节点得分: 0.6050776021779772
+category_155 节点信息
+节点内容: Mentorship
+节点父节点: ['domain_25']
+节点子节点: ['keyword_355', 'keyword_13', 'keyword_356']
+节点得分: 0.6038702266944349
+category_294 节点信息
+节点内容: Study Tips
+节点父节点: ['domain_25']
+节点子节点: ['keyword_625', 'keyword_626', 'keyword_627']
+节点得分: 0.6037104486946283
+category_89 节点信息
+节点内容: Childhood Books
+节点父节点: ['domain_25']
+节点子节点: ['keyword_214', 'keyword_215', 'keyword_216']
+节点得分: 0.599302100845274
+category_35 节点信息
+节点内容: LGBTQ+ Advocacy
+节点父节点: ['domain_26']
+节点子节点: ['keyword_84', 'keyword_85', 'keyword_86']
+节点得分: 0.5960417821437602
+--------------------------------
+--------------------------------
+该层level HierarchyLevel.KEYWORD
+该层候选数量 30
+keyword_23 节点信息
+节点内容: career options
+节点父节点: ['category_7']
+节点子节点: ['dialogue_8']
+节点得分: 0.6241412355731742
+keyword_146 节点信息
+节点内容: career
+节点父节点: ['category_61']
+节点子节点: ['dialogue_68']
+节点得分: 0.6223645877365299
+keyword_22 节点信息
+节点内容: edu
+节点父节点: ['category_7']
+节点子节点: ['dialogue_8']
+节点得分: 0.6194794593343574
+keyword_216 节点信息
+节点内容: educational books
+节点父节点: ['category_89']
+节点子节点: ['dialogue_100']
+节点得分: 0.6139294281893867
+keyword_214 节点信息
+节点内容: kids' books
+节点父节点: ['category_89']
+节点子节点: ['dialogue_100']
+节点得分: 0.5983946736747291
+keyword_32 节点信息
+节点内容: counselor
+节点父节点: ['category_10']
+节点子节点: ['dialogue_11']
+节点得分: 0.5977031493887008
+keyword_28 节点信息
+节点内容: counseling
+节点父节点: ['category_9', 'category_61', 'category_62', 'category_64', 'category_65', 'category_71', 'category_98', 'category_100']
+节点子节点: ['dialogue_10', 'dialogue_68', 'dialogue_69', 'dialogue_71', 'dialogue_72', 'dialogue_78', 'dialogue_94', 'dialogue_112', 'dialogue_114']
+节点得分: 0.5909689261147593
+keyword_84 节点信息
+节点内容: gender identity
+节点父节点: ['category_35', 'category_78']
+节点子节点: ['dialogue_37', 'dialogue_342']
+节点得分: 0.5889764421934806
+keyword_3 节点信息
+节点内容: kids
+节点父节点: ['category_1', 'category_16', 'category_23', 'category_31', 'category_32', 'category_45', 'category_85', 'category_58', 'category_119', 'category_146', 'category_167', 'category_168', 'category_169', 'category_258', 'category_311', 'category_312', 'category_313', 'category_318', 'category_293', 'category_327']
+节点子节点: ['dialogue_1', 'dialogue_17', 'dialogue_24', 'dialogue_32', 'dialogue_33', 'dialogue_48', 'dialogue_95', 'dialogue_136', 'dialogue_137', 'dialogue_138', 'dialogue_174', 'dialogue_198', 'dialogue_199', 'dialogue_200', 'dialogue_307', 'dialogue_316', 'dialogue_385', 'dialogue_386', 'dialogue_387', 'dialogue_396', 'dialogue_407', 'dialogue_409']
+节点得分: 0.5875159733335547
+keyword_31 节点信息
+节点内容: understanding
+节点父节点: ['category_10', 'category_231', 'category_249']
+节点子节点: ['dialogue_11', 'dialogue_280', 'dialogue_305']
+节点得分: 0.5871339357855854
+--------------------------------
+--------------------------------
+该层level HierarchyLevel.DIALOGUE
+该层候选数量 38
+dialogue_8 节点信息
+节点内容: 1:56 pm on 8 May, 2023
+Caroline: Gonna continue my edu and check out career options, which is pretty exciting!
+节点父节点: ['keyword_22', 'keyword_23', 'keyword_24']
+节点子节点: []
+节点得分: 0.6603768779828413
+dialogue_68 节点信息
+节点内容: 10:37 am on 27 June, 2023
+Caroline: Lately, I've been looking into counseling and mental health as a career. I want to help people who have gone through the same things as me.
+节点父节点: ['keyword_28', 'keyword_29', 'keyword_146']
+节点子节点: []
+节点得分: 0.6193422483211121
+dialogue_387 节点信息
+节点内容: 6:55 pm on 20 October, 2023
+Caroline: Kids are amazingly resilient in tough situations. They have an amazing ability to bounce back.
+节点父节点: ['keyword_664', 'keyword_3', 'keyword_665']
+节点子节点: []
+节点得分: 0.6151472477162444
+dialogue_409 节点信息
+节点内容: 9:55 am on 22 October, 2023
+Melanie: I totally agree, Caroline. Everyone deserves that. It's awesome to see how passionate you are about helping these kids.
+节点父节点: ['keyword_202', 'keyword_682', 'keyword_3']
+节点子节点: []
+节点得分: 0.613022913468894
+dialogue_114 节点信息
+节点内容: 4:33 pm on 12 July, 2023
+Caroline: I struggled with mental health, and support I got was really helpful. It made me realize how important it is for others to have a support system. So, I started looking into counseling and mental health career options, so I could help other people on their own journeys like I was helped.
+节点父节点: ['keyword_29', 'keyword_104', 'keyword_28']
+节点子节点: []
+节点得分: 0.6079724208677568
+dialogue_10 节点信息
+节点内容: 1:56 pm on 8 May, 2023
+Caroline: I'm keen on counseling or working in mental health - I'd love to support those with similar issues.
+节点父节点: ['keyword_28', 'keyword_29', 'keyword_13']
+节点子节点: []
+节点得分: 0.6057676702017523
+dialogue_316 节点信息
+节点内容: 3:19 pm on 28 August, 2023
+Caroline: We're putting together a talent show for the kids next month. I'm looking forward to seeing how much fun everyone has and how proud they'll feel of their talents!
+节点父节点: ['keyword_552', 'keyword_3', 'keyword_553']
+节点子节点: []
+节点得分: 0.6042267234618789
+dialogue_17 节点信息
+节点内容: 1:56 pm on 8 May, 2023
+Melanie: Yep, Caroline. Taking care of ourselves is vital. I'm off to go swimming with the kids. Talk to you soon!
+节点父节点: ['keyword_46', 'keyword_3', 'keyword_47']
+节点子节点: []
+节点得分: 0.6016400963343316
+dialogue_95 节点信息
+节点内容: 8:18 pm on 6 July, 2023
+Melanie: That's awesome, Caroline! Congrats on following your dreams. Yesterday I took the kids to the museum - it was so cool spending time with them and seeing their eyes light up!
+节点父节点: ['keyword_203', 'keyword_3', 'keyword_204']
+节点子节点: []
+节点得分: 0.6015756367191132
+dialogue_385 节点信息
+节点内容: 6:55 pm on 20 October, 2023
+Caroline: The kids look so cute, Mel! I bet they bring lots of joy. How did they handle the accident?
+节点父节点: ['keyword_3', 'keyword_656', 'keyword_184']
+节点子节点: []
+节点得分: 0.5985554723773434
+--------------------------------
+1:56 pm on 8 May, 2023
+Caroline: I went to a LGBTQ support group yesterday and it was so powerful.
+['keyword_6', 'keyword_7', 'keyword_8']
+support group
+关于 keyword_6 的得分
+欧式检索得分： -0.0027497088027271435
+双曲检索得分： 0.5635144902004422
+LGBTQ
+关于 keyword_7 的得分
+欧式检索得分： 0.16563668929360814
+双曲检索得分： 0.5851833089187457
+powerful
+关于 keyword_8 的得分
+欧式检索得分： 0.07243197793737537
+双曲检索得分： 0.5710033352740912
+关于原句的得分
+欧式检索得分： 0.2890238953823822
+双曲检索得分： 0.5921520271901473
+--------------------------------
+['domain_2']
+关于category_2的父节点Social Issues的得分
+欧式检索得分： 0.16481519322202648
+双曲检索得分： 0.5830262149564993
+关于category_2的得分
+欧式检索得分： 0.11190740138844894
+双曲检索得分： 0.5850088470247189
+['domain_55']
+关于category_94的父节点LGBTQ Rights的得分
+欧式检索得分： 0.10692980016486932
+双曲检索得分： 0.5791226637601253
+关于category_94的得分
+欧式检索得分： 0.2963870621680827
+双曲检索得分： 0.5926030374073334
+['domain_82']
+关于category_157的父节点Art Exhibition的得分
+欧式检索得分： 0.11269751952779182
+双曲检索得分： 0.5769026780428654
+关于category_157的得分
+欧式检索得分： 0.084016113387918
+双曲检索得分： 0.5802149157269176

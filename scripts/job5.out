@@ -1,0 +1,205 @@
+/share/home/leiyh5/Memory/model/retrievers/hyperbolic_retriver.py:327: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  checkpoint = torch.load(resolved_path, map_location="cpu")
+`torch_dtype` is deprecated! Use `dtype` instead!
+[计数器恢复] DOMAIN 层级: 已有 137 个节点，新节点 ID将从 137 开始
+[计数器恢复] CATEGORY 层级: 已有 332 个节点，新节点 ID将从 332 开始
+[计数器恢复] KEYWORD 层级: 已有 691 个节点，新节点 ID将从 691 开始
+[计数器恢复] DIALOGUE 层级: 已有 419 个节点，新节点 ID将从 419 开始
+正在加载模型: /share/home/leiyh5/models/Qwen2.5-7B-Instruct
+检测到模型类型: qwen
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:04,  1.40s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:02<00:02,  1.35s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:04<00:01,  1.35s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.28s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.31s/it]
+模型加载完成
+<model.retrievers.hyperbolic_retriver.GeodesicHyperbolicRetriever object at 0x2b5179d097b0>
+
+========== 样本 conv-26 (1/1) ==========
+提取到的数据条数：
+419
+正在加载模型: /share/home/leiyh5/models/Qwen2.5-7B-Instruct
+检测到模型类型: qwen
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:04,  1.38s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:02<00:02,  1.34s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:04<00:01,  1.34s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.28s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.30s/it]
+模型加载完成
+批量分析:   0%|          | 0/53 [00:00<?, ?batch/s]The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+批量分析:   2%|▏         | 1/53 [00:02<02:14,  2.59s/batch]批量分析:   4%|▍         | 2/53 [00:04<01:48,  2.12s/batch]批量分析:   6%|▌         | 3/53 [00:06<01:37,  1.95s/batch]批量分析:   8%|▊         | 4/53 [00:07<01:32,  1.88s/batch]批量分析:   9%|▉         | 5/53 [00:09<01:28,  1.85s/batch]批量分析:  11%|█▏        | 6/53 [00:11<01:27,  1.85s/batch]批量分析:  13%|█▎        | 7/53 [00:13<01:21,  1.77s/batch]批量分析:  15%|█▌        | 8/53 [00:15<01:25,  1.89s/batch]批量分析:  17%|█▋        | 9/53 [00:17<01:23,  1.91s/batch]批量分析:  19%|█▉        | 10/53 [00:19<01:22,  1.91s/batch]批量分析:  21%|██        | 11/53 [00:20<01:17,  1.86s/batch]批量分析:  23%|██▎       | 12/53 [00:22<01:15,  1.84s/batch]批量分析:  25%|██▍       | 13/53 [00:24<01:11,  1.80s/batch]批量分析:  26%|██▋       | 14/53 [00:26<01:10,  1.81s/batch]批量分析:  28%|██▊       | 15/53 [00:28<01:09,  1.82s/batch]批量分析:  30%|███       | 16/53 [00:29<01:06,  1.80s/batch]批量分析:  32%|███▏      | 17/53 [00:31<01:02,  1.73s/batch]批量分析:  34%|███▍      | 18/53 [00:33<01:01,  1.75s/batch]批量分析:  36%|███▌      | 19/53 [00:34<00:58,  1.73s/batch]批量分析:  38%|███▊      | 20/53 [00:36<00:55,  1.68s/batch]批量分析:  40%|███▉      | 21/53 [00:38<00:53,  1.68s/batch]批量分析:  42%|████▏     | 22/53 [00:39<00:52,  1.69s/batch]批量分析:  43%|████▎     | 23/53 [00:41<00:51,  1.72s/batch]批量分析:  45%|████▌     | 24/53 [00:43<00:50,  1.74s/batch]批量分析:  47%|████▋     | 25/53 [00:45<00:48,  1.74s/batch]批量分析:  49%|████▉     | 26/53 [00:46<00:47,  1.77s/batch]批量分析:  51%|█████     | 27/53 [00:48<00:45,  1.75s/batch]批量分析:  53%|█████▎    | 28/53 [00:50<00:45,  1.82s/batch]批量分析:  55%|█████▍    | 29/53 [00:52<00:44,  1.84s/batch]批量分析:  57%|█████▋    | 30/53 [00:54<00:42,  1.83s/batch]批量分析:  58%|█████▊    | 31/53 [00:56<00:39,  1.81s/batch]批量分析:  60%|██████    | 32/53 [00:57<00:37,  1.77s/batch]批量分析:  62%|██████▏   | 33/53 [00:59<00:35,  1.78s/batch]批量分析:  64%|██████▍   | 34/53 [01:01<00:33,  1.78s/batch]批量分析:  66%|██████▌   | 35/53 [01:02<00:31,  1.73s/batch]批量分析:  68%|██████▊   | 36/53 [01:04<00:30,  1.81s/batch]批量分析:  70%|██████▉   | 37/53 [01:06<00:28,  1.80s/batch]批量分析:  72%|███████▏  | 38/53 [01:08<00:27,  1.80s/batch]批量分析:  74%|███████▎  | 39/53 [01:10<00:24,  1.78s/batch]批量分析:  75%|███████▌  | 40/53 [01:12<00:23,  1.77s/batch]批量分析:  77%|███████▋  | 41/53 [01:13<00:20,  1.74s/batch]批量分析:  79%|███████▉  | 42/53 [01:15<00:19,  1.73s/batch]批量分析:  81%|████████  | 43/53 [01:17<00:17,  1.77s/batch]批量分析:  83%|████████▎ | 44/53 [01:19<00:16,  1.80s/batch]批量分析:  85%|████████▍ | 45/53 [01:20<00:14,  1.80s/batch]批量分析:  87%|████████▋ | 46/53 [01:22<00:12,  1.77s/batch]批量分析:  89%|████████▊ | 47/53 [01:24<00:10,  1.76s/batch]批量分析:  91%|█████████ | 48/53 [01:26<00:08,  1.75s/batch]批量分析:  92%|█████████▏| 49/53 [01:27<00:06,  1.72s/batch]批量分析:  94%|█████████▍| 50/53 [01:29<00:05,  1.67s/batch]批量分析:  96%|█████████▌| 51/53 [01:31<00:03,  1.71s/batch]批量分析:  98%|█████████▊| 52/53 [01:32<00:01,  1.76s/batch]批量分析: 100%|██████████| 53/53 [01:34<00:00,  1.70s/batch]批量分析: 100%|██████████| 53/53 [01:34<00:00,  1.78s/batch]
+/share/home/leiyh5/Memory/model/hyperbolic_utils/hyperbolic_projector.py:48: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with torch.cuda.amp.autocast(enabled=False):
+正在加载嵌入模型: /share/home/leiyh5/.cache/huggingface/hub/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf
+嵌入模型加载完成，维度: 384
+[建库成功！！！]
+HierarchicalMemoryStats(total_nodes=1579, domain_count=137, category_count=332, keyword_count=691, dialogue_count=419)
+When did Caroline go to the LGBTQ support group?
+欧式检索结果：
+--------------------------------
+该层level HierarchyLevel.DOMAIN
+该层候选数量 137
+domain_81 节点信息
+节点内容: LGBTQ Advocacy
+节点父节点: []
+节点子节点: ['category_156']
+节点得分: 0.6482189566347604
+domain_85 节点信息
+节点内容: LGBTQ+ Activism
+节点父节点: []
+节点子节点: ['category_165']
+节点得分: 0.6461406083533655
+domain_117 节点信息
+节点内容: LGBTQ events
+节点父节点: []
+节点子节点: ['category_249']
+节点得分: 0.6433755718000118
+domain_42 节点信息
+节点内容: LGBTQ+ Events
+节点父节点: []
+节点子节点: ['category_70', 'category_153', 'category_304']
+节点得分: 0.6398571607931152
+domain_55 节点信息
+节点内容: LGBTQ Rights
+节点父节点: []
+节点子节点: ['category_94', 'category_96', 'category_3', 'category_221']
+节点得分: 0.6381381713196929
+domain_4 节点信息
+节点内容: LGBTQ+
+节点父节点: []
+节点子节点: ['category_3', 'category_81', 'category_236']
+节点得分: 0.6373415332810738
+domain_111 节点信息
+节点内容: LGBTQ+ Culture
+节点父节点: []
+节点子节点: ['category_235']
+节点得分: 0.6313434248387558
+--------------------------------
+--------------------------------
+该层level HierarchyLevel.CATEGORY
+该层候选数量 13
+category_81 节点信息
+节点内容: Transgender Community Events
+节点父节点: ['domain_4']
+节点子节点: ['keyword_187', 'keyword_165', 'keyword_188']
+节点得分: 0.640589947605709
+category_235 节点信息
+节点内容: Symbolism in LGBTQ+ Art
+节点父节点: ['domain_111']
+节点子节点: ['keyword_506', 'keyword_85', 'keyword_507']
+节点得分: 0.6228453557298863
+category_96 节点信息
+节点内容: Advocacy and Progress
+节点父节点: ['domain_55']
+节点子节点: ['keyword_227', 'keyword_228', 'keyword_188']
+节点得分: 0.6220229935326681
+category_221 节点信息
+节点内容: Personal Identity and Support
+节点父节点: ['domain_55']
+节点子节点: ['keyword_227', 'keyword_488', 'keyword_313']
+节点得分: 0.6141624393894417
+category_153 节点信息
+节点内容: Pride Event Experience
+节点父节点: ['domain_42']
+节点子节点: ['keyword_351', 'keyword_76', 'keyword_307']
+节点得分: 0.6068513382749888
+category_304 节点信息
+节点内容: Transgender Poetry Reading
+节点父节点: ['domain_42']
+节点子节点: ['keyword_12', 'keyword_643', 'keyword_137']
+节点得分: 0.6058882755970687
+category_165 节点信息
+节点内容: Group Organization
+节点父节点: ['domain_85']
+节点子节点: ['keyword_375', 'keyword_376', 'keyword_226']
+节点得分: 0.6021086847272542
+--------------------------------
+--------------------------------
+该层level HierarchyLevel.KEYWORD
+该层候选数量 19
+keyword_375 节点信息
+节点内容: Connected LGBTQ Activists
+节点父节点: ['category_165']
+节点子节点: ['dialogue_195']
+节点得分: 0.6604576234909356
+keyword_227 节点信息
+节点内容: LGBTQ rights
+节点父节点: ['category_96', 'category_164', 'category_221']
+节点子节点: ['dialogue_110', 'dialogue_232', 'dialogue_267']
+节点得分: 0.6419708945309391
+keyword_187 节点信息
+节点内容: transgender conference
+节点父节点: ['category_81']
+节点子节点: ['dialogue_88']
+节点得分: 0.6294571025836411
+keyword_12 节点信息
+节点内容: transgender
+节点父节点: ['category_3', 'category_232', 'category_12', 'category_304']
+节点子节点: ['dialogue_4', 'dialogue_282', 'dialogue_289', 'dialogue_372']
+节点得分: 0.6152261543986912
+keyword_85 节点信息
+节点内容: trans community
+节点父节点: ['category_35', 'category_36', 'category_235']
+节点子节点: ['dialogue_37', 'dialogue_38', 'dialogue_285']
+节点得分: 0.6126631910945912
+keyword_488 节点信息
+节点内容: supportive people
+节点父节点: ['category_221']
+节点子节点: ['dialogue_267']
+节点得分: 0.6077521397204072
+keyword_188 节点信息
+节点内容: advocacy
+节点父节点: ['category_81', 'category_96']
+节点子节点: ['dialogue_88', 'dialogue_110']
+节点得分: 0.6067322142630756
+--------------------------------
+--------------------------------
+该层level HierarchyLevel.DIALOGUE
+该层候选数量 12
+dialogue_195 节点信息
+节点内容: 8:56 pm on 20 July, 2023
+Caroline: Thanks, Melanie! It's awesome to have our own platform to be ourselves and support others' rights. Our group, 'Connected LGBTQ Activists', is made of all kinds of people investing in positive changes. We have regular meetings, plan events and campaigns, to get together and support each other.
+节点父节点: ['keyword_375', 'keyword_376', 'keyword_226']
+节点子节点: []
+节点得分: 0.6810232989209307
+dialogue_110 节点信息
+节点内容: 4:33 pm on 12 July, 2023
+Caroline: Yeah, it's true! Having people who back you makes such a huge difference. It's great to see how far LGBTQ rights have come, but there's still plenty of progress to be made. I wanna help make a difference.
+节点父节点: ['keyword_227', 'keyword_228', 'keyword_188']
+节点子节点: []
+节点得分: 0.676968490441842
+dialogue_232 节点信息
+节点内容: 1:50 pm on 17 August, 2023
+Caroline: Hey Mel! How're ya doin'? Recently, I had a not-so-great experience on a hike. I ran into a group of religious conservatives who said something that really upset me. It made me think how much work we still have to do for LGBTQ rights. It's been so helpful to have people around me who accept and support me, so I know I'll be ok!
+节点父节点: ['keyword_227', 'keyword_435', 'keyword_142']
+节点子节点: []
+节点得分: 0.6583645856604412
+dialogue_4 节点信息
+节点内容: 1:56 pm on 8 May, 2023
+Caroline: The transgender stories were so inspiring! I was so happy and thankful for all the support.
+节点父节点: ['keyword_12', 'keyword_9', 'keyword_13']
+节点子节点: []
+节点得分: 0.6537456822927291
+dialogue_372 节点信息
+节点内容: 10:31 am on 13 October, 2023
+Caroline: It was a transgender poetry reading where transgender people shared their stories through poetry. It was extra special 'cause it was a safe place for self-expression and it was really empowering to hear others share and celebrate their identities.
+节点父节点: ['keyword_12', 'keyword_643', 'keyword_137']
+节点子节点: []
+节点得分: 0.651537586772664
+dialogue_88 节点信息
+节点内容: 1:36 pm on 3 July, 2023
+Caroline: Thanks Mel! I'm going to a transgender conference this month. I'm so excited to meet other people in the community and learn more about advocacy. It's gonna be great!
+节点父节点: ['keyword_187', 'keyword_165', 'keyword_188']
+节点子节点: []
+节点得分: 0.6454525802362787
+dialogue_282 节点信息
+节点内容: 1:33 pm on 25 August, 2023
+Melanie: Thanks, Caroline! I really appreciate your help and motivation. What made you decide to transition and join the transgender community?
+节点父节点: ['keyword_81', 'keyword_300', 'keyword_12']
+节点子节点: []
+节点得分: 0.64309169452614
+--------------------------------
+节点1分数： 0.6810232989209307
+节点2分数： 0.676968490441842
+节点3分数： 0.6583645856604412
+节点4分数： 0.6537456822927291
+节点5分数： 0.651537586772664
+节点6分数： 0.6454525802362787
+节点7分数： 0.64309169452614
+输入长度
+569
+上下文: "[记忆片段 #1]\n8:56 pm on 20 July, 2023\nCaroline: Thanks, Melanie! It's awesome to have our own platform to be ourselves and support others' rights. Our group, 'Connected LGBTQ Activists', is made of all kinds of people investing in positive changes. We have regular meetings, plan events and campaigns, to get together and support each other.\n\n[记忆片段 #2]\n4:33 pm on 12 July, 2023\nCaroline: Yeah, it's true! Having people who back you makes such a huge difference. It's great to see how far LGBTQ rights have come, but there's still plenty of progress to be made. I wanna help make a difference.\n\n[记忆片段 #3]\n1:50 pm on 17 August, 2023\nCaroline: Hey Mel! How're ya doin'? Recently, I had a not-so-great experience on a hike. I ran into a group of religious conservatives who said something that really upset me. It made me think how much work we still have to do for LGBTQ rights. It's been so helpful to have people around me who accept and support me, so I know I'll be ok!\n\n[记忆片段 #4]\n1:56 pm on 8 May, 2023\nCaroline: The transgender stories were so inspiring! I was so happy and thankful for all the support.\n\n[记忆片段 #5]\n10:31 am on 13 October, 2023\nCaroline: It was a transgender poetry reading where transgender people shared their stories through poetry. It was extra special 'cause it was a safe place for self-expression and it was really empowering to hear others share and celebrate their identities.\n\n[记忆片段 #6]\n1:36 pm on 3 July, 2023\nCaroline: Thanks Mel! I'm going to a transgender conference this month. I'm so excited to meet other people in the community and learn more about advocacy. It's gonna be great!\n\n[记忆片段 #7]\n1:33 pm on 25 August, 2023\nMelanie: Thanks, Caroline! I really appreciate your help and motivation. What made you decide to transition and join the transgender community?"
+问题: When did Caroline go to the LGBTQ support group?
+生成: 'The provided context does not explicitly mention when Caroline attended an LGBTQ support group. However, it does mention several activities and events related to the LGBTQ community, including meetings, conferences, and poetry readings. For instance, Caroline mentioned she was going to a transgender conference this month (memory #6), and there was a transgender poetry reading (memory #5) which was a safe space for self-expression. These events are likely part of the support network Caroline is involved in, but they are not specifically labeled as support groups.'

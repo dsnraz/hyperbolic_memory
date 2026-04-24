@@ -1,0 +1,49 @@
+/share/home/leiyh5/Memory/model/retrievers/hyperbolic_retriver.py:321: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  checkpoint = torch.load(resolved_path, map_location="cpu")
+`torch_dtype` is deprecated! Use `dtype` instead!
+正在加载模型: /share/home/leiyh5/models/Qwen2.5-7B-Instruct
+检测到模型类型: qwen
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:04,  1.38s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:02<00:02,  1.31s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:12<00:05,  5.32s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:13<00:00,  3.67s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:13<00:00,  3.47s/it]
+模型加载完成
+
+========== 样本 conv-26 (1/1) ==========
+正在加载模型: /share/home/leiyh5/models/Qwen2.5-7B-Instruct
+检测到模型类型: qwen
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:04,  1.34s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:02<00:02,  1.30s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:04<00:01,  1.36s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.27s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.29s/it]
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+/share/home/leiyh5/Memory/model/hyperbolic_utils/hyperbolic_projector.py:48: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with torch.cuda.amp.autocast(enabled=False):
+模型加载完成
+正在加载嵌入模型: /share/home/leiyh5/.cache/huggingface/hub/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf
+嵌入模型加载完成，维度: 384
+[建库] interactions=419, 成功条数=419
+节点1分数： 0.9988994002342224
+节点2分数： 0.99853515625
+节点3分数： 0.9983749985694885
+节点4分数： 0.9979921579360962
+节点5分数： 0.9977954626083374
+输入长度
+435
+上下文: "[记忆片段 #1]\n1:33 pm on 25 August, 2023\nCaroline: Yeah Mel, stoked! Gonna be a great night featuring LGBTQ artists and their awesome talents. We want it to spread understanding and acceptance - let's make it happen!\n\n[记忆片段 #2]\n4:33 pm on 12 July, 2023\nCaroline: Yeah, it's true! Having people who back you makes such a huge difference. It's great to see how far LGBTQ rights have come, but there's still plenty of progress to be made. I wanna help make a difference.\n\n[记忆片段 #3]\n3:31 pm on 23 August, 2023\nCaroline: Thanks, Melanie. Art gives me a sense of freedom, but so does having supportive people around, promoting LGBTQ rights and being true to myself. I want to live authentically and help others to do the same.\n\n[记忆片段 #4]\n2:24 pm on 14 August, 2023\nCaroline: It was so inspiring, Mel! Check out the crowd. People of all kinds celebrating love and acceptance - it really pushed me to keep fighting for LGBTQ rights.\n\n[记忆片段 #5]\n1:33 pm on 25 August, 2023\nMelanie: I feel the same way! Art is so cool like that - it connects us and helps us understand each other. I was actually just remembering yesterday, spending the day with my fam volunteering at a homeless shelter. It was hard to see how neglected some people are, but it was great to feel like we could make a difference."
+问题: When did Caroline go to the LGBTQ support group?
+生成: 'The provided context does not mention Caroline attending an LGBTQ support group. The memories include discussions about supporting LGBTQ rights, organizing events featuring LGBTQ artists, and general advocacy for the LGBTQ community, but there is no specific mention of Caroline attending a support group.'
+节点1分数： 0.997788667678833
+节点2分数： 0.9975122213363647
+节点3分数： 0.9970844984054565
+节点4分数： 0.9964063763618469
+节点5分数： 0.9961154460906982
+输入长度
+359
+上下文: "[记忆片段 #1]\n2:31 pm on 17 July, 2023\nMelanie: Wow, Caroline, that painting is awesome! Those colors are so vivid and the whole thing looks really unified. What inspired you?\n\n[记忆片段 #2]\n1:33 pm on 25 August, 2023\nMelanie: Wow, Caroline, that's so nice! The colors are so bright and the flowers are so pretty. Art is such a source of joy.\n\n[记忆片段 #3]\n10:31 am on 13 October, 2023\nMelanie: Yeah, Here's one I did last week. It's inspired by the sunsets. The colors make me feel calm. What have you been up to lately, artistically?\n\n[记忆片段 #4]\n1:33 pm on 25 August, 2023\nMelanie: Wow Caroline, that looks amazing! Those colors are so vivid, it really looks like a real sunset. What gave you the idea to paint it?\n\n[记忆片段 #5]\n1:51 pm on 15 July, 2023\nCaroline: Wow Mel, that painting's amazing! The colors are so bold and it really highlights the beauty of nature. Y'all work on it together?"
+问题: When did Melanie paint a sunrise?
+生成: 'The provided context does not contain any information about Melanie painting a sunrise. Therefore, I cannot answer when Melanie painted a sunrise based on the given information.'
+节点1分数： 0.997438907623291
+节点2分数： 0.9961142539978027
+节点3分数： 0.9945655465126038
+节点4分数： 0.9921004772186279
+节点5分数： 0.9920037388801575
+输入长度
+426
+上下文: "[记忆片段 #1]\n1:56 pm on 8 May, 2023\nCaroline: Gonna continue my edu and check out career options, which is pretty exciting!\n\n[记忆片段 #2]\n2:31 pm on 17 July, 2023\nCaroline: Seeing my mentee's face light up when they saw the support was the best! Such a special moment.\n\n[记忆片段 #3]\n7:55 pm on 9 June, 2023\nCaroline: Thanks, Mel! Your backing really means a lot. I felt super powerful giving my talk. I shared my own journey, the struggles I had and how much I've developed since coming out. It was wonderful to see how the audience related to what I said and how it inspired them to be better allies. Conversations about gender identity and inclusion are so necessary and I'm thankful for being able to give a voice to the trans community.\n\n[记忆片段 #4]\n1:36 pm on 3 July, 2023\nMelanie: Thanks, Caroline! Yeah, I made this bowl in my class. It took some work, but I'm pretty proud of it.\n\n[记忆片段 #5]\n7:55 pm on 9 June, 2023\nMelanie: Wow, Caroline, you're doing an awesome job of inspiring others with your journey. It's great to be part of it and see how you're positively affecting so many. Talking about inclusivity and acceptance is crucial, and you're so brave to speak up for the trans community. Keep up the great work!"
+问题: What fields would Caroline be likely to pursue in her educaton?
+生成: 'Based on the context provided, the memory does not contain specific information about the fields Caroline plans to pursue in her education. The only information given is that she is continuing her education and exploring career options, which are exciting for her. To determine the specific fields she might be interested in, more details would be needed.'

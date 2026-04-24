@@ -1,0 +1,194 @@
+/share/home/leiyh5/Memory/model/retrievers/hyperbolic_retriver.py:321: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  checkpoint = torch.load(resolved_path, map_location="cpu")
+Traceback (most recent call last):
+  File "/share/home/leiyh5/miniconda3/envs/memory/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/share/home/leiyh5/miniconda3/envs/memory/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/share/home/leiyh5/Memory/model/retrievers/try_retrive.py", line 302, in <module>
+    node_embedding,node_level_embedding,node = load_dialogue_embedding(text = "Wow, John! It's great when you have that kind of support. My mom and I made some dinner together last night!")
+  File "/share/home/leiyh5/Memory/model/retrievers/try_retrive.py", line 112, in load_dialogue_embedding
+    raise ValueError(f"未找到节点: {node_id}")
+ValueError: 未找到节点: None
+[计数器恢复] DOMAIN 层级: 已有 787 个节点，新节点 ID将从 787 开始
+[计数器恢复] CATEGORY 层级: 已有 2770 个节点，新节点 ID将从 2770 开始
+[计数器恢复] KEYWORD 层级: 已有 4572 个节点，新节点 ID将从 4572 开始
+[计数器恢复] DIALOGUE 层级: 已有 4414 个节点，新节点 ID将从 4414 开始
+正在加载嵌入模型: /share/home/leiyh5/.cache/huggingface/hub/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf
+嵌入模型加载完成，维度: 384
+欧式检索结果：
+--------------------------------
+该层level HierarchyLevel.DOMAIN
+该层候选数量 787
+domain_444 节点信息
+节点内容: restaurant dining
+节点父节点: []
+节点子节点: ['category_1296']
+节点得分: 0.3197525612265518
+domain_25 节点信息
+节点内容: Food and Dining
+节点父节点: []
+节点子节点: ['category_35', 'category_224', 'category_546', 'category_565', 'category_747', 'category_772', 'category_786', 'category_962', 'category_966', 'category_1295', 'category_1292', 'category_2478']
+节点得分: 0.2989869135715353
+domain_437 节点信息
+节点内容: restaurant
+节点父节点: []
+节点子节点: ['category_1268']
+节点得分: 0.28860078220072793
+domain_235 节点信息
+节点内容: celebration
+节点父节点: []
+节点子节点: ['category_440']
+节点得分: 0.2752606838269181
+domain_772 节点信息
+节点内容: Celebration
+节点父节点: []
+节点子节点: ['category_135']
+节点得分: 0.2752606838269181
+--------------------------------
+--------------------------------
+该层level HierarchyLevel.CATEGORY
+该层候选数量 16
+category_2478 节点信息
+节点内容: Restaurant Plans
+节点父节点: ['domain_25']
+节点子节点: ['keyword_90', 'keyword_2635', 'keyword_4']
+节点得分: 0.3066805051997284
+category_35 节点信息
+节点内容: Meal Sharing
+节点父节点: ['domain_25', 'domain_111', 'domain_387']
+节点子节点: ['keyword_92', 'keyword_93', 'keyword_94', 'keyword_480', 'keyword_38', 'keyword_481', 'keyword_2046', 'keyword_2047', 'keyword_110']
+节点得分: 0.2777044033933191
+category_224 节点信息
+节点内容: Restaurant Experience
+节点父节点: ['domain_25', 'domain_244']
+节点子节点: ['keyword_482', 'keyword_7', 'keyword_85', 'keyword_1860', 'keyword_1861', 'keyword_1862', 'keyword_2315', 'keyword_89', 'keyword_217', 'keyword_2314', 'keyword_269', 'keyword_1098']
+节点得分: 0.21539054222931228
+category_747 节点信息
+节点内容: Desserts
+节点父节点: ['domain_25']
+节点子节点: ['keyword_1101', 'keyword_1102', 'keyword_110']
+节点得分: 0.21057358028438822
+category_1292 节点信息
+节点内容: Restaurant Recommendation
+节点父节点: ['domain_111', 'domain_25']
+节点子节点: ['keyword_2314', 'keyword_2274', 'keyword_1908', 'keyword_2317', 'keyword_1099', 'keyword_346', 'keyword_170']
+节点得分: 0.2016663004502731
+--------------------------------
+--------------------------------
+该层level HierarchyLevel.KEYWORD
+该层候选数量 32
+keyword_89 节点信息
+节点内容: dinner
+节点父节点: ['category_33', 'category_223', 'category_389', 'category_224', 'category_1866']
+节点子节点: ['dialogue_36', 'dialogue_263', 'dialogue_492', 'dialogue_1871', 'dialogue_2782']
+节点得分: 0.396170418158085
+keyword_2046 节点信息
+节点内容: meal ideas
+节点父节点: ['category_35']
+节点子节点: ['dialogue_1534']
+节点得分: 0.2775802854198636
+keyword_92 节点信息
+节点内容: shared meals
+节点父节点: ['category_35']
+节点子节点: ['dialogue_38']
+节点得分: 0.25940128432582604
+keyword_1102 节点信息
+节点内容: desserts
+节点父节点: ['category_549', 'category_565', 'category_563', 'category_644', 'category_747', 'category_774']
+节点子节点: ['dialogue_722', 'dialogue_745', 'dialogue_747', 'dialogue_857', 'dialogue_1014', 'dialogue_1052', 'dialogue_1053']
+节点得分: 0.2105735842924919
+keyword_90 节点信息
+节点内容: food
+节点父节点: ['category_34', 'category_963', 'category_2410', 'category_2476', 'category_2477', 'category_2478', 'category_2467', 'category_230', 'category_2685']
+节点子节点: ['dialogue_37', 'dialogue_1353', 'dialogue_3787', 'dialogue_3900', 'dialogue_3901', 'dialogue_3902', 'dialogue_3903', 'dialogue_4028', 'dialogue_4265']
+节点得分: 0.2076899574288312
+--------------------------------
+--------------------------------
+该层level HierarchyLevel.DIALOGUE
+该层候选数量 23
+dialogue_36 节点信息
+节点内容: {"time": "6:10 pm on 22 December, 2022", "interaction": "Maria: Woah, that's a nice pic, John! You all obviously had a blast at dinner. Nothing beats getting together with loved ones for a good meal - it makes some awesome memories!"}
+节点父节点: ['keyword_89', 'keyword_87', 'keyword_83']
+节点子节点: []
+节点得分: 0.5171677771505758
+dialogue_38 节点信息
+节点内容: {"time": "6:10 pm on 22 December, 2022", "interaction": "Maria: Yeah, John! It definitely builds a strong bond. Those shared meals really make life enjoyable and meaningful. What did you make?"}
+节点父节点: ['keyword_92', 'keyword_93', 'keyword_94']
+节点子节点: []
+节点得分: 0.499683077864671
+dialogue_263 节点信息
+节点内容: {"time": "3:18 pm on 4 May, 2023", "interaction": "Maria: Wow, John! It's great when you have that kind of support. My mom and I made some dinner together last night!"}
+节点父节点: ['keyword_89', 'keyword_479', 'keyword_102']
+节点子节点: []
+节点得分: 0.4872162139401373
+dialogue_1052 节点信息
+节点内容: {"time": "6:03 pm on 5 September, 2022", "interaction": "Nate: Woah, those look great, Joanna! It's cool that you make desserts that work for everyone's diets. Do you have any more yummy recipes hiding in there?"}
+节点父节点: ['keyword_1102', 'keyword_1508', 'keyword_1316']
+节点子节点: []
+节点得分: 0.46655674217063403
+dialogue_747 节点信息
+节点内容: {"time": "1:07 pm on 25 February, 2022", "interaction": "Nate: Thanks, Joanna! It means a lot that you enjoy the desserts I bake."}
+节点父节点: ['keyword_1102', 'keyword_975', 'keyword_824']
+节点子节点: []
+节点得分: 0.43795880165751644
+--------------------------------
+双曲检索结果：
+--------------------------------
+该层level HierarchyLevel.KEYWORD
+该层候选数量 4572
+keyword_976 节点信息
+节点内容: maria
+节点父节点: ['category_494']
+节点子节点: ['dialogue_645']
+节点得分: 0.6303078009175693
+keyword_208 节点信息
+节点内容: Maria
+节点父节点: ['category_86', 'category_89', 'category_118', 'category_168', 'category_212', 'category_243', 'category_263', 'category_75', 'category_381', 'category_427', 'category_440']
+节点子节点: ['dialogue_95', 'dialogue_98', 'dialogue_130', 'dialogue_189', 'dialogue_248', 'dialogue_293', 'dialogue_317', 'dialogue_318', 'dialogue_478', 'dialogue_553', 'dialogue_571']
+节点得分: 0.6303076825165638
+keyword_89 节点信息
+节点内容: dinner
+节点父节点: ['category_33', 'category_223', 'category_389', 'category_224', 'category_1866']
+节点子节点: ['dialogue_36', 'dialogue_263', 'dialogue_492', 'dialogue_1871', 'dialogue_2782']
+节点得分: 0.607093636972015
+keyword_4309 节点信息
+节点内容: Ferrari
+节点父节点: ['category_2568', 'category_2572', 'category_23', 'category_2676', 'category_2677']
+节点子节点: ['dialogue_4050', 'dialogue_4056', 'dialogue_4244', 'dialogue_4245', 'dialogue_4246']
+节点得分: 0.5940042562262808
+keyword_1149 节点信息
+节点内容: Joanna
+节点父节点: ['category_573', 'category_494', 'category_667', 'category_679', 'category_686', 'category_563', 'category_522', 'category_140', 'category_704', 'category_849']
+节点子节点: ['dialogue_755', 'dialogue_791', 'dialogue_893', 'dialogue_908', 'dialogue_920', 'dialogue_966', 'dialogue_1072', 'dialogue_1134', 'dialogue_1159', 'dialogue_1181', 'dialogue_1183', 'dialogue_1276']
+节点得分: 0.5936132116778636
+--------------------------------
+--------------------------------
+该层level HierarchyLevel.DIALOGUE
+该层候选数量 34
+dialogue_130 节点信息
+节点内容: {"time": "8:55 pm on 25 February, 2023", "interaction": "John: Wow, Maria! How did she end up in such a situation, and how did she remain positive throughout?"}
+节点父节点: ['keyword_208', 'keyword_239', 'keyword_274']
+节点子节点: []
+节点得分: 0.6108773880694565
+dialogue_36 节点信息
+节点内容: {"time": "6:10 pm on 22 December, 2022", "interaction": "Maria: Woah, that's a nice pic, John! You all obviously had a blast at dinner. Nothing beats getting together with loved ones for a good meal - it makes some awesome memories!"}
+节点父节点: ['keyword_89', 'keyword_87', 'keyword_83']
+节点子节点: []
+节点得分: 0.6055054487029224
+dialogue_263 节点信息
+节点内容: {"time": "3:18 pm on 4 May, 2023", "interaction": "Maria: Wow, John! It's great when you have that kind of support. My mom and I made some dinner together last night!"}
+节点父节点: ['keyword_89', 'keyword_479', 'keyword_102']
+节点子节点: []
+节点得分: 0.5944987480145832
+dialogue_98 节点信息
+节点内容: {"time": "1:17 pm on 28 January, 2023", "interaction": "Maria: That's nice of you, John. What's the photo about?"}
+节点父节点: ['keyword_214', 'keyword_26', 'keyword_208']
+节点子节点: []
+节点得分: 0.5921675772077468
+dialogue_553 节点信息
+节点内容: {"time": "6:20 pm on 3 August, 2023", "interaction": "John: Maria, what's the deal with that note? Who wrote it and what does it say?"}
+节点父节点: ['keyword_855', 'keyword_208', 'keyword_26']
+节点子节点: []
+节点得分: 0.5871993861873177
+--------------------------------
