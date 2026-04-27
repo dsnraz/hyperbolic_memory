@@ -32,7 +32,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         "--persist-directory",
         type=str,
-        default="/share/home/leiyh5/Memory/data/memory_running",
+        default="/share/home/leiyh5/Memory/data/memory_running1",
         help="Chroma 持久化目录",
     )
     p.add_argument(
@@ -69,13 +69,25 @@ def parse_args() -> argparse.Namespace:
             "hyperbolic_angular_geodesic_hybrid=按深度分界上外角下测地"
         ),
     )
-    p.add_argument("--max-samples", type=int, default=1)
-    p.add_argument("--max-questions", type=int, default=1)
+    p.add_argument("--max-samples", type=int, default=100000000)
+    p.add_argument("--max-questions", type=int, default=100000000)
     p.add_argument("--memory-llm-batch-size", type=int, default=8)
     p.add_argument("--device", type=str, default="auto")
     p.add_argument("--retriever-top-k", type=int, default=7)
     p.add_argument("--generation-handler-type", type=str, default="transformers")
     p.add_argument("--generation-model-name", type=str, default=None)
+    p.add_argument(
+        "--out-file",
+        type=str,
+        default="/share/home/leiyh5/Memory/data/locomo/locomo_qa_test_pred2.json",
+        help="保存预测结果的 JSON（LoCoMo 评测可读）",
+    )
+    p.add_argument(
+        "--prediction-key",
+        type=str,
+        default="memory_prediction",
+        help="写入每个 qa 条目的预测字段名，如 gpt-4-turbo_prediction",
+    )
     p.add_argument(
         "--generation-model-path",
         type=str,
@@ -129,6 +141,7 @@ def main() -> None:
     if n_samples > 0:
         builder.clear()
         inference.clear_retriever_cache()
+    output_samples: List[Dict[str, Any]] = []
     for si in range(n_samples):
         sample = samples[si]
         sid = sample.get("sample_id", f"index_{si}")
@@ -147,7 +160,10 @@ def main() -> None:
         print(builder.manager.vector_store.get_stats())
         inference.clear_retriever_cache()
 
-        qa_list = sample.get("qa") or []
+        # 输出结构与 LoCoMo 的评测数据兼容：每个 sample 含 sample_id 和 qa 列表，
+        # 且每个 qa 保留 answer/category/evidence 并新增 *_prediction 字段。
+        out_sample: Dict[str, Any] = {"sample_id": sid, "qa": [dict(q) for q in (sample.get("qa") or [])]}
+        qa_list = out_sample["qa"]
         n_q = min(len(qa_list), max(1, args.max_questions))
         for qi in range(n_q):
             item = qa_list[qi]
@@ -158,12 +174,21 @@ def main() -> None:
             out = inference.answer(question)
             context = out.get("context")
             gen = out.get("answer")
+            item[args.prediction_key] = "" if gen is None else str(gen).strip()
             print(f"上下文: {context!r}")
             print(f"问题: {question}")
             print(f"生成: {gen!r}")
 
+        output_samples.append(out_sample)
         builder.clear()
         inference.clear_retriever_cache()
+
+    out_path = Path(args.out_file)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(output_samples, f, ensure_ascii=False, indent=2)
+    print(f"\n结果已写入: {out_path}")
+    print(f"预测字段: {args.prediction_key}")
 
 if __name__ == "__main__":
     main()

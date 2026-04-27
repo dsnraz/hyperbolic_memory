@@ -169,7 +169,7 @@ class TransformersModelHandler(BaseModelHandler):
     def generate(
         self,
         prompt: str,
-        max_new_tokens: int = 256,
+        max_new_tokens: int = 1024,
         temperature: float = 0.1,
         top_p: float = 0.9,
         **kwargs
@@ -186,7 +186,7 @@ class TransformersModelHandler(BaseModelHandler):
             formatted_prompt,
             return_tensors="pt",
             truncation=True,
-            max_length=kwargs.get("max_length", 1024)
+            max_length=kwargs.get("max_length", 10000000)
         )
         
         if hasattr(self._model, "device"):
@@ -214,7 +214,7 @@ class TransformersModelHandler(BaseModelHandler):
     def batch_generate(
         self,
         prompts: List[str],
-        max_new_tokens: int = 256,
+        max_new_tokens: int = 1024,
         temperature: float = 0.1,
         top_p: float = 0.9,
         **kwargs
@@ -241,7 +241,7 @@ class TransformersModelHandler(BaseModelHandler):
             formatted_prompts,
             return_tensors="pt",
             truncation=True,
-            max_length=kwargs.get("max_length", 1024),
+            max_length=kwargs.get("max_length", 10000000000),
             padding=True,
         )
         
@@ -260,6 +260,8 @@ class TransformersModelHandler(BaseModelHandler):
             )
         
         input_lengths = inputs["input_ids"].shape[1]
+        print("输入长度")
+        print(input_lengths)
         responses = []
         for output in outputs:
             generated_part = output[input_lengths:]

@@ -24,7 +24,8 @@ class MemoryAugmentedLLMInference:
         "Retrieved context from memory:\n"
         "{context}\n\n"
         "Question: {query}\n"
-        "Answer based on the context above. If the memory does not contain enough information, say so clearly.\n"
+        "Answer based on the context above clearly and concisely. \n"
+        "If there is no relevant information in the context, please reject the question."
         "Answer:"
     )
 
@@ -133,20 +134,20 @@ class MemoryAugmentedLLMInference:
             target_level=target_level or self.target_level,
             **retrieve_kwargs,
         )
-        result_euclidean = retrieval_result.level_results
-        print("欧式检索结果：")
-        for i in result_euclidean:
-            print("--------------------------------")
-            print("该层level",i.level)
-            print("该层候选数量",i.candidate_count)
-            for j in i.hits:
-                id = j.node.id
-                print(f"{id} 节点信息")
-                print(f"节点内容: {j.node.content}")
-                print(f"节点父节点: {j.node.parent_ids}")
-                print(f"节点子节点: {j.node.child_ids}")
-                print(f"节点得分: {j.score}")
-            print("--------------------------------")
+        # result_euclidean = retrieval_result.level_results
+        # print("欧式检索结果：")
+        # for i in result_euclidean:
+        #     print("--------------------------------")
+        #     print("该层level",i.level)
+        #     print("该层候选数量",i.candidate_count)
+        #     for j in i.hits:
+        #         id = j.node.id
+        #         print(f"{id} 节点信息")
+        #         print(f"节点内容: {j.node.content}")
+        #         print(f"节点父节点: {j.node.parent_ids}")
+        #         print(f"节点子节点: {j.node.child_ids}")
+        #         print(f"节点得分: {j.score}")
+        #     print("--------------------------------")
         context = self.retriever.get_context(
             query_text=query_text,
             top_k=top_k or self.retriever_top_k,

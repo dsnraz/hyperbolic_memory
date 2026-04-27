@@ -2,7 +2,7 @@
 #SBATCH -p gpu_chen
 #SBATCH -n 1
 #SBATCH -G 1
-#SBATCH -o job5.out
+#SBATCH -o job6.out
 #
 # 使用多父外角加权双曲检索（hyperbolic_angular）跑 model.llm_inference.run。
 # 路径默认值在 run.py 的 argparse 中；若需覆盖可追加参数，例如：
