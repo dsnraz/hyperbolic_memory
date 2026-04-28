@@ -102,6 +102,10 @@ class TrainConfig:
     sequential_levels: bool = True           # 是否逐层级对顺序训练
     resume: Optional[str] = None
 
+    # v3_mixed_training 新增
+    mixed_training: bool = False             # 启用时三层级对按权重随机交错
+    mixed_total_iterations: Optional[int] = None   # 为 None 时取 sum(iterations_map.values())
+
 
 # ============================================================================
 # 训练器类
@@ -478,10 +482,102 @@ class HyperbolicTrainer:
         self.train_level_pair(level_idx)
         self._save_checkpoint(final=True)
         print(f"\n层级对 {level_idx} 训练完成!")
-    
+
+    def train_mixed(self):
+        """
+        v3_mixed_training: 混合批次训练。
+
+        一次性加载全部四层节点，构造一个 level_pair=None 的 SubtreeDataset，
+        按 iterations_map 的比例给出权重，每步随机采一个层级对。
+        """
+        print(f"\n{'='*60}")
+        print(f"开始混合批次训练 (v3_mixed_training)")
+        print(f"{'='*60}")
+
+        total_iter = self.config.mixed_total_iterations or sum(self.config.iterations_map.values())
+        print(f"  总步数: {total_iter}")
+
+        # 按原 iterations_map 算权重
+        weights_by_idx = self.config.iterations_map
+        total_w = sum(weights_by_idx.values())
+        weights = {
+            LEVEL_PAIRS[i - 1]: weights_by_idx[i] / total_w
+            for i in weights_by_idx
+        }
+        print(f"  层级对权重:")
+        for lp, w in weights.items():
+            print(f"    {lp[0]} -> {lp[1]}: {w:.4f}")
+
+        # 一次性加载所有层级节点
+        nodes_by_level = extract_nodes_from_store(self.vector_store, level_pair_index=None)
+        for lvl, ns in nodes_by_level.items():
+            print(f"    {lvl}: {len(ns)} 节点")
+
+        dataset = SubtreeDataset(
+            nodes_by_level=nodes_by_level,
+            embedding_dim=self.config.embedding_dim,
+            device=self.device,
+            num_iterations=total_iter,
+            num_parents_per_batch=self.config.num_parents_per_batch,
+            num_children_per_parent=self.config.num_children_per_parent,
+            max_children_per_parent=self.config.max_children_per_parent,
+            level_pair=None,                       # 关键：混合模式
+            load_feats_by_level=False,
+            use_level_embedding=self.config.use_level_embedding,
+            level_pair_weights=weights,            # 关键：加权
+        )
+
+        dataloader = DataLoader(
+            dataset,
+            batch_size=1,
+            shuffle=False,  # 已经在 dataset 内部按权重随机
+            num_workers=0,
+            collate_fn=subtree_collate_fn,
+        )
+
+        self._create_scheduler(total_iter)
+
+        pbar = tqdm(dataloader, total=total_iter, desc="混合训练")
+        self.current_level_idx = 0
+        self.level_step = 0
+
+        for batch in pbar:
+            if isinstance(batch, list):
+                batch = batch[0]
+            stats = self.train_step(batch)
+
+            postfix = {
+                'loss': f"{stats['total_loss']:.4f}",
+                'c': f"{stats['curvature']:.4f}",
+                'pair': batch.parent_level[:3] + '->' + batch.child_level[:3],
+            }
+            pbar.set_postfix(postfix)
+
+            if self.level_step % self.config.log_interval == 0:
+                # 打印层级对采样计数
+                counter_str = ", ".join(
+                    f"{p[0][:3]}->{p[1][:3]}:{c}"
+                    for p, c in dataset.level_pair_counter.items()
+                )
+                print(f"\n[Step {self.global_step}] 采样计数: {counter_str}")
+                self._log_stats(stats)
+
+            if self.level_step % self.config.save_interval == 0:
+                self._save_checkpoint(level_info=f"mixed_step{self.level_step}")
+
+        self._save_checkpoint(final=True)
+        print(f"\n混合训练完成!")
+        print(f"最终采样分布:")
+        total_count = sum(dataset.level_pair_counter.values())
+        for p, c in dataset.level_pair_counter.items():
+            print(f"  {p[0]} -> {p[1]}: {c} ({c / max(total_count,1):.2%})")
+
     def train(self):
         """执行训练。"""
-        if self.config.level_pair_index is not None:
+        # v3_mixed_training: 优先检查混合开关
+        if self.config.mixed_training:
+            self.train_mixed()
+        elif self.config.level_pair_index is not None:
             # 单层级对训练
             self.train_single_level()
         else:
@@ -601,7 +697,7 @@ def parse_args() -> TrainConfig:
     # 数据参数
     parser.add_argument('--vector_store_path', type=str, default='/share/home/leiyh5/Memory/data/hierarchical_memory_locomo')
     parser.add_argument('--embedding_dim', type=int, default=384)
-    parser.add_argument('--hidden_dim', type=int, default=256)
+    parser.add_argument('--hidden_dim', type=int, default=1024)
     
     # 采样参数
     parser.add_argument('--num_iterations', type=int, default=5000,
@@ -644,7 +740,13 @@ def parse_args() -> TrainConfig:
     # 恢复训练
     parser.add_argument('--resume', type=str, default="/share/home/leiyh5/Memory/checkpoints_locomo",
                         help='恢复训练的检查点路径')
-    
+
+    # v3_mixed_training 新增
+    parser.add_argument('--mixed_training', action='store_true',
+                        help='启用混合批次训练（三个层级对按权重随机交错）')
+    parser.add_argument('--mixed_total_iterations', type=int, default=None,
+                        help='混合训练总步数；None 时取 sum(iterations_map.values())')
+
     args = parser.parse_args()
     
     return TrainConfig(
@@ -673,11 +775,14 @@ def parse_args() -> TrainConfig:
         save_interval=args.save_interval,
         level_pair_index=args.level_pair_index,
         sequential_levels=True,
+        mixed_training=args.mixed_training,                    # v3_mixed_training
+        mixed_total_iterations=args.mixed_total_iterations,    # v3_mixed_training
     )
 
 
 def main():
     """主函数入口。"""
+    print("训练开始")
     config = parse_args()
     
     print(f"\n{'='*60}")
@@ -706,9 +811,9 @@ def main():
     trainer = HyperbolicTrainer(config)
     
     # 恢复训练
-    resume_path = parse_args().resume
-    if resume_path:
-        trainer.load_checkpoint(resume_path)
+    # resume_path = parse_args().resume
+    # if resume_path:
+    #     trainer.load_checkpoint(resume_path)
     
     trainer.train()
 

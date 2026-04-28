@@ -295,11 +295,17 @@ class SubtreeSampler:
         }
         
         parent_child_mask = torch.zeros(n_parent, n_child, dtype=torch.float32)
-        
-        for local_parent_idx, global_child_idx in parent_child_relations:
-            if global_child_idx in child_global_to_local:
-                local_child_idx = child_global_to_local[global_child_idx]
-                parent_child_mask[local_parent_idx, local_child_idx] = 1.0
+
+        # ====================================================================
+        # v2_mask_fix: 修复假负例。
+        # 旧实现只标注"被具体采样的 (父, 子) 对"，漏掉了批内其他父也真管这个子的情况。
+        # 新实现：对每个批内父，检查它与所有批内子的真实父子关系，一起标注。
+        # ====================================================================
+        for local_parent_idx, global_parent_idx in enumerate(selected_parent_indices):
+            real_children_set = set(self.parent_to_children[global_parent_idx])
+            for local_child_idx, global_child_idx in enumerate(selected_child_indices):
+                if global_child_idx in real_children_set:
+                    parent_child_mask[local_parent_idx, local_child_idx] = 1.0
         
         # 保留该字段仅用于兼容旧接口；多父训练语义以后续的 parent_child_mask 为准。
         parent_child_map = parent_child_mask.argmax(dim=0)

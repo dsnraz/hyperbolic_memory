@@ -808,7 +808,7 @@ class HybridHyperbolicRetriever(GeodesicHyperbolicRetriever):
         仅用 ``Hybrid._similarity`` 按层与 `boundary` 在角分 / 测地分之间切换，不转调
         其它类的 ``_rank_nodes``。
         """
-        print("开始检索一层，当前层级为：", nodes[0].level)
+        # print("开始检索一层，当前层级为：", nodes[0].level)
         scored_hits: List[HyperbolicRetrievalHit] = []
         for node in nodes:
             score, opposite_score = self._similarity(query_h, node)
@@ -829,8 +829,8 @@ class HybridHyperbolicRetriever(GeodesicHyperbolicRetriever):
         query_h: torch.Tensor,
         node: HierarchicalNode,
     ) -> Tuple[float, float]:
-        print("开始计算相似度")
-        print("当前分界层为：", self._hybrid_scoring_geodesic_from_level)
+        # print("开始计算相似度")
+        # print("当前分界层为：", self._hybrid_scoring_geodesic_from_level)
         boundary = self._hybrid_scoring_geodesic_from_level
         if boundary is None:
             print("使用测地线检索")

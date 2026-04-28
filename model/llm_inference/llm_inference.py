@@ -24,8 +24,15 @@ class MemoryAugmentedLLMInference:
         "Retrieved context from memory:\n"
         "{context}\n\n"
         "Question: {query}\n"
-        "Answer based on the context above clearly and concisely. \n"
-        "If there is no relevant information in the context, please reject the question."
+        "Answer based on the context above following the style of the examples below (short, factual, and concise)\n"
+        "Examples:\n"
+        "Who did she have dinner with on May 3, 2023?\n"
+        "her mother\n"
+        "When did she donate her car?\n"
+        "21 December 2022\n"
+        "What type of volunteering have John and Maria both done?\n"
+        "Volunteering at a homeless shelter"
+        "If there is no relevant information in the context, please reject the question in one sentence."
         "Answer:"
     )
 
@@ -132,6 +139,7 @@ class MemoryAugmentedLLMInference:
             top_k=top_k or self.retriever_top_k,
             start_level=start_level or self.start_level,
             target_level=target_level or self.target_level,
+            adaptive_start_level = True
             **retrieve_kwargs,
         )
         # result_euclidean = retrieval_result.level_results

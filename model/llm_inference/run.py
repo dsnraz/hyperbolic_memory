@@ -32,7 +32,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         "--persist-directory",
         type=str,
-        default="/share/home/leiyh5/Memory/data/memory_running1",
+        default="/share/home/leiyh5/Memory/data/memory_running",
         help="Chroma 持久化目录",
     )
     p.add_argument(
@@ -44,7 +44,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         "--projector-checkpoint-path",
         type=str,
-        default="/share/home/leiyh5/Memory/checkpoints_locomo/hyperbolic_projector_final.pt",
+        default="/share/home/leiyh5/Memory/checkpoints_v3/hyperbolic_projector_final.pt",
         help="双曲 projector .pt ",
     )
     p.add_argument(
@@ -56,7 +56,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         "--retriever-type",
         type=str,
-        default="hyperbolic_geodesic",
+        default="hyperbolic_angular",
         choices=(
             "cosine",
             "hyperbolic_geodesic",
@@ -73,13 +73,23 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--max-questions", type=int, default=100000000)
     p.add_argument("--memory-llm-batch-size", type=int, default=8)
     p.add_argument("--device", type=str, default="auto")
-    p.add_argument("--retriever-top-k", type=int, default=7)
+    p.add_argument("--retriever-top-k", type=int, default=10)
     p.add_argument("--generation-handler-type", type=str, default="transformers")
     p.add_argument("--generation-model-name", type=str, default=None)
     p.add_argument(
+        "--build-mode",
+        type=str,
+        default="cached",
+        choices=("natural", "cached"),
+        help=(
+            "natural: 保持原逻辑，每轮清库并重建；"
+            "cached: 按轮次持久化建库结果，优先复用已有库。"
+        ),
+    )
+    p.add_argument(
         "--out-file",
         type=str,
-        default="/share/home/leiyh5/Memory/data/locomo/locomo_qa_test_pred2.json",
+        default="/share/home/leiyh5/Memory/data/locomo/locomo_qa_test_pred.json",
         help="保存预测结果的 JSON（LoCoMo 评测可读）",
     )
     p.add_argument(
@@ -126,62 +136,143 @@ def main() -> None:
     ):
         infer_kw["projector_checkpoint_path"] = args.projector_checkpoint_path
 
-    inference = MemoryAugmentedLLMInference(**infer_kw)
-    builder = ConversationMemoryBuilder(
-        inference.manager,
-        llm_batch_size=args.memory_llm_batch_size,
-    )
-    if inference.retriever:
-        print(inference.retriever)
-    else:
-        print("没找到检索器")
-
     n_samples = min(len(samples), max(1, args.max_samples))
-    # 清库：循环首行之前清一次（首样本建库前需空库），每一样本 QA 后清空（等同“下一样本开始再清”）。
-    if n_samples > 0:
-        builder.clear()
-        inference.clear_retriever_cache()
     output_samples: List[Dict[str, Any]] = []
-    for si in range(n_samples):
-        sample = samples[si]
-        sid = sample.get("sample_id", f"index_{si}")
-        print(f"\n========== 样本 {sid} ({si + 1}/{n_samples}) ==========")
-
-        builder.build_from_sample(
-            sample,
-            dataset_name="locomo",
-            clear_before_build=False,
-            generate_embedding=True,
-            show_progress=True,
+    if args.build_mode == "natural":
+        inference = MemoryAugmentedLLMInference(**infer_kw)
+        builder = ConversationMemoryBuilder(
+            inference.manager,
+            llm_batch_size=args.memory_llm_batch_size,
         )
-        print(
-            f"[建库成功！！！]"
-        )
-        print(builder.manager.vector_store.get_stats())
-        inference.clear_retriever_cache()
+        if inference.retriever:
+            print(inference.retriever)
+        else:
+            print("没找到检索器")
 
-        # 输出结构与 LoCoMo 的评测数据兼容：每个 sample 含 sample_id 和 qa 列表，
-        # 且每个 qa 保留 answer/category/evidence 并新增 *_prediction 字段。
-        out_sample: Dict[str, Any] = {"sample_id": sid, "qa": [dict(q) for q in (sample.get("qa") or [])]}
-        qa_list = out_sample["qa"]
-        n_q = min(len(qa_list), max(1, args.max_questions))
-        for qi in range(n_q):
-            item = qa_list[qi]
-            question = str(item.get("question", "")).strip()
-            print(question)
-            if not question:
-                continue
-            out = inference.answer(question)
-            context = out.get("context")
-            gen = out.get("answer")
-            item[args.prediction_key] = "" if gen is None else str(gen).strip()
-            print(f"上下文: {context!r}")
-            print(f"问题: {question}")
-            print(f"生成: {gen!r}")
+        # 原逻辑：首轮前清库，且每轮结束后清库
+        if n_samples > 0:
+            builder.clear()
+            inference.clear_retriever_cache()
 
-        output_samples.append(out_sample)
-        builder.clear()
-        inference.clear_retriever_cache()
+        for si in range(n_samples):
+            sample = samples[si]
+            sid = sample.get("sample_id", f"index_{si}")
+            print(f"\n========== 样本 {sid} ({si + 1}/{n_samples}) ==========")
+
+            builder.build_from_sample(
+                sample,
+                dataset_name="locomo",
+                clear_before_build=False,
+                generate_embedding=True,
+                show_progress=True,
+            )
+            print("[建库成功！！！]")
+            print(builder.manager.vector_store.get_stats())
+            inference.clear_retriever_cache()
+
+            out_sample: Dict[str, Any] = {"sample_id": sid, "qa": [dict(q) for q in (sample.get("qa") or [])]}
+            qa_list = out_sample["qa"]
+            n_q = min(len(qa_list), max(1, args.max_questions))
+            for qi in range(n_q):
+                item = qa_list[qi]
+                question = str(item.get("question", "")).strip()
+                print(question)
+                if not question:
+                    continue
+                out = inference.answer(question)
+                context = out.get("context")
+                gen = out.get("answer")
+                item[args.prediction_key] = "" if gen is None else str(gen).strip()
+                print(f"上下文: {context!r}")
+                print(f"问题: {question}")
+                print(f"生成: {gen!r}")
+
+            output_samples.append(out_sample)
+            builder.clear()
+            inference.clear_retriever_cache()
+    else:
+        # cached 模式：每轮一个独立持久化目录，存在则直接复用，避免重复建库
+        persist_root = Path(args.persist_directory)
+        persist_root.mkdir(parents=True, exist_ok=True)
+        shared_generation_handler = None
+
+        for si in range(n_samples):
+            sample = samples[si]
+            sid = sample.get("sample_id", f"index_{si}")
+            round_dir = persist_root / f"round_{si + 1}_{sid}"
+            round_dir.mkdir(parents=True, exist_ok=True)
+            build_marker = round_dir / "build_complete.json"
+
+            print(f"\n========== 样本 {sid} ({si + 1}/{n_samples}) ==========")
+            print(f"[cached 模式] 轮次目录: {round_dir}")
+
+            round_infer_kw = dict(infer_kw)
+            round_infer_kw["persist_directory"] = str(round_dir)
+
+            # 已有缓存时无需加载建库 LLM（节省启动与显存）
+            if build_marker.exists():
+                round_infer_kw["llm_model_path"] = None
+
+            # 复用生成器，避免每轮重复加载生成模型
+            if shared_generation_handler is not None:
+                round_infer_kw["generation_handler_type"] = None
+                round_infer_kw["generation_model_name"] = None
+                round_infer_kw["generation_model_path"] = None
+
+            inference = MemoryAugmentedLLMInference(**round_infer_kw)
+            if shared_generation_handler is None:
+                shared_generation_handler = inference.generation_handler
+            else:
+                inference.generation_handler = shared_generation_handler
+
+            builder = ConversationMemoryBuilder(
+                inference.manager,
+                llm_batch_size=args.memory_llm_batch_size,
+            )
+
+            if build_marker.exists():
+                print("[复用缓存建库] 检测到已持久化结果，跳过建库。")
+            else:
+                print("[首次建库] 未检测到缓存，开始建库并持久化。")
+                builder.clear()
+                inference.clear_retriever_cache()
+                builder.build_from_sample(
+                    sample,
+                    dataset_name="locomo",
+                    clear_before_build=False,
+                    generate_embedding=True,
+                    show_progress=True,
+                )
+                marker_payload = {
+                    "sample_id": sid,
+                    "round_index": si + 1,
+                    "persist_directory": str(round_dir),
+                }
+                with open(build_marker, "w", encoding="utf-8") as f:
+                    json.dump(marker_payload, f, ensure_ascii=False, indent=2)
+                print("[建库成功并已持久化]")
+                print(builder.manager.vector_store.get_stats())
+                inference.clear_retriever_cache()
+
+            out_sample: Dict[str, Any] = {"sample_id": sid, "qa": [dict(q) for q in (sample.get("qa") or [])]}
+            qa_list = out_sample["qa"]
+            n_q = min(len(qa_list), max(1, args.max_questions))
+            for qi in range(n_q):
+                item = qa_list[qi]
+                question = str(item.get("question", "")).strip()
+                print(question)
+                if not question:
+                    continue
+                out = inference.answer(question)
+                context = out.get("context")
+                gen = out.get("answer")
+                item[args.prediction_key] = "" if gen is None else str(gen).strip()
+                print(f"上下文: {context!r}")
+                print(f"问题: {question}")
+                print(f"生成: {gen!r}")
+
+            output_samples.append(out_sample)
+            inference.clear_retriever_cache()
 
     out_path = Path(args.out_file)
     out_path.parent.mkdir(parents=True, exist_ok=True)
