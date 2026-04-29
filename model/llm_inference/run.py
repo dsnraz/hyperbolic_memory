@@ -44,19 +44,19 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         "--projector-checkpoint-path",
         type=str,
-        default="/share/home/leiyh5/Memory/checkpoints_v3/hyperbolic_projector_final.pt",
+        default="/share/home/leiyh5/Memory/checkpoints_v2/hyperbolic_projector_final.pt",
         help="双曲 projector .pt ",
     )
     p.add_argument(
         "--embedding-model",
         type=str,
-        default="/share/home/leiyh5/Memory/models/sentence-transformers_all-MiniLM-L6-v2",
+        default="sentence-transformers/all-mpnet-base-v2",
         help="句向量：本地模型用绝对目录；若目录不存在可改为 HF Hub 名并自行覆盖",
     )
     p.add_argument(
         "--retriever-type",
         type=str,
-        default="hyperbolic_angular",
+        default="hyperbolic_geodesic",
         choices=(
             "cosine",
             "hyperbolic_geodesic",

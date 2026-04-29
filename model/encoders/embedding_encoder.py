@@ -28,7 +28,7 @@ class EmbeddingEncoder(BaseMemoryEncoder):
     def __init__(
         self,
         model_name: str = None,
-        model_path: str = DEFAULT_LOCAL_MODEL_PATH,
+        model_path: str = None,
         device: str = "auto",
         normalize: bool = True,
         local_files_only: bool = True,
@@ -47,8 +47,8 @@ class EmbeddingEncoder(BaseMemoryEncoder):
         """
         super().__init__(embedding_model=None, embedding_dim=384, **kwargs)
         
-        # 优先使用本地路径
-        self.model_path = model_path or DEFAULT_LOCAL_MODEL_PATH
+        # 仅当显式传入时才使用本地路径；否则按模型名称加载。
+        self.model_path = model_path
         self.model_name = model_name
         self.device = device
         self.normalize = normalize
@@ -65,10 +65,10 @@ class EmbeddingEncoder(BaseMemoryEncoder):
             
             device = None if self.device == "auto" else self.device
             
-            # 优先使用本地路径
-            model_source = self.model_path or self.model_name
+            model_source = self.model_path or self.model_name or DEFAULT_LOCAL_MODEL_PATH
+            source_kind = "model_path" if self.model_path else ("model_name" if self.model_name else "default_local")
             
-            print(f"正在加载嵌入模型: {model_source}")
+            print(f"正在加载嵌入模型({source_kind}): {model_source}")
             
             self._model = SentenceTransformer(
                 model_source,

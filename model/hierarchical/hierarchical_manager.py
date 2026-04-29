@@ -7,6 +7,7 @@
 
 import time
 from typing import Any, Dict, List, Optional, Set, Tuple
+from pathlib import Path
 
 from .hierarchy_types import (
     HierarchicalNode,
@@ -533,7 +534,20 @@ def create_hierarchical_manager(
             device=device,
         )
     
-    embedding_encoder = EmbeddingEncoder()
+    # 支持通过名称加载 HuggingFace embedding 模型。
+    # 若传入的是本地目录路径，则作为 model_path 使用。
+    if embedding_model and Path(embedding_model).exists():
+        embedding_encoder = EmbeddingEncoder(
+            model_path=embedding_model,
+            model_name=None,
+            device=device,
+        )
+    else:
+        embedding_encoder = EmbeddingEncoder(
+            model_name=embedding_model,
+            model_path=None,
+            device=device,
+        )
     
     vector_store = HierarchicalVectorStore(
         persist_directory=persist_directory,

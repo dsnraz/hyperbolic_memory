@@ -139,7 +139,7 @@ class MemoryAugmentedLLMInference:
             top_k=top_k or self.retriever_top_k,
             start_level=start_level or self.start_level,
             target_level=target_level or self.target_level,
-            adaptive_start_level = True
+            adaptive_start_level = True,
             **retrieve_kwargs,
         )
         # result_euclidean = retrieval_result.level_results

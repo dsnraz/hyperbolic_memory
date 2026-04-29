@@ -695,7 +695,7 @@ class MultiParentAngularHyperbolicRetriever(BaseHyperbolicRetriever):
         if aq.numel() == 0:
             return 0.0
         delta = aq - an
-        print(f"delta: {delta}")
+        # print(f"delta: {delta}")
         sim_i = (1.0 + torch.cos(delta)) * 0.5
         w = self._parent_aggregation_weights(parents_h, query_h, node_h, curv)
         score = float((w * sim_i).sum().item())
