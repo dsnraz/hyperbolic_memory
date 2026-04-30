@@ -1,68 +1,29 @@
 /share/home/leiyh5/miniconda3/envs/memory/lib/python3.10/runpy.py:126: RuntimeWarning: 'model.hierarchical.data_process' found in sys.modules after import of package 'model.hierarchical', but prior to execution of 'model.hierarchical.data_process'; this may result in unpredictable behaviour
   warn(RuntimeWarning(msg))
-[计数器恢复] DOMAIN 层级: 已有 12946 个节点，新节点 ID将从 12946 开始
-[计数器恢复] CATEGORY 层级: 已有 106039 个节点，新节点 ID将从 106039 开始
-[计数器恢复] KEYWORD 层级: 已有 698569 个节点，新节点 ID将从 698569 开始
-[计数器恢复] DIALOGUE 层级: 已有 899620 个节点，新节点 ID将从 899620 开始
 存在 manager
 数据加载成功
-[断点续处理] 已加载 899620 个已处理索引，将跳过这些样本
-[断点续处理] 已加载 47 个失败索引
+无已处理索引记录文件，从头开始处理
+无失败索引记录文件
 处理器创建成功
 
 ============================================================
 批量推理模式配置:
   LLM 批量大小: 64
   处理批次大小: 256
-  数据总量: 899667
-  已处理跳过: 899620
-  待处理数量: 47
+  数据总量: 4414
+  已处理跳过: 0
+  待处理数量: 4414
   flush 间隔: 2048
 ============================================================
 
-批量处理:   0%|          | 0/1 [00:00<?, ?batch/s] `torch_dtype` is deprecated! Use `dtype` instead!
+批量处理:   0%|          | 0/18 [00:00<?, ?batch/s] `torch_dtype` is deprecated! Use `dtype` instead!
 正在加载模型: /share/home/leiyh5/models/Qwen2.5-7B-Instruct
 检测到模型类型: qwen
 
 Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s][A
-Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:04,  1.35s/it][A
-Loading checkpoint shards:  50%|█████     | 2/4 [00:02<00:02,  1.31s/it][A
-Loading checkpoint shards:  75%|███████▌  | 3/4 [00:03<00:01,  1.30s/it][A
-Loading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.24s/it][ALoading checkpoint shards: 100%|██████████| 4/4 [00:05<00:00,  1.26s/it]
+Loading checkpoint shards:  25%|██▌       | 1/4 [00:05<00:17,  5.75s/it][A
+Loading checkpoint shards:  50%|█████     | 2/4 [00:11<00:11,  5.88s/it][A
+Loading checkpoint shards:  75%|███████▌  | 3/4 [00:15<00:04,  4.90s/it][A
+Loading checkpoint shards: 100%|██████████| 4/4 [00:19<00:00,  4.48s/it][ALoading checkpoint shards: 100%|██████████| 4/4 [00:19<00:00,  4.82s/it]
 The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
-批量处理:   0%|          | 0/1 [00:22<?, ?batch/s] , 成功=47, 失败=0, 待增=48, 待更=4, 速度=2.1/s, llm=21.3s, emb=0.2s, build=0.7s, flush=0.0s, other=0.0s, batch=22.3s批量处理: 100%|██████████| 1/1 [00:22<00:00, 22.25s/batch] , 成功=47, 失败=0, 待增=48, 待更=4, 速度=2.1/s, llm=21.3s, emb=0.2s, build=0.7s, flush=0.0s, other=0.0s, batch=22.3s批量处理: 100%|██████████| 1/1 [00:22<00:00, 22.25s/batch] , 成功=47, 失败=0, 待增=48, 待更=4, 速度=2.1/s, llm=21.3s, emb=0.2s, build=0.7s, flush=0.0s, other=0.0s, batch=22.3s
-模型加载完成
-输入长度
-2210
-正在加载嵌入模型: /share/home/leiyh5/.cache/huggingface/hub/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf
-嵌入模型加载完成，维度: 384
-
-处理完成，正在写入剩余节点...
-已批量写入 48 个节点到 ChromaDB
-失败索引已保存到: /share/home/leiyh5/Memory/data/hierarchical_memory_hotpot1/failed_indices1.json
-
-============================================================
-处理完成！
-  本轮成功: 47 条
-  本轮跳过: 899620 条（已处理）
-  本轮失败: 0 条
-  累计已处理: 899667 条
-  累计失败: 0 条
-  总耗时: 26.74 秒
-  平均速度: 1.76 条/秒
-  LLM耗时: 21.30 秒
-  Embedding耗时: 0.24 秒
-  构图耗时: 0.71 秒
-  关系更新耗时: 0.00 秒
-  Flush耗时: 4.46 秒
-  最近批次耗时: 22.25 秒
-  最近批次Flush耗时: 0.00 秒
-  最近批次其他耗时: 0.00 秒
-============================================================
-
-统计信息:
-  总节点数: 1717222
-  领域数: 12946
-  类别数: 106039
-  关键词数: 698570
-  对话数: 899667
+批量处理:   0%|          | 0/18 [01:32<?, ?batch/s] , 成功=256, 失败=0, 待增=1054, 待更=0, 速度=2.8/s, llm=83.6s, emb=7.7s, build=0.8s, flush=0.0s, other=0.0s, batch=92.1s批量处理:   6%|▌         | 1/18 [01:32<26:06, 92.12s/batch] , 成功=256, 失败=0, 待增=1054, 待更=0, 速度=2.8/s, llm=83.6s, emb=7.7s, build=0.8s, flush=0.0s, other=0.0s, batch=92.1s批量处理:   6%|▌         | 1/18 [01:54<26:06, 92.12s/batch] , 成功=512, 失败=0, 待增=1904, 待更=0, 速度=4.5/s, llm=20.5s, emb=1.1s, build=0.6s, flush=0.0s, other=0.0s, batch=22.2s批量处理:  11%|█         | 2/18 [01:54<13:36, 51.02s/batch] , 成功=512, 失败=0, 待增=1904, 待更=0, 速度=4.5/s, llm=20.5s, emb=1.1s, build=0.6s, flush=0.0s, other=0.0s, batch=22.2s批量处理:  11%|█         | 2/18 [02:16<13:36, 51.02s/batch] , 成功=768, 失败=0, 待增=2781, 待更=0, 速度=5.6/s, llm=19.8s, emb=1.1s, build=0.8s, flush=0.0s, other=0.0s, batch=21.8s批量处理:  17%|█▋        | 3/18 [02:16<09:24, 37.66s/batch] , 成功=768, 失败=0, 待增=2781, 待更=0, 速度=5.6/s, llm=19.8s, emb=1.1s, build=0.8s, flush=0.0s, other=0.0s, batch=21.8s批量处理:  17%|█▋        | 3/18 [02:37<09:24, 37.66s/batch] , 成功=1024, 失败=0, 待增=3558, 待更=0, 速度=6.5/s, llm=20.1s, emb=1.1s, build=0.6s, flush=0.0s, other=0.0s, batch=21.8s批量处理:  22%|██▏       | 4/18 [02:37<07:19, 31.39s/batch] , 成功=1024, 失败=0, 待增=3558, 待更=0, 速度=6.5/s, llm=20.1s, emb=1.1s, build=0.6s, flush=0.0s, other=0.0s, batch=21.8s批量处理:  22%|██▏       | 4/18 [03:00<07:19, 31.39s/batch] , 成功=1280, 失败=0, 待增=4306, 待更=0, 速度=7.1/s, llm=20.9s, emb=1.1s, build=0.5s, flush=0.0s, other=0.0s, batch=22.5s批量处理:  28%|██▊       | 5/18 [03:00<06:06, 28.20s/batch] , 成功=1280, 失败=0, 待增=4306, 待更=0, 速度=7.1/s, llm=20.9s, emb=1.1s, build=0.5s, flush=0.0s, other=0.0s, batch=22.5s批量处理:  28%|██▊       | 5/18 [03:22<06:06, 28.20s/batch] , 成功=1536, 失败=0, 待增=5057, 待更=0, 速度=7.6/s, llm=20.7s, emb=1.1s, build=0.6s, flush=0.0s, other=0.0s, batch=22.4s批量处理:  33%|███▎      | 6/18 [03:22<05:14, 26.21s/batch] , 成功=1536, 失败=0, 待增=5057, 待更=0, 速度=7.6/s, llm=20.7s, emb=1.1s, build=0.6s, flush=0.0s, other=0.0s, batch=22.4s批量处理:  33%|███▎      | 6/18 [03:44<05:14, 26.21s/batch] , 成功=1792, 失败=0, 待增=5714, 待更=0, 速度=8.0/s, llm=20.1s, emb=1.1s, build=0.5s, flush=0.0s, other=0.0s, batch=21.7s批量处理:  39%|███▉      | 7/18 [03:44<04:31, 24.72s/batch] , 成功=1792, 失败=0, 待增=5714, 待更=0, 速度=8.0/s, llm=20.1s, emb=1.1s, build=0.5s, flush=0.0s, other=0.0s, batch=21.7s                                                                                                                                                                                    批量处理:  39%|███▉      | 7/18 [04:07<04:31, 24.72s/batch] , 成功=1792, 失败=0, 待增=5714, 待更=0, 速度=8.0/s, llm=20.1s, emb=1.1s, build=0.5s, flush=0.0s, other=0.0s, batch=21.7s批量处理:  39%|███▉      | 7/18 [04:16<04:31, 24.72s/batch] , 成功=2048, 失败=0, 待增=0, 待更=0, 速度=8.0/s, llm=21.3s, emb=1.1s, build=0.6s, flush=9.0s, other=0.0s, batch=31.9s   批量处理:  44%|████▍     | 8/18 [04:16<04:30, 27.01s/batch] , 成功=2048, 失败=0, 待增=0, 待更=0, 速度=8.0/s, llm=21.3s, emb=1.1s, build=0.6s, flush=9.0s, other=0.0s, batch=31.9s

@@ -354,7 +354,8 @@ class HierarchicalAngularContrastiveLoss(nn.Module):
         loss_centroid = torch.abs(dist_parent_centroid - parent_target) + torch.abs(dist_child_centroid - child_target)
         
         # --- 3. 总损失 ---
-        total_loss = loss_angle + self.lambda_centroid * loss_centroid
+        total_loss = loss_angle 
+        # + self.lambda_centroid * loss_centroid
         
         return {
             'loss': total_loss,

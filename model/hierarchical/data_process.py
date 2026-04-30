@@ -498,12 +498,12 @@ class DataProcessor:
 
 def main():
     LLM_MODEL_PATH = "/share/home/leiyh5/models/Qwen2.5-7B-Instruct"
-    DATA_FILE = "/share/home/leiyh5/Memory/data/hotpot_context_texts.json"
-    PERSIST_DIR = "/share/home/leiyh5/Memory/data/hierarchical_memory_hotpot1"
+    DATA_FILE = "/share/home/leiyh5/Memory/data/locomo/locomo_train_interactions.json"
+    PERSIST_DIR = "/share/home/leiyh5/Memory/data/hierarchical_memory_locomo1"
     
     processor = DataProcessor(
         llm_model_path=LLM_MODEL_PATH,
-        embedding_model="sentence-transformers/all-MiniLM-L6-v2",
+        embedding_model="sentence-transformers/all-mpnet-base-v2",
         persist_directory=PERSIST_DIR,
         device="auto",
         datapath=DATA_FILE,
