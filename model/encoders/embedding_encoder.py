@@ -12,7 +12,7 @@ from ..core.memory_types import MemoryType, MemoryPriority
 
 
 # 默认本地模型路径
-DEFAULT_LOCAL_MODEL_PATH = "/share/home/leiyh5/.cache/huggingface/hub/models--sentence-transformers--all-MiniLM-L6-v2/snapshots/c9745ed1d9f207416be6d2e6f8de32d1f16199bf"
+DEFAULT_LOCAL_MODEL_PATH = "/share/home/leiyh5/.cache/huggingface/hub/models--sentence-transformers--all-mpnet-base-v2/snapshots/e8c3b32edf5434bc2275fc9bab85f82640a19130"
 
 
 class EmbeddingEncoder(BaseMemoryEncoder):

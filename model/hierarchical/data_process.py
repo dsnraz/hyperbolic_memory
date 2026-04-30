@@ -498,8 +498,8 @@ class DataProcessor:
 
 def main():
     LLM_MODEL_PATH = "/share/home/leiyh5/models/Qwen2.5-7B-Instruct"
-    DATA_FILE = "/share/home/leiyh5/Memory/data/locomo/locomo_train_interactions.json"
-    PERSIST_DIR = "/share/home/leiyh5/Memory/data/hierarchical_memory_locomo1"
+    DATA_FILE = "/share/home/leiyh5/Memory/data/locomo/extract_ratio_1_0/locomo_train_interactions.json"
+    PERSIST_DIR = "/share/home/leiyh5/Memory/data/hierarchical_memory_locomo_total"
     
     processor = DataProcessor(
         llm_model_path=LLM_MODEL_PATH,

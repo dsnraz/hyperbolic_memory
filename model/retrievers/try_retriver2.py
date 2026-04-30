@@ -22,8 +22,10 @@ from ..stores.hierarchical_vector_store import HierarchicalVectorStore
 
 LOCOMO_QA_TEST = "/share/home/leiyh5/Memory/data/locomo/locomo_qa_test.json"
 PERSIST_DIR = "/share/home/leiyh5/Memory/data/try_retriever2_test_built"
-PROJECTOR_PATH = "/share/home/leiyh5/Memory/checkpoints_locomo/hyperbolic_projector_final.pt"
+PROJECTOR_PATH = "/share/home/leiyh5/Memory/checkpoints_locomo2/hyperbolic_projector_final.pt"
 LLM_MODEL_PATH = "/share/home/leiyh5/models/Qwen2.5-7B-Instruct"
+# 与 hyperbolic_projector_final.pt 期望的输入维度对齐（当前是 768）
+EMBEDDING_MODEL = "sentence-transformers/all-mpnet-base-v2"
 DEVICE = "auto"
 LLM_BATCH_SIZE = 8
 
@@ -272,17 +274,18 @@ if __name__ == "__main__":
 
     manager = create_hierarchical_manager(
         llm_model_path=LLM_MODEL_PATH,
+        embedding_model=EMBEDDING_MODEL,
         persist_directory=PERSIST_DIR,
         device=DEVICE,
         delayed_write=False,
     )
-    # manager.batch_process_dialogues(
-    #     interactions,
-    #     llm_batch_size=LLM_BATCH_SIZE,
-    #     generate_embedding=True,
-    #     show_progress=True,
-    # )
-    # manager.flush()
+    manager.batch_process_dialogues(
+        interactions,
+        llm_batch_size=LLM_BATCH_SIZE,
+        generate_embedding=True,
+        show_progress=True,
+    )
+    manager.flush()
 
     store = manager.vector_store
     retriever_euclidean = CosineRetriever(vector_store=store)

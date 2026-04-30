@@ -4,8 +4,8 @@ from ..encoders import EmbeddingEncoder
 
 PERSIST_DIR = "/share/home/leiyh5/Memory/data/hierarchical_memory2"
 
-
-embedding_encoder = EmbeddingEncoder()
+EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+embedding_encoder = EmbeddingEncoder(model_name=EMBEDDING_MODEL, model_path=None)
 store = HierarchicalVectorStore(
     persist_directory=PERSIST_DIR,
     embedding_function=embedding_encoder.generate_embedding,

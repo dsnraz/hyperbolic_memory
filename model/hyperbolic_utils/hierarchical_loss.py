@@ -355,7 +355,7 @@ class HierarchicalAngularContrastiveLoss(nn.Module):
         
         # --- 3. 总损失 ---
         total_loss = loss_angle 
-        # + self.lambda_centroid * loss_centroid
+        + self.lambda_centroid * loss_centroid
         
         return {
             'loss': total_loss,

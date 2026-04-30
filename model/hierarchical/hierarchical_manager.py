@@ -517,7 +517,7 @@ class HierarchicalMemoryManager:
 
 def create_hierarchical_manager(
     llm_model_path: Optional[str] = None,
-    embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2",
+    embedding_model: str = "sentence-transformers/all-mpnet-base-v2",
     persist_directory: Optional[str] = None,
     device: str = "auto",
     delayed_write: bool = True,

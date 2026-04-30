@@ -25,13 +25,19 @@ import model.retrievers.try_retriver2 as tr2
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--query", type=str, default = "When did Caroline go to the LGBTQ support group?",help="查询文本")
-    parser.add_argument("--retriever_type", type=str, default="hyperbolic_angular_geodesic_hybrid",
+    parser.add_argument("--retriever_type", type=str, default="hyperbolic_geodesic",
                         choices=["cosine", "hyperbolic_geodesic", "hyperbolic_angular",
                                  "hyperbolic_angular_geodesic_hybrid"])
-    parser.add_argument("--checkpoint", type=str, required=False, default="/share/home/leiyh5/Memory/checkpoints_v3/hyperbolic_projector_final.pt")
+    parser.add_argument("--checkpoint", type=str, required=False, default="/share/home/leiyh5/Memory/checkpoints_locomo_total/hyperbolic_projector_final.pt")
     parser.add_argument("--persist_dir", type=str,default="/share/home/leiyh5/Memory/data/try_retriever2_test_built",
                         help="vector store 持久化目录")
-    parser.add_argument("--top_k", type=int, default=10)
+    parser.add_argument(
+        "--embedding_model",
+        type=str,
+        default="sentence-transformers/all-mpnet-base-v2",
+        help="用于生成 query embedding 的模型名（需与 projector 输入维度匹配）。",
+    )
+    parser.add_argument("--top_k", type=int, default=20)
     parser.add_argument("--query_prefix", type=str, default=None,
                         help="v4_query_prefix: 可选的 query 前缀")
     args = parser.parse_args()
@@ -45,6 +51,7 @@ def main():
         retriever_type=args.retriever_type,
         projector_checkpoint_path=args.checkpoint,
         retriever_top_k=args.top_k,
+        embedding_model=args.embedding_model,
     )
 
     # v4 支持：构造后设置前缀
@@ -56,7 +63,6 @@ def main():
         top_k=args.top_k,
         start_level=HierarchyLevel.DOMAIN,
         target_level=HierarchyLevel.DIALOGUE,
-        adaptive_start_level = True
     )
 
     print()
@@ -121,7 +127,7 @@ def main():
         query_embedding,
         query_embedding_hyperbolic,
     )
-    print("关于原句的得分")
+    print(f"关于原句的得分{node.id,node.content}")
     print("欧式检索得分：", score1)
     print("双曲检索得分：", score2)
 

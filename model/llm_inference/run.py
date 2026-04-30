@@ -44,7 +44,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         "--projector-checkpoint-path",
         type=str,
-        default="/share/home/leiyh5/Memory/checkpoints_v2/hyperbolic_projector_final.pt",
+        default="/share/home/leiyh5/Memory/checkpoints_locomo_total/hyperbolic_projector_final.pt",
         help="双曲 projector .pt ",
     )
     p.add_argument(
