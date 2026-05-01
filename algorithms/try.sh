@@ -6,4 +6,4 @@
 source ~/miniconda3/etc/profile.d/conda.sh 
 conda activate memory
 cd //share/home/leiyh5/Memory
-python  -m algorithms.diagnose
+python  -m algorithms.session_diagnose

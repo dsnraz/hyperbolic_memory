@@ -18,26 +18,26 @@ You ONLY output STANDARD JSON.
 You DO NOT output any extra words.
 
 Return JSON with this schema:
-{
+{{
   "domain": "macro domain",
   "categories": [
-    {
+    {{
       "category": "category name",
       "keywords": [
-        {
+        {{
           "keyword": "keyword or phrase",
           "dialogue_indices": [0, 2]
-        }
+        }}
       ]
-    }
+    }}
   ],
   "dialogue_summaries": [
-    {
+    {{
       "dialogue_index": 0,
       "summary": "short summary"
-    }
+    }}
   ]
-}
+}}
 
 Rules:
 1. Read the full session before deciding the structure.

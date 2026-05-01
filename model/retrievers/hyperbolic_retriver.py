@@ -127,15 +127,17 @@ class BaseHyperbolicRetriever(HierarchicalRetrieverBase, ABC):
         self,
         query_text: Optional[str] = None,
         query_embedding: Optional[Sequence[float]] = None,
-        top_k: int = 5,
+        top_k: List[int] = [5, 5, 5, 5],
         start_level: HierarchyLevel = HierarchyLevel.DOMAIN,
         target_level: HierarchyLevel = HierarchyLevel.DIALOGUE,
         force_rebuild_cache: bool = False,
         adaptive_start_level: bool = False,
     ) -> HyperbolicRetrievalResult:
         """执行自顶向下的双曲层级检索。"""
-        if top_k <= 0:
-            raise ValueError("top_k 必须大于 0")
+        if len(top_k) != 4:
+            raise ValueError("top_k 必须是长度为 4 的列表: [DOMAIN, CATEGORY, KEYWORD, DIALOGUE]")
+        if any(k <= 0 for k in top_k):
+            raise ValueError("top_k 列表中的每个值都必须大于 0")
 
         self._validate_level_path(start_level, target_level)
 
@@ -158,9 +160,16 @@ class BaseHyperbolicRetriever(HierarchicalRetrieverBase, ABC):
         level_results: List[HyperbolicLevelRetrievalResult] = []
         current_level = resolved_start_level
         current_candidates = self._get_nodes_by_level(current_level)
+        top_k_map = {
+            HierarchyLevel.DOMAIN: top_k[0],
+            HierarchyLevel.CATEGORY: top_k[1],
+            HierarchyLevel.KEYWORD: top_k[2],
+            HierarchyLevel.DIALOGUE: top_k[3],
+        }
 
         while True:
-            ranked_hits = self._rank_nodes(query_h, current_candidates, top_k)
+            level_top_k = top_k_map[current_level]
+            ranked_hits = self._rank_nodes(query_h, current_candidates, level_top_k)
             level_results.append(
                 HyperbolicLevelRetrievalResult(
                     level=current_level,
@@ -196,7 +205,7 @@ class BaseHyperbolicRetriever(HierarchicalRetrieverBase, ABC):
         self,
         query_text: Optional[str] = None,
         query_embedding: Optional[Sequence[float]] = None,
-        top_k: int = 5,
+        top_k: List[int] = [5, 5, 5, 5],
         start_level: HierarchyLevel = HierarchyLevel.DOMAIN,
         target_level: HierarchyLevel = HierarchyLevel.DIALOGUE,
         return_opposite_score: bool = True,

@@ -57,7 +57,7 @@ class CosineRetriever(HierarchicalRetrieverBase):
         self,
         query_text: Optional[str] = None,
         query_embedding: Optional[Sequence[float]] = None,
-        top_k: int = 5,
+        top_k: List[int] = [5, 5, 5, 5],
         start_level: HierarchyLevel = HierarchyLevel.DOMAIN,
         target_level: HierarchyLevel = HierarchyLevel.DIALOGUE,
     ) -> HierarchicalRetrievalResult:
@@ -71,8 +71,10 @@ class CosineRetriever(HierarchicalRetrieverBase):
             start_level: 起始检索层级
             target_level: 目标层级
         """
-        if top_k <= 0:
-            raise ValueError("top_k 必须大于 0")
+        if len(top_k) != 4:
+            raise ValueError("top_k 必须是长度为 4 的列表: [DOMAIN, CATEGORY, KEYWORD, DIALOGUE]")
+        if any(k <= 0 for k in top_k):
+            raise ValueError("top_k 列表中的每个值都必须大于 0")
 
         self._validate_level_path(start_level, target_level)
 
@@ -84,9 +86,16 @@ class CosineRetriever(HierarchicalRetrieverBase):
 
         current_level = start_level
         current_candidates = self._get_nodes_by_level(current_level)
+        top_k_map = {
+            HierarchyLevel.DOMAIN: top_k[0],
+            HierarchyLevel.CATEGORY: top_k[1],
+            HierarchyLevel.KEYWORD: top_k[2],
+            HierarchyLevel.DIALOGUE: top_k[3],
+        }
 
         while True:
-            ranked_hits = self._rank_nodes(prepared_query_embedding, current_candidates, top_k)
+            level_top_k = top_k_map[current_level]
+            ranked_hits = self._rank_nodes(prepared_query_embedding, current_candidates, level_top_k)
             level_results.append(
                 LevelRetrievalResult(
                     level=current_level,
@@ -118,7 +127,7 @@ class CosineRetriever(HierarchicalRetrieverBase):
         self,
         query_text: Optional[str] = None,
         query_embedding: Optional[Sequence[float]] = None,
-        top_k: int = 5,
+        top_k: List[int] = [5, 5, 5, 5],
         start_level: HierarchyLevel = HierarchyLevel.DOMAIN,
         target_level: HierarchyLevel = HierarchyLevel.DIALOGUE,
     ) -> List[Tuple[HierarchicalNode, float]]:

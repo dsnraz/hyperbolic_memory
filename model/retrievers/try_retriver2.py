@@ -21,7 +21,7 @@ from ..llm_inference.data_adapter import extract_interactions
 from ..stores.hierarchical_vector_store import HierarchicalVectorStore
 
 LOCOMO_QA_TEST = "/share/home/leiyh5/Memory/data/locomo/locomo_qa_test.json"
-PERSIST_DIR = "/share/home/leiyh5/Memory/data/try_retriever2_test_built"
+PERSIST_DIR = "/share/home/leiyh5/Memory/data/test_built_session_batch"
 PROJECTOR_PATH = "/share/home/leiyh5/Memory/checkpoints_locomo2/hyperbolic_projector_final.pt"
 LLM_MODEL_PATH = "/share/home/leiyh5/models/Qwen2.5-7B-Instruct"
 # 与 hyperbolic_projector_final.pt 期望的输入维度对齐（当前是 768）
@@ -301,13 +301,13 @@ if __name__ == "__main__":
     # ----- 以下与 try_retrive 流程一致（仅 query / 选节点来源不同） -----
     reu = retriever_euclidean.retrieve(
         query_text=query_text,
-        top_k=10,
+        top_k=[10, 10, 10, 10],
         start_level=HierarchyLevel.DOMAIN,
         target_level=HierarchyLevel.DIALOGUE,
     )
     rhy = retriever_hyperbolic.retrieve(
         query_text=query_text,
-        top_k=10,
+        top_k=[10, 10, 10, 10],
         start_level=HierarchyLevel.DOMAIN,
         target_level=HierarchyLevel.DIALOGUE,
         adaptive_start_level=False,

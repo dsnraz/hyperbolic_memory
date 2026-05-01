@@ -51,6 +51,7 @@ class SessionHierarchicalMemoryManager:
         sessions: List[List[str]],
         generate_embedding: bool = True,
         show_progress: bool = True,
+        session_ids: Optional[List[str]] = None,
     ) -> Tuple[List[Optional[Dict[str, Any]]], List[bool]]:
         if self.llm_encoder is None:
             raise ValueError("LLM encoder is required")
@@ -64,16 +65,21 @@ class SessionHierarchicalMemoryManager:
 
         nodes_list: List[Optional[Dict[str, Any]]] = [None] * len(sessions)
         ok_list: List[bool] = [False] * len(sessions)
+        resolved_session_ids = session_ids or [str(idx) for idx in range(len(sessions))]
+        if len(resolved_session_ids) != len(sessions):
+            raise ValueError("session_ids length must match sessions length")
 
         build_start = time.perf_counter()
-        for idx, (analysis, dialogues, parse_ok) in enumerate(zip(analyses, sessions, parse_ok_list)):
+        for idx, (analysis, dialogues, parse_ok, sid) in enumerate(
+            zip(analyses, sessions, parse_ok_list, resolved_session_ids)
+        ):
             if not parse_ok or analysis is None:
                 continue
             nodes, build_ok = self._build_nodes_from_session(
                 analysis=analysis,
                 dialogues=dialogues,
                 generate_embedding=generate_embedding,
-                session_id=str(idx),
+                session_id=sid,
             )
             nodes_list[idx] = nodes
             ok_list[idx] = build_ok

@@ -94,7 +94,7 @@ class HierarchicalRetrieverBase(ABC):
         """把单个命中格式化为记忆片段文本。"""
         parent_context = self._get_parent_context_text(hit.node)
         confidence = "none" if rerank_score is None else str(rerank_score)
-        print(f"节点{memory_idx}分数：",hit.score)
+        # print(f"节点{memory_idx}分数：",hit.score)
         return (
             f"[记忆片段 #{memory_idx}]\n"
             # f"相关领域/父节点：{parent_context}\n"

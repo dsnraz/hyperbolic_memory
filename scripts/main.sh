@@ -12,4 +12,4 @@ source ~/miniconda3/etc/profile.d/conda.sh
 conda activate memory
 cd /share/home/leiyh5/Memory
 
-python -m model.llm_inference.run
+python -m model.llm_inference.session_run

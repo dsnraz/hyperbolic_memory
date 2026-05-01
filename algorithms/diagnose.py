@@ -24,7 +24,7 @@ import model.retrievers.try_retriver2 as tr2
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--query", type=str, default = "When did Caroline go to the LGBTQ support group?",help="查询文本")
+    parser.add_argument("--query", type=str, default = "What did Caroline research?",help="查询文本")
     parser.add_argument("--retriever_type", type=str, default="hyperbolic_geodesic",
                         choices=["cosine", "hyperbolic_geodesic", "hyperbolic_angular",
                                  "hyperbolic_angular_geodesic_hybrid"])
@@ -37,7 +37,7 @@ def main():
         default="sentence-transformers/all-mpnet-base-v2",
         help="用于生成 query embedding 的模型名（需与 projector 输入维度匹配）。",
     )
-    parser.add_argument("--top_k", type=int, default=20)
+    parser.add_argument("--top_k", type=int, nargs=4, default=[20, 15, 10, 8])
     parser.add_argument("--query_prefix", type=str, default=None,
                         help="v4_query_prefix: 可选的 query 前缀")
     args = parser.parse_args()
@@ -79,7 +79,7 @@ def main():
         if scores:
             mn, mx = min(scores), max(scores)
             print(f"  top-{len(scores)} score range: [{mn:.4f}, {mx:.4f}]  dynamic range: {mx - mn:.4f}")
-        for h in lvl_res.hits[:args.top_k]:
+        for h in lvl_res.hits:
             content = h.node.content.replace("\n", " ")
             content = content[:80] + "..." if len(content) > 80 else content
             parents = ",".join(h.node.parent_ids) if h.node.parent_ids else "(root)"
@@ -97,8 +97,8 @@ def main():
     query_embedding_hyperbolic = tr2.retriever_hyperbolic.project_query(query_embedding)
 
     d1_3_dialogue_content = (
-        "1:56 pm on 8 May, 2023\n"
-        "Caroline: I went to a LGBTQ support group yesterday and it was so powerful."
+        "1:14 pm on 25 May, 2023\n"
+        "Caroline: Researching adoption agencies — it's been a dream to have a family and give a loving home to kids who need it."
     )
     _e, _le, node = tr2.load_node_embedding(text=d1_3_dialogue_content)
     node_embedding, node_level_embedding, node = tr2.load_node_embedding(node_id=node.id)

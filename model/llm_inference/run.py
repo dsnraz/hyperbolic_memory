@@ -21,6 +21,15 @@ from model.llm_inference.llm_inference import MemoryAugmentedLLMInference
 from model.llm_inference.memory_builder import ConversationMemoryBuilder
 
 
+def print_readable_context(context: Any) -> None:
+    print("上下文:")
+    if context is None:
+        print("None")
+        return
+    context_text = str(context)
+    print(context_text)
+
+
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="LoCoMo QA + 分层记忆检索/生成（打印）")
     p.add_argument(
@@ -73,7 +82,8 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--max-questions", type=int, default=100000000)
     p.add_argument("--memory-llm-batch-size", type=int, default=8)
     p.add_argument("--device", type=str, default="auto")
-    p.add_argument("--retriever-top-k", type=int, default=10)
+    p.add_argument("--retriever-top-k", type=int, nargs=4, default=[20, 15, 10, 8],
+                   help="四层 top-k: [DOMAIN CATEGORY KEYWORD DIALOGUE]")
     p.add_argument("--generation-handler-type", type=str, default="transformers")
     p.add_argument("--generation-model-name", type=str, default=None)
     p.add_argument(
@@ -183,7 +193,7 @@ def main() -> None:
                 context = out.get("context")
                 gen = out.get("answer")
                 item[args.prediction_key] = "" if gen is None else str(gen).strip()
-                print(f"上下文: {context!r}")
+                print_readable_context(context)
                 print(f"问题: {question}")
                 print(f"生成: {gen!r}")
 
@@ -267,7 +277,7 @@ def main() -> None:
                 context = out.get("context")
                 gen = out.get("answer")
                 item[args.prediction_key] = "" if gen is None else str(gen).strip()
-                print(f"上下文: {context!r}")
+                print_readable_context(context)
                 print(f"问题: {question}")
                 print(f"生成: {gen!r}")
 

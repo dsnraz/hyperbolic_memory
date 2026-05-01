@@ -44,7 +44,7 @@ LEVEL_ORDER = [
 
 result_euclidean = retriever_euclidean.retrieve(
     query_text=query_text,
-    top_k=5,
+    top_k=[5, 5, 5, 5],
     start_level=HierarchyLevel.DOMAIN,
     target_level=HierarchyLevel.DIALOGUE,
 )
@@ -52,7 +52,7 @@ result_euclidean = retriever_euclidean.retrieve(
 
 result_hyperbolic = retriever_hyperbolic.retrieve(
     query_text=query_text,
-    top_k=5,
+    top_k=[5, 5, 5, 5],
     start_level=HierarchyLevel.DOMAIN,
     target_level=HierarchyLevel.DIALOGUE,
     adaptive_start_level = True

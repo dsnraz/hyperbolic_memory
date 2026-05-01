@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from model.encoders.model_handler import BaseModelHandler, create_model_handler
 from model.hierarchical.hierarchical_manager import (
@@ -24,14 +24,7 @@ class MemoryAugmentedLLMInference:
         "Retrieved context from memory:\n"
         "{context}\n\n"
         "Question: {query}\n"
-        "Answer based on the context above following the style of the examples below (short, factual, and concise)\n"
-        "Examples:\n"
-        "Who did she have dinner with on May 3, 2023?\n"
-        "her mother\n"
-        "When did she donate her car?\n"
-        "21 December 2022\n"
-        "What type of volunteering have John and Maria both done?\n"
-        "Volunteering at a homeless shelter"
+        "Answer straightly based on the context above"
         "If there is no relevant information in the context, please reject the question in one sentence."
         "Answer:"
     )
@@ -50,7 +43,7 @@ class MemoryAugmentedLLMInference:
         generation_model_name: Optional[str] = None,
         generation_model_path: Optional[str] = None,
         generation_api_base: str = "http://localhost:11434",
-        retriever_top_k: int = 5,
+        retriever_top_k: List[int] = [5, 5, 5, 5],
         start_level: HierarchyLevel = HierarchyLevel.DOMAIN,
         target_level: HierarchyLevel = HierarchyLevel.DIALOGUE,
     ) -> None:
@@ -127,16 +120,19 @@ class MemoryAugmentedLLMInference:
         self,
         query_text: str,
         prompt_template: Optional[str] = None,
-        top_k: Optional[int] = None,
+        top_k: Optional[List[int]] = None,
         start_level: Optional[HierarchyLevel] = None,
         target_level: Optional[HierarchyLevel] = None,
         retrieve_kwargs: Optional[Dict[str, Any]] = None,
         generate_kwargs: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         retrieve_kwargs = retrieve_kwargs or {}
+        resolved_top_k = top_k or self.retriever_top_k
+        if len(resolved_top_k) != 4:
+            raise ValueError("top_k 必须是长度为 4 的列表: [DOMAIN, CATEGORY, KEYWORD, DIALOGUE]")
         retrieval_result = self.retriever.retrieve(
             query_text=query_text,
-            top_k=top_k or self.retriever_top_k,
+            top_k=resolved_top_k,
             start_level=start_level or self.start_level,
             target_level=target_level or self.target_level,
             adaptive_start_level = True,
@@ -158,7 +154,7 @@ class MemoryAugmentedLLMInference:
         #     print("--------------------------------")
         context = self.retriever.get_context(
             query_text=query_text,
-            top_k=top_k or self.retriever_top_k,
+            top_k=resolved_top_k[3],
             start_level=start_level or self.start_level,
             target_level=target_level or self.target_level,
             retrieval_result=retrieval_result,
