@@ -18,13 +18,66 @@ from __future__ import annotations
 
 import argparse
 import sys
+from collections import Counter
 from pathlib import Path
+
 import model.retrievers.try_retriver2 as tr2
+from algorithms.locomo_qa_evidence import reference_dialogue_for_query
+
+from model.hierarchical.hierarchy_types import HierarchicalNode, HierarchyLevel
+from model.stores.hierarchical_vector_store import HierarchicalVectorStore
+
+
+def keyword_session_ids(
+    keyword_node: HierarchicalNode,
+    store: HierarchicalVectorStore,
+) -> list[str]:
+    """单个 keyword 子 dialogue 上去重、排序后的 session_id 列表。"""
+    if keyword_node.level != HierarchyLevel.KEYWORD:
+        raise ValueError(f"expected KEYWORD node, got {keyword_node.level!r}")
+
+    seen: set[str] = set()
+    for child_id in keyword_node.child_ids:
+        dialogue = store.get_node(child_id, HierarchyLevel.DIALOGUE)
+        if dialogue is None:
+            raise ValueError(f"dialogue child not found: {child_id!r} under keyword {keyword_node.id!r}")
+        meta = dialogue.metadata or {}
+        sid = meta.get("session_id")
+        if sid is None or str(sid).strip() == "":
+            raise ValueError(f"missing or empty session_id on dialogue {child_id!r}")
+        seen.add(str(sid).strip())
+    return sorted(seen)
+
+
+def count_session_ids_across_keyword_hits(
+    keyword_hits: list,
+    store: HierarchicalVectorStore,
+) -> list[tuple[str, int]]:
+    """
+    本轮 KEYWORD 层每个 hit：取其 session_id 集合；
+    某 session_id 在多少个不同 keyword hit 中出现，计数即加几。
+    """
+    counts: Counter[str] = Counter()
+    for h in keyword_hits:
+        for sid in keyword_session_ids(h.node, store):
+            counts[sid] += 1
+    return sorted(counts.items(), key=lambda x: (-x[1], x[0]))
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--query", type=str, default="When is Melanie planning on going camping?", help="查询文本")
+    parser.add_argument(
+        "--query",
+        type=str,
+        default="What did Caroline research?",
+        help="查询文本（与 locomo_qa_test.json 中某条 question 一致时可自动拼 gold evidence）",
+    )
+    parser.add_argument(
+        "--qa_json",
+        type=str,
+        default=str(Path(__file__).resolve().parent.parent / "data/locomo/locomo_qa_test.json"),
+        help="LoCoMo QA+conversation，用于按 question 匹配 evidence 并生成与 store 一致的参考文本",
+    )
     parser.add_argument("--retriever_type", type=str, default="hyperbolic_geodesic",
                         choices=["cosine", "hyperbolic_geodesic", "hyperbolic_angular",
                                  "hyperbolic_angular_geodesic_hybrid"])
@@ -65,6 +118,8 @@ def main():
         target_level=HierarchyLevel.DIALOGUE,
     )
 
+    store = inf.manager.vector_store
+
     print()
     print("=" * 80)
     print(f"Query: {args.query}")
@@ -84,9 +139,15 @@ def main():
             content = content[:80] + "..." if len(content) > 80 else content
             parents = ",".join(h.node.parent_ids) if h.node.parent_ids else "(root)"
             print(f"  {h.node.id:<16}  score={h.score:.4f}  parents=[{parents[:40]}]  {content}")
+            if lvl_res.level == HierarchyLevel.KEYWORD:
+                for sid in keyword_session_ids(h.node, store):
+                    print(f"      session_id={sid}")
+
+        if lvl_res.level == HierarchyLevel.KEYWORD and lvl_res.hits:
+            agg = count_session_ids_across_keyword_hits(lvl_res.hits, store)
+            print(f"  [session_id, keyword_hit_count]: {agg}")
 
     print("=" * 80)
-    store = inf.manager.vector_store
     # try_retriver2 的工具函数依赖模块级全局变量；被 import 使用时需要手动绑定。
     tr2.store = store
     if getattr(inf, "retriever", None) is not None:
@@ -96,11 +157,15 @@ def main():
     query_embedding = tr2.retriever_hyperbolic._prepare_query_embedding(args.query, None)
     query_embedding_hyperbolic = tr2.retriever_hyperbolic.project_query(query_embedding)
 
-    d1_3_dialogue_content = (
-        "1:14 pm on 25 May, 2023\n"
-        "Melanie: Thanks, Caroline. It's still a work in progress, but I'm doing my best. My kids are so excited about summer break! We're thinking about going camping next month. Any fun plans for the summer?"
-    )
-    _e, _le, node = tr2.load_node_embedding(text=d1_3_dialogue_content)
+    try:
+        reference_dialogue_content, gold_evidence = reference_dialogue_for_query(
+            args.query, Path(args.qa_json)
+        )
+    except (FileNotFoundError, LookupError, KeyError, ValueError) as e:
+        print(f"[locomo_qa_evidence] {e}", file=sys.stderr)
+        sys.exit(1)
+    print(f"[gold evidence] {gold_evidence}")
+    _e, _le, node = tr2.load_node_embedding(text=reference_dialogue_content)
     node_embedding, node_level_embedding, node = tr2.load_node_embedding(node_id=node.id)
     print(node.content)
 

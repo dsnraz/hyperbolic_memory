@@ -19,12 +19,20 @@ from __future__ import annotations
 import argparse
 import sys
 from pathlib import Path
+
 import model.retrievers.try_retriver2 as tr2
+from algorithms.locomo_qa_evidence import reference_dialogue_for_query
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--query", type=str, default = "What did Caroline research?",help="查询文本")
+    parser.add_argument("--query", type=str, default = "What did Caroline research?",help="查询文本（与 locomo_qa_test.json 中某条 question 一致时可自动拼 gold evidence）")
+    parser.add_argument(
+        "--qa_json",
+        type=str,
+        default=str(Path(__file__).resolve().parent.parent / "data/locomo/locomo_qa_test.json"),
+        help="LoCoMo QA+conversation，用于按 question 匹配 evidence 并生成与 store 一致的参考文本",
+    )
     parser.add_argument("--retriever_type", type=str, default="hyperbolic_geodesic",
                         choices=["cosine", "hyperbolic_geodesic", "hyperbolic_angular",
                                  "hyperbolic_angular_geodesic_hybrid"])
@@ -96,11 +104,15 @@ def main():
     query_embedding = tr2.retriever_hyperbolic._prepare_query_embedding(args.query, None)
     query_embedding_hyperbolic = tr2.retriever_hyperbolic.project_query(query_embedding)
 
-    d1_3_dialogue_content = (
-        "1:14 pm on 25 May, 2023\n"
-        "Caroline: Researching adoption agencies — it's been a dream to have a family and give a loving home to kids who need it."
-    )
-    _e, _le, node = tr2.load_node_embedding(text=d1_3_dialogue_content)
+    try:
+        reference_dialogue_content, gold_evidence = reference_dialogue_for_query(
+            args.query, Path(args.qa_json)
+        )
+    except (FileNotFoundError, LookupError, KeyError, ValueError) as e:
+        print(f"[locomo_qa_evidence] {e}", file=sys.stderr)
+        sys.exit(1)
+    print(f"[gold evidence] {gold_evidence}")
+    _e, _le, node = tr2.load_node_embedding(text=reference_dialogue_content)
     node_embedding, node_level_embedding, node = tr2.load_node_embedding(node_id=node.id)
     print(node.content)
 
