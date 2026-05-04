@@ -185,6 +185,35 @@ class BaseHyperbolicRetriever(HierarchicalRetrieverBase, ABC):
             if child_level is None:
                 break
 
+            # fact → dialogue 层：按 fact 排序优先级组织 dialogue，
+            # 每个 fact 内部按 dialogue 自身相似度排序，避免全局混排把
+            # 高相关 fact 的 dialogue 挤到后面。
+            if child_level == HierarchyLevel.DIALOGUE:
+                dialogue_top_k = top_k_map[HierarchyLevel.DIALOGUE]
+                per_fact_dialogue_hits: List[HyperbolicRetrievalHit] = []
+                seen_ids: set = set()
+                total_candidates = 0
+                for fact_hit in ranked_hits:
+                    fact_dialogues = self._collect_children([fact_hit.node])
+                    total_candidates += len(fact_dialogues)
+                    unique_dialogues = [d for d in fact_dialogues if d.id not in seen_ids]
+                    if not unique_dialogues:
+                        continue
+                    for d in unique_dialogues:
+                        seen_ids.add(d.id)
+                    dialogue_hits = self._rank_nodes(query_h, unique_dialogues, dialogue_top_k)
+                    per_fact_dialogue_hits.extend(dialogue_hits)
+
+                level_results.append(
+                    HyperbolicLevelRetrievalResult(
+                        level=child_level,
+                        hits=per_fact_dialogue_hits,
+                        candidate_count=total_candidates,
+                    )
+                )
+                current_level = child_level
+                break
+
             current_candidates = self._collect_children([hit.node for hit in ranked_hits])
             current_level = child_level
 
@@ -537,22 +566,16 @@ def _pair_hyperbolic_angle_at_origin_scores(
 
 class MultiParentAngularHyperbolicRetriever(BaseHyperbolicRetriever):
     """
-    多父场景：相对各父节点的外角向量（`lorentz.pairwise_exterior_angle_vectors`，与
-    `HierarchicalAngularContrastiveLoss` 中的外角矩阵一致）。
+    双曲角度检索器，支持两种角度模式。
 
-    「夹角」与「外角」见 `lorentz.pairwise_exterior_angle_vectors`。**有图父**时 ``parents_h``
-    为真父行，对 query 与候选分别算外角向量后做重角加权重余弦。
-    **无图父**：Lorentz 模型下，用相对参考点 O（空间 0）的**双曲**三角形边长与
-    **双曲余弦定理**得 O 处内角，夹角越小越相似；`opposite_score` 为该内角（弧度），
-    `score = 1/(1+opposite_score)`。
+    ``angle_mode="origin"``：
+        在 Lorentz 模型原点 O 处，用双曲余弦定理计算 query 与候选节点之间的**内角**。
+        无父节点依赖，全程统一使用 O 点内角排序（越小越相似）。
 
-    有父时排序：对每个父 \(i\) 计算 \(\mathrm{Sim}_i=\frac{1+\cos(\alpha_Q^i-\alpha_D^i)}{2}\)，
-    加权后 `opposite_score = 1 - \text{加权和 sim}`。
-
-    父权重（有父时至少开启一种，否则构造时报错）：
-    - `weight_by_parent_origin_geodesic`：父到原点测地线越远，归一化后权重越大；
-    - `weight_by_parent_anchor_geodesic`：父到锚点（query 或候选 node，见 `parent_geodesic_anchor`）
-      测地线越近，归一化后权重越大；二者同时开启时先各自归一化再逐元相乘后再次归一化。
+    ``angle_mode="exterior"``：
+        **有父时**：以父节点为锥顶点，分别计算 query 和候选节点的外角向量，按
+        cos(α_Q - α_D) 的均值作为相似度（无权重，简单平均）。
+        **无父时**：退回 origin 模式，使用 O 点内角。
     """
 
     def __init__(
@@ -560,23 +583,12 @@ class MultiParentAngularHyperbolicRetriever(BaseHyperbolicRetriever):
         vector_store: HierarchicalVectorStore,
         checkpoint_path: Optional[str] = None,
         *,
-        weight_by_parent_origin_geodesic: bool = True,
-        weight_by_parent_anchor_geodesic: bool = False,
-        parent_geodesic_anchor: Literal["query", "node"] = "query",
-        weight_eps: float = 1e-8,
+        angle_mode: Literal["origin", "exterior"] = "exterior",
         **kwargs: Any,
     ) -> None:
-        if not weight_by_parent_origin_geodesic and not weight_by_parent_anchor_geodesic:
-            raise ValueError(
-                "MultiParentAngularHyperbolicRetriever 至少需开启一种父节点加权："
-                "weight_by_parent_origin_geodesic 或 weight_by_parent_anchor_geodesic。"
-            )
-        if parent_geodesic_anchor not in ("query", "node"):
-            raise ValueError("parent_geodesic_anchor 必须为 'query' 或 'node'。")
-        self.weight_by_parent_origin_geodesic = weight_by_parent_origin_geodesic
-        self.weight_by_parent_anchor_geodesic = weight_by_parent_anchor_geodesic
-        self.parent_geodesic_anchor = parent_geodesic_anchor
-        self.weight_eps = weight_eps
+        if angle_mode not in ("origin", "exterior"):
+            raise ValueError(f"angle_mode 必须是 'origin' 或 'exterior'，当前值: {angle_mode}")
+        self.angle_mode = angle_mode
         super().__init__(vector_store, checkpoint_path, **kwargs)
 
     def _similarity(
@@ -584,21 +596,38 @@ class MultiParentAngularHyperbolicRetriever(BaseHyperbolicRetriever):
         query_h: torch.Tensor,
         node: HierarchicalNode,
     ) -> Tuple[float, float]:
-        """
-        无图父：O 点双曲内角；有父：多父外角逐父加权重余弦。内部取 ``node`` 的投影与父节点。
-        """
         projected = self._get_projected_tensor(node)
         if projected is None:
             return 0.0, float("inf")
+
+        if self.angle_mode == "origin":
+            return _pair_hyperbolic_angle_at_origin_scores(
+                query_h, projected, self.get_curvature()
+            )
+
+        # exterior mode
         parents_h = self._gather_parent_hyperbolic_matrix(node)
         if parents_h is None or parents_h.shape[0] == 0:
             return _pair_hyperbolic_angle_at_origin_scores(
                 query_h, projected, self.get_curvature()
             )
-        opposite_score = self._weighted_cosine_angular_opposite_score(
-            query_h, projected, parents_h
+
+        curv = self.get_curvature()
+        aq = self.compute_exterior_angle_vector_relative_to_parents(
+            query_h, parents_h, curv
         )
-        return (1.0 - opposite_score), opposite_score
+        an = self.compute_exterior_angle_vector_relative_to_parents(
+            projected, parents_h, curv
+        )
+        if aq.numel() == 0:
+            return _pair_hyperbolic_angle_at_origin_scores(
+                query_h, projected, curv
+            )
+        delta = aq - an
+        sim_i = (1.0 + torch.cos(delta)) * 0.5
+        score = float(sim_i.mean().item())
+        score = min(1.0, max(0.0, score))
+        return (score, 1.0 - score)
 
     @staticmethod
     def compute_exterior_angle_vector_relative_to_parents(
@@ -644,72 +673,6 @@ class MultiParentAngularHyperbolicRetriever(BaseHyperbolicRetriever):
         if not rows:
             return None
         return torch.stack(rows, dim=0)
-
-    def _normalize_parent_weights(self, raw: torch.Tensor) -> torch.Tensor:
-        """非负权重归一化为概率向量；全零时退化为均匀。"""
-        z = raw.clamp(min=0.0)
-        s = z.sum()
-        if s < self.weight_eps:
-            n = z.numel()
-            return torch.full_like(z, 1.0 / max(n, 1))
-        return z / s
-
-    def _parent_aggregation_weights(
-        self,
-        parents_h: torch.Tensor,
-        query_h: torch.Tensor,
-        node_h: torch.Tensor,
-        curv: float,
-    ) -> torch.Tensor:
-        """
-        形状 (P,) 的父权重，和为 1。按实例标志组合「原点远则大」与「锚点近则大」两种因子。
-        """
-        par = parents_h.detach().float().cpu()
-        p_count = par.shape[0]
-        w = torch.ones(p_count, dtype=torch.float32)
-
-        if self.weight_by_parent_origin_geodesic:
-            origin = torch.zeros(1, par.shape[1], dtype=par.dtype, device=par.device)
-            d_origin = L.pairwise_dist_vectors(par, origin, curv=curv).squeeze(-1)
-            w = w * self._normalize_parent_weights(d_origin)
-
-        if self.weight_by_parent_anchor_geodesic:
-            if self.parent_geodesic_anchor == "query":
-                anchor = _hyperbolic_spatial_row(query_h).unsqueeze(0)
-            else:
-                anchor = _hyperbolic_spatial_row(node_h).unsqueeze(0)
-            d_anchor = L.pairwise_dist_vectors(par, anchor, curv=curv).squeeze(-1)
-            inv = 1.0 / (d_anchor + self.weight_eps)
-            w = w * self._normalize_parent_weights(inv)
-
-        return self._normalize_parent_weights(w)
-
-    def _weighted_cosine_angular_opposite_score(
-        self,
-        query_h: torch.Tensor,
-        node_h: torch.Tensor,
-        parents_h: torch.Tensor,
-    ) -> float:
-        """
-        逐父 \(\mathrm{Sim}_i=(1+\cos(\alpha_Q^i-\alpha_D^i))/2\)，加权得 `score` 后返回 `1 - score`
-        （即写入 `HyperbolicRetrievalHit.opposite_score` 的量，非测地线距离）。
-        """
-        curv = self.get_curvature()
-        aq = self.compute_exterior_angle_vector_relative_to_parents(
-            query_h, parents_h, curv
-        )
-        an = self.compute_exterior_angle_vector_relative_to_parents(
-            node_h, parents_h, curv
-        )
-        if aq.numel() == 0:
-            return 0.0
-        delta = aq - an
-        # print(f"delta: {delta}")
-        sim_i = (1.0 + torch.cos(delta)) * 0.5
-        w = self._parent_aggregation_weights(parents_h, query_h, node_h, curv)
-        score = float((w * sim_i).sum().item())
-        score = min(1.0, max(0.0, score))
-        return 1.0 - score
 
     def _rank_nodes(
         self,
@@ -860,6 +823,7 @@ class HybridHyperbolicRetriever(GeodesicHyperbolicRetriever):
         target_level: HierarchyLevel = HierarchyLevel.DIALOGUE,
         force_rebuild_cache: bool = False,
         adaptive_start_level: bool = False,
+        hybrid_scoring_boundary: Optional[HierarchyLevel] = None,
     ) -> HyperbolicRetrievalResult:
         if top_k <= 0:
             raise ValueError("top_k 必须大于 0")
@@ -878,7 +842,9 @@ class HybridHyperbolicRetriever(GeodesicHyperbolicRetriever):
         query_h = self.project_query(prepared_query_embedding)
         query_depth = self._compute_query_depth(query_h)
 
-        if adaptive_start_level:
+        if hybrid_scoring_boundary is not None:
+            boundary = hybrid_scoring_boundary
+        elif adaptive_start_level:
             boundary = self._select_start_level_by_depth(
                 query_depth, start_level, target_level
             )
@@ -906,6 +872,33 @@ class HybridHyperbolicRetriever(GeodesicHyperbolicRetriever):
 
             child_level = current_level.get_child_level()
             if child_level is None:
+                break
+
+            # fact → dialogue 层：按 fact 排序优先级组织 dialogue，
+            # 每个 fact 内部按 dialogue 自身相似度排序。
+            if child_level == HierarchyLevel.DIALOGUE:
+                per_fact_dialogue_hits: List[HyperbolicRetrievalHit] = []
+                seen_ids: set = set()
+                total_candidates = 0
+                for fact_hit in ranked_hits:
+                    fact_dialogues = self._collect_children([fact_hit.node])
+                    total_candidates += len(fact_dialogues)
+                    unique_dialogues = [d for d in fact_dialogues if d.id not in seen_ids]
+                    if not unique_dialogues:
+                        continue
+                    for d in unique_dialogues:
+                        seen_ids.add(d.id)
+                    dialogue_hits = self._rank_nodes(query_h, unique_dialogues, top_k)
+                    per_fact_dialogue_hits.extend(dialogue_hits)
+
+                level_results.append(
+                    HyperbolicLevelRetrievalResult(
+                        level=child_level,
+                        hits=per_fact_dialogue_hits,
+                        candidate_count=total_candidates,
+                    )
+                )
+                current_level = child_level
                 break
 
             current_candidates = self._collect_children([hit.node for hit in ranked_hits])

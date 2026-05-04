@@ -20,9 +20,10 @@ import argparse
 import sys
 from collections import Counter
 from pathlib import Path
+from typing import List
 
 import model.retrievers.try_retriver2 as tr2
-from algorithms.locomo_qa_evidence import reference_dialogue_for_query
+from algorithms.locomo_qa_evidence import reference_dialogues_for_query
 
 from model.hierarchical.hierarchy_types import HierarchicalNode, HierarchyLevel
 from model.stores.hierarchical_vector_store import HierarchicalVectorStore
@@ -78,6 +79,57 @@ def count_session_ids_across_keyword_hits(
         for sid in keyword_session_ids(h.node, store):
             counts[sid] += 1
     return sorted(counts.items(), key=lambda x: (-x[1], x[0]))
+
+
+def print_ancestor_chain(
+    store: HierarchicalVectorStore,
+    node: HierarchicalNode,
+    query_embedding: list,
+    query_embedding_hyperbolic,
+    label: str,
+) -> None:
+    """沿 node 的 parent_ids 回溯，打印从 keyword → category → domain 的得分链。"""
+    print(f"\n{'='*60}")
+    print(f"[{label}] dialogue: {node.id}  {node.content[:100]}...")
+    score_d_e, score_d_h = tr2.score_query_against_node(
+        node, query_embedding, query_embedding_hyperbolic,
+    )
+    print(f"  dialogue 得分: euclidean={score_d_e:.4f}  hyperbolic={score_d_h:.4f}")
+
+    # keyword 父节点
+    keyword_ids = node.parent_ids
+    print(f"  keyword 父节点: {keyword_ids}")
+
+    category_ids: List[str] = []
+    seen_cat: set = set()
+    for kw_id in keyword_ids:
+        _, _, kw_node = tr2.load_node_embedding(node_id=kw_id, level=HierarchyLevel.KEYWORD)
+        score_k_e, score_k_h = tr2.score_query_against_node(
+            kw_node, query_embedding, query_embedding_hyperbolic,
+        )
+        print(f"    keyword {kw_id} ({kw_node.content[:60]}...): euclidean={score_k_e:.4f}  hyperbolic={score_k_h:.4f}")
+        print(f"      {memory_unit_extra_text(kw_node)}")
+        for cat_id in kw_node.parent_ids:
+            if cat_id not in seen_cat:
+                seen_cat.add(cat_id)
+                category_ids.append(cat_id)
+
+    print(f"  category 父节点: {category_ids}")
+    seen_domain: set = set()
+    for cat_id in category_ids:
+        _, _, cat_node = tr2.load_node_embedding(node_id=cat_id, level=HierarchyLevel.CATEGORY)
+        score_c_e, score_c_h = tr2.score_query_against_node(
+            cat_node, query_embedding, query_embedding_hyperbolic,
+        )
+        print(f"    category {cat_id} ({cat_node.content[:60]}...): euclidean={score_c_e:.4f}  hyperbolic={score_c_h:.4f}")
+        for dom_id in cat_node.parent_ids:
+            if dom_id not in seen_domain:
+                seen_domain.add(dom_id)
+                _, _, dom_node = tr2.load_node_embedding(node_id=dom_id, level=HierarchyLevel.DOMAIN)
+                score_d_e, score_d_h = tr2.score_query_against_node(
+                    dom_node, query_embedding, query_embedding_hyperbolic,
+                )
+                print(f"      domain {dom_id} ({dom_node.content[:60]}...): euclidean={score_d_e:.4f}  hyperbolic={score_d_h:.4f}")
 
 
 def main():
@@ -176,91 +228,43 @@ def main():
     query_embedding = tr2.retriever_hyperbolic._prepare_query_embedding(args.query, None)
     query_embedding_hyperbolic = tr2.retriever_hyperbolic.project_query(query_embedding)
 
+    # ---- gold evidence: 逐条独立格式化，支持多 evidence 和含图像 turn ----
     try:
-        reference_dialogue_content, gold_evidence = reference_dialogue_for_query(
+        evidence_texts, gold_evidence = reference_dialogues_for_query(
             args.query, Path(args.qa_json)
         )
     except (FileNotFoundError, LookupError, KeyError, ValueError) as e:
         print(f"[locomo_qa_evidence] {e}", file=sys.stderr)
         sys.exit(1)
-    print(f"[gold evidence] {gold_evidence}")
-    _e, _le, node = tr2.load_node_embedding(text=reference_dialogue_content)
-    node_embedding, node_level_embedding, node = tr2.load_node_embedding(node_id=node.id)
-    print(node.content)
 
-    keywords = node.parent_ids
-    print(keywords)
+    print(f"\n[gold evidence] {gold_evidence}  ({len(evidence_texts)} turns)")
 
-    for keyword in keywords:
-        node_embedding_keyword, node_level_embedding_keyword, node_keyword = tr2.load_node_embedding(
-            node_id=keyword, level=HierarchyLevel.KEYWORD
-        )
-        print(node_keyword.content)
-        print(memory_unit_extra_text(node_keyword))
-        score1, score2 = tr2.score_query_against_node(
-            node_keyword,
-            query_embedding,
-            query_embedding_hyperbolic,
-        )
-        print("关于", keyword, node_keyword.content, "的得分")
-        print("欧式检索得分：", score1)
-        print("双曲检索得分：", score2)
+    for ev_idx, ev_text in enumerate(evidence_texts):
+        ev_id = gold_evidence[ev_idx]
+        print(f"\n{'─'*60}")
+        print(f"[evidence {ev_idx}] dia_id={ev_id}")
+        print(f"  raw: {ev_text[:120]}...")
 
-    score1, score2 = tr2.score_query_against_node(
-        node,
-        query_embedding,
-        query_embedding_hyperbolic,
-    )
-    print(f"关于原句的得分{node.id,node.content}")
-    print("欧式检索得分：", score1)
-    print("双曲检索得分：", score2)
-
-    # 从当前节点的 keyword 父节点出发，遍历所有 category 父节点，再遍历对应 domain 父节点
-    category_ids: list[str] = []
-    seen_category_ids: set[str] = set()
-    for keyword in keywords:
-        _, _, node_keyword = tr2.load_node_embedding(
-            node_id=keyword, level=HierarchyLevel.KEYWORD
-        )
-        for category_id in node_keyword.parent_ids:
-            if category_id in seen_category_ids:
+        try:
+            _e, _le, node = tr2.load_node_embedding(text=ev_text)
+            node_embedding, node_level_embedding, node = tr2.load_node_embedding(node_id=node.id)
+        except ValueError as exc:
+            print(f"  !! 未在 store 中找到该 evidence 节点: {exc}")
+            # 尝试用 content 模糊搜索
+            found = False
+            for d_node in store.get_nodes_by_level(HierarchyLevel.DIALOGUE):
+                if ev_text.strip()[:80] in (d_node.content or ""):
+                    print(f"  -> 模糊匹配到: {d_node.id}  {d_node.content[:100]}...")
+                    node = d_node
+                    found = True
+                    break
+            if not found:
                 continue
-            seen_category_ids.add(category_id)
-            category_ids.append(category_id)
 
-    print("--------------------------------")
-    print("由关键词回溯得到的 category 节点:", category_ids)
-
-    seen_domain_ids: set[str] = set()
-    for category_id in category_ids:
-        _, _, node_category = tr2.load_node_embedding(
-            node_id=category_id, level=HierarchyLevel.CATEGORY
+        print_ancestor_chain(
+            store, node, query_embedding, query_embedding_hyperbolic,
+            label=f"evidence[{ev_idx}] {ev_id}",
         )
-        score_c_e, score_c_h = tr2.score_query_against_node(
-            node_category,
-            query_embedding,
-            query_embedding_hyperbolic,
-        )
-        print(f"关于{category_id}({node_category.content})的得分")
-        print("欧式检索得分：", score_c_e)
-        print("双曲检索得分：", score_c_h)
-        print(f"{category_id} 的 domain 父节点: {node_category.parent_ids}")
-
-        for domain_id in node_category.parent_ids:
-            if domain_id in seen_domain_ids:
-                continue
-            seen_domain_ids.add(domain_id)
-            _, _, node_domain = tr2.load_node_embedding(
-                node_id=domain_id, level=HierarchyLevel.DOMAIN
-            )
-            score_d_e, score_d_h = tr2.score_query_against_node(
-                node_domain,
-                query_embedding,
-                query_embedding_hyperbolic,
-            )
-            print(f"关于{category_id}的父节点{node_domain.content}({domain_id})的得分")
-            print("欧式检索得分：", score_d_e)
-            print("双曲检索得分：", score_d_h)
 
 
 if __name__ == "__main__":
