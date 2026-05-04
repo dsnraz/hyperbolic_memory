@@ -204,8 +204,8 @@ class TransformersModelHandler(BaseModelHandler):
             )
         
         input_token_length = inputs["input_ids"].shape[1]
-        print("输入长度")
-        print(input_token_length)
+        # print("输入长度")
+        # print(input_token_length)
         generated_part = outputs[0][input_token_length:]
         response = self._tokenizer.decode(generated_part, skip_special_tokens=True).strip()
         

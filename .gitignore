@@ -13,6 +13,8 @@ scripts/*job*/
 # 本地大体积 wheel，避免推送到远端
 *.whl
 *.out
+*.pt
+
 
 # Python
 __pycache__/

@@ -85,7 +85,7 @@ def main():
     parser.add_argument(
         "--query",
         type=str,
-        default="What did Caroline research?",
+        default="When did Melanie run a charity race?",
         help="查询文本（与 locomo_qa_test.json 中某条 question 一致时可自动拼 gold evidence）",
     )
     parser.add_argument(
@@ -97,8 +97,8 @@ def main():
     parser.add_argument("--retriever_type", type=str, default="hyperbolic_geodesic",
                         choices=["cosine", "hyperbolic_geodesic", "hyperbolic_angular",
                                  "hyperbolic_angular_geodesic_hybrid"])
-    parser.add_argument("--checkpoint", type=str, required=False, default="/share/home/leiyh5/Memory/checkpoints_locomo_session_batch/hyperbolic_projector_final.pt")
-    parser.add_argument("--persist_dir", type=str, default="/share/home/leiyh5/Memory/data/memory_running_session_batch/round_1_conv-26",
+    parser.add_argument("--checkpoint", type=str, required=False, default="/share/home/leiyh5/Memory/checkpoints_locomo_fact/hyperbolic_projector_final.pt")
+    parser.add_argument("--persist_dir", type=str, default="/share/home/leiyh5/Memory/data/memory_running_fact/round_1_conv-26",
                         help="vector store 持久化目录")
     parser.add_argument(
         "--embedding_model",
@@ -106,8 +106,8 @@ def main():
         default="sentence-transformers/all-mpnet-base-v2",
         help="用于生成 query embedding 的模型名（需与 projector 输入维度匹配）。",
     )
-    parser.add_argument("--top_k", type=int, nargs=4, default=[20, 15, 10, 8])
-    parser.add_argument("--memory_unit_mode", choices=["keyword", "fact"], default="keyword")
+    parser.add_argument("--top_k", type=int, nargs=4, default=[20, 30, 10, 8])
+    parser.add_argument("--memory_unit_mode", choices=["keyword", "fact"], default="fact")
     parser.add_argument("--query_prefix", type=str, default=None,
                         help="v4_query_prefix: 可选的 query 前缀")
     args = parser.parse_args()

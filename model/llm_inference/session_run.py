@@ -52,7 +52,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         "--persist-directory",
         type=str,
-        default="/share/home/leiyh5/Memory/data/memory_running_session_batch",
+        default="/share/home/leiyh5/Memory/data/memory_running_fact",
         help="Chroma 持久化目录",
     )
     p.add_argument(
@@ -64,7 +64,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         "--projector-checkpoint-path",
         type=str,
-        default="/share/home/leiyh5/Memory/checkpoints_locomo_session_batch/hyperbolic_projector_final.pt",
+        default="/share/home/leiyh5/Memory/checkpoints_locomo_fact/hyperbolic_projector_final.pt",
         help="双曲 projector .pt ",
     )
     p.add_argument(
@@ -110,7 +110,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         "--out-file",
         type=str,
-        default="/share/home/leiyh5/Memory/data/locomo/locomo_qa_test_pred_session_batch.json",
+        default="/share/home/leiyh5/Memory/data/locomo/locomo_qa_test_pred_fact.json",
         help="保存预测结果的 JSON（LoCoMo 评测可读）",
     )
     p.add_argument(
@@ -129,7 +129,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         "--memory-unit-mode",
         choices=("keyword", "fact"),
-        default="keyword",
+        default="fact",
         help="session third layer mode: keyword keeps old behavior; fact stores factual statements in the third layer.",
     )
     return p.parse_args()

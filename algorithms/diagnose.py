@@ -33,7 +33,7 @@ def main():
         default=str(Path(__file__).resolve().parent.parent / "data/locomo/locomo_qa_test.json"),
         help="LoCoMo QA+conversation，用于按 question 匹配 evidence 并生成与 store 一致的参考文本",
     )
-    parser.add_argument("--retriever_type", type=str, default="hyperbolic_geodesic",
+    parser.add_argument("--retriever_type", type=str, default="hyperbolic_angular",
                         choices=["cosine", "hyperbolic_geodesic", "hyperbolic_angular",
                                  "hyperbolic_angular_geodesic_hybrid"])
     parser.add_argument("--checkpoint", type=str, required=False, default="/share/home/leiyh5/Memory/checkpoints_locomo_total/hyperbolic_projector_final.pt")
