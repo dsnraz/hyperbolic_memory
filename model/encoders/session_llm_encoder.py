@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Literal, Tuple
 
 import json_repair
 
@@ -10,6 +10,8 @@ from .llm_encoder import LLMEncoder
 
 class SessionLLMEncoder(LLMEncoder):
     """LLM encoder that extracts one four-level tree for a whole session."""
+
+    MEMORY_UNIT_MODES = ("keyword", "fact")
 
     SESSION_ANALYSIS_PROMPT = """
 [INST]
@@ -53,12 +55,67 @@ Session dialogues:
 JSON OUTPUT:
 """
 
+    SESSION_FACT_ANALYSIS_PROMPT = """
+[INST]
+You are a professional session-level dialogue fact extractor.
+You ONLY output STANDARD JSON.
+You DO NOT output any extra words.
+
+Return JSON with this schema:
+{{
+  "domain": "macro domain",
+  "categories": [
+    {{
+      "category": "category name",
+      "facts": [
+        {{
+          "fact": "one self-contained factual statement",
+          "dialogue_indices": [0, 2],
+          "subject": "main person or entity",
+          "predicate": "relation or action",
+          "object": "object or complement",
+          "time": "time expression if present, else empty string"
+        }}
+      ]
+    }}
+  ],
+  "dialogue_summaries": [
+    {{
+      "dialogue_index": 0,
+      "summary": "short summary"
+    }}
+  ]
+}}
+
+Rules:
+1. Read the full session before deciding the structure.
+2. Extract atomic facts that can answer detailed questions. Prefer explicit events, preferences, relationships, plans, dates, locations, and personal details.
+3. A fact may be supported by multiple dialogues; dialogue_indices must list every supporting dialogue index.
+4. dialogue_indices are zero-based and must point to the input dialogue list.
+5. A dialogue can support multiple facts.
+6. fact must be self-contained and include the key entity names instead of pronouns whenever possible.
+7. Keep categories compact and globally consistent for the session.
+8. Output JSON only.
+[/INST]
+
+Session dialogues:
+{session_text}
+
+JSON OUTPUT:
+"""
+
+    def __init__(self, *args: Any, memory_unit_mode: Literal["keyword", "fact"] = "keyword", **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        if memory_unit_mode not in self.MEMORY_UNIT_MODES:
+            raise ValueError(f"memory_unit_mode must be one of {self.MEMORY_UNIT_MODES}")
+        self.memory_unit_mode = memory_unit_mode
+
     def analyze_session(self, dialogues: List[str], **kwargs: Any) -> Tuple[Dict[str, Any], bool]:
         if not self._init_handler():
             raise RuntimeError("model init failed")
 
         session_text = self._format_session(dialogues)
-        prompt = self.SESSION_ANALYSIS_PROMPT.format(session_text=session_text)
+        prompt = self._session_prompt_template().format(session_text=session_text)
         response = self._handler.generate(prompt, **kwargs)
         return self._parse_session_response(response, dialogues)
 
@@ -71,10 +128,8 @@ JSON OUTPUT:
         if not self._init_handler():
             raise RuntimeError("model init failed")
 
-        prompts = [
-            self.SESSION_ANALYSIS_PROMPT.format(session_text=self._format_session(session))
-            for session in sessions
-        ]
+        prompt_template = self._session_prompt_template()
+        prompts = [prompt_template.format(session_text=self._format_session(session)) for session in sessions]
         responses = self._handler.batch_generate(prompts, **kwargs)
 
         results: List[Dict[str, Any]] = []
@@ -97,6 +152,11 @@ JSON OUTPUT:
     def _format_session(self, dialogues: List[str]) -> str:
         return "\n".join(f"[{idx}] {self._format_input(text)}" for idx, text in enumerate(dialogues))
 
+    def _session_prompt_template(self) -> str:
+        if self.memory_unit_mode == "fact":
+            return self.SESSION_FACT_ANALYSIS_PROMPT
+        return self.SESSION_ANALYSIS_PROMPT
+
     def _parse_session_response(
         self,
         response: str,
@@ -115,6 +175,11 @@ JSON OUTPUT:
             return self._fallback_session_payload(dialogues), False
 
     def _normalize_session_payload(self, data: Any, dialogues: List[str]) -> Dict[str, Any]:
+        if self.memory_unit_mode == "fact":
+            return self._normalize_fact_session_payload(data, dialogues)
+        return self._normalize_keyword_session_payload(data, dialogues)
+
+    def _normalize_keyword_session_payload(self, data: Any, dialogues: List[str]) -> Dict[str, Any]:
         payload = data if isinstance(data, dict) else {}
         dialogue_count = len(dialogues)
 
@@ -172,6 +237,7 @@ JSON OUTPUT:
 
         return {
             "domain": str(payload.get("domain", "unknown")).strip() or "unknown",
+            "memory_unit_mode": "keyword",
             "categories": normalized_categories,
             "dialogue_summaries": [
                 {
@@ -183,9 +249,121 @@ JSON OUTPUT:
             ],
         }
 
+    def _normalize_fact_session_payload(self, data: Any, dialogues: List[str]) -> Dict[str, Any]:
+        payload = data if isinstance(data, dict) else {}
+        dialogue_count = len(dialogues)
+
+        normalized_categories: List[Dict[str, Any]] = []
+        for category_item in payload.get("categories", []):
+            if not isinstance(category_item, dict):
+                continue
+            category_name = str(category_item.get("category", "")).strip()
+            if not category_name:
+                continue
+
+            normalized_facts: List[Dict[str, Any]] = []
+            raw_facts = category_item.get("facts", [])
+            if not isinstance(raw_facts, list):
+                raw_facts = []
+            for fact_item in raw_facts:
+                if not isinstance(fact_item, dict):
+                    continue
+                fact_text = str(fact_item.get("fact", "")).strip()
+                if not fact_text:
+                    continue
+                indices = self._normalize_dialogue_indices(
+                    fact_item.get("dialogue_indices", []),
+                    dialogue_count,
+                )
+                if not indices:
+                    continue
+                normalized_facts.append(
+                    {
+                        "fact": fact_text,
+                        "dialogue_indices": indices,
+                        "subject": str(fact_item.get("subject", "")).strip(),
+                        "predicate": str(fact_item.get("predicate", "")).strip(),
+                        "object": str(fact_item.get("object", "")).strip(),
+                        "time": str(fact_item.get("time", "")).strip(),
+                    }
+                )
+
+            if normalized_facts:
+                normalized_categories.append(
+                    {
+                        "category": category_name,
+                        "facts": normalized_facts,
+                    }
+                )
+
+        summary_map = self._normalize_summary_map(payload, dialogue_count)
+        return {
+            "domain": str(payload.get("domain", "unknown")).strip() or "unknown",
+            "memory_unit_mode": "fact",
+            "categories": normalized_categories,
+            "dialogue_summaries": [
+                {
+                    "dialogue_index": idx,
+                    "summary": summary_map.get(idx, ""),
+                    "raw_dialogue": dialogues[idx],
+                }
+                for idx in range(dialogue_count)
+            ],
+        }
+
+    def _normalize_dialogue_indices(self, raw_indices: Any, dialogue_count: int) -> List[int]:
+        indices: List[int] = []
+        for value in raw_indices if isinstance(raw_indices, list) else []:
+            try:
+                idx = int(value)
+            except (TypeError, ValueError):
+                continue
+            if 0 <= idx < dialogue_count and idx not in indices:
+                indices.append(idx)
+        return sorted(indices)
+
+    def _normalize_summary_map(self, payload: Dict[str, Any], dialogue_count: int) -> Dict[int, str]:
+        summary_map: Dict[int, str] = {}
+        for summary_item in payload.get("dialogue_summaries", []):
+            if not isinstance(summary_item, dict):
+                continue
+            try:
+                idx = int(summary_item.get("dialogue_index"))
+            except (TypeError, ValueError):
+                continue
+            if 0 <= idx < dialogue_count:
+                summary_map[idx] = str(summary_item.get("summary", "")).strip()
+        return summary_map
+
     def _fallback_session_payload(self, dialogues: List[str]) -> Dict[str, Any]:
+        if self.memory_unit_mode == "fact":
+            return {
+                "domain": "unknown",
+                "memory_unit_mode": "fact",
+                "categories": [
+                    {
+                        "category": "general",
+                        "facts": [
+                            {
+                                "fact": text,
+                                "dialogue_indices": [idx],
+                                "subject": "",
+                                "predicate": "",
+                                "object": "",
+                                "time": "",
+                            }
+                            for idx, text in enumerate(dialogues)
+                        ],
+                    }
+                ],
+                "dialogue_summaries": [
+                    {"dialogue_index": idx, "summary": "", "raw_dialogue": text}
+                    for idx, text in enumerate(dialogues)
+                ],
+            }
         return {
             "domain": "unknown",
+            "memory_unit_mode": "keyword",
             "categories": [
                 {
                     "category": "general",

@@ -126,6 +126,12 @@ def parse_args() -> argparse.Namespace:
         help="本地生成权重绝对路径，仅在与 --generation-handler-type 同用时生效",
     )
     p.add_argument("--generation-api-base", type=str, default="http://localhost:11434")
+    p.add_argument(
+        "--memory-unit-mode",
+        choices=("keyword", "fact"),
+        default="keyword",
+        help="session third layer mode: keyword keeps old behavior; fact stores factual statements in the third layer.",
+    )
     return p.parse_args()
 
 
@@ -149,6 +155,7 @@ def main() -> None:
         generation_model_name=args.generation_model_name,
         generation_model_path=args.generation_model_path,
         generation_api_base=args.generation_api_base,
+        memory_unit_mode=args.memory_unit_mode,
     )
     if args.retriever_type in (
         "hyperbolic_geodesic",
@@ -223,6 +230,13 @@ def main() -> None:
             round_dir = persist_root / f"round_{si + 1}_{sid}"
             round_dir.mkdir(parents=True, exist_ok=True)
             build_marker = round_dir / "build_complete.json"
+            marker_matches_mode = False
+            if build_marker.exists():
+                try:
+                    with open(build_marker, encoding="utf-8") as f:
+                        marker_matches_mode = json.load(f).get("memory_unit_mode", "keyword") == args.memory_unit_mode
+                except (OSError, json.JSONDecodeError):
+                    marker_matches_mode = False
 
             print(f"\n========== 样本 {sid} ({si + 1}/{n_samples}) ==========")
             print(f"[cached 模式] 轮次目录: {round_dir}")
@@ -231,7 +245,7 @@ def main() -> None:
             round_infer_kw["persist_directory"] = str(round_dir)
 
             # 已有缓存时无需加载建库 LLM（节省启动与显存）
-            if build_marker.exists():
+            if marker_matches_mode:
                 round_infer_kw["llm_model_path"] = None
 
             # 复用生成器，避免每轮重复加载生成模型
@@ -251,7 +265,7 @@ def main() -> None:
                 llm_batch_size=args.memory_llm_batch_size,
             )
 
-            if build_marker.exists():
+            if marker_matches_mode:
                 print("[复用缓存建库] 检测到已持久化结果，跳过建库。")
                 print_store_stats(inference, str(sid))
             else:
@@ -269,6 +283,7 @@ def main() -> None:
                     "sample_id": sid,
                     "round_index": si + 1,
                     "persist_directory": str(round_dir),
+                    "memory_unit_mode": args.memory_unit_mode,
                 }
                 with open(build_marker, "w", encoding="utf-8") as f:
                     json.dump(marker_payload, f, ensure_ascii=False, indent=2)

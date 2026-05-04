@@ -15,7 +15,9 @@ def normalize_interaction(item: Any) -> str:
         for key in ("interaction", "text", "content", "dialogue", "utterance"):
             value = item.get(key)
             if isinstance(value, str) and value.strip():
-                return value.strip()
+                base_text = value.strip()
+                image_context = _image_context_text(item)
+                return f"{base_text}\n{image_context}" if image_context else base_text
 
     text = str(item).strip()
     if not text:
@@ -32,19 +34,40 @@ def get_session_numbers(conversation: Dict[str, Any]) -> List[int]:
     return sorted(session_numbers)
 
 
+def _clean_text(value: Any) -> str:
+    return str(value).strip() if value is not None else ""
+
+
+def _image_context_text(turn: Dict[str, Any]) -> str:
+    """Return text-only context for LoCoMo image turns."""
+    parts: List[str] = []
+    caption = _clean_text(turn.get("blip_caption"))
+    if caption:
+        parts.append(f"Image description: {caption}")
+    image_query = _clean_text(turn.get("query"))
+    if image_query:
+        parts.append(f"Image query: {image_query}")
+    return "\n".join(parts)
+
+
 def turn_to_text(turn: Dict[str, Any], time_value: str = "") -> str:
     """
     把 LoCoMo 原生 turn 转成可直接建库的文本。
 
     这里保留 speaker + text，并把 session 时间拼进去，方便后续时间相关检索。
     """
-    speaker = str(turn.get("speaker", "")).strip()
-    text = str(turn.get("text", "")).strip()
+    speaker = _clean_text(turn.get("speaker"))
+    text = _clean_text(turn.get("text"))
     if not speaker or not text:
         return ""
+    parts: List[str] = []
     if time_value:
-        return f"{time_value}\n{speaker}: {text}"
-    return f"{speaker}: {text}"
+        parts.append(time_value)
+    parts.append(f"{speaker}: {text}")
+    image_context = _image_context_text(turn)
+    if image_context:
+        parts.append(image_context)
+    return "\n".join(parts)
 
 
 def extract_locomo_conversation_interactions(sample: Dict[str, Any]) -> List[str]:

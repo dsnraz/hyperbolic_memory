@@ -37,6 +37,10 @@ def keyword_session_ids(
         raise ValueError(f"expected KEYWORD node, got {keyword_node.level!r}")
 
     seen: set[str] = set()
+    meta = keyword_node.metadata or {}
+    sid = meta.get("session_id")
+    if sid is not None and str(sid).strip():
+        seen.add(str(sid).strip())
     for child_id in keyword_node.child_ids:
         dialogue = store.get_node(child_id, HierarchyLevel.DIALOGUE)
         if dialogue is None:
@@ -47,6 +51,18 @@ def keyword_session_ids(
             raise ValueError(f"missing or empty session_id on dialogue {child_id!r}")
         seen.add(str(sid).strip())
     return sorted(seen)
+
+
+def memory_unit_extra_text(node: HierarchicalNode) -> str:
+    meta = node.metadata or {}
+    unit_type = meta.get("unit_type") or meta.get("memory_unit_mode") or "keyword"
+    if unit_type == "fact":
+        return (
+            f"unit_type=fact session_id={meta.get('session_id', '')} "
+            f"dialogue_indices={meta.get('dialogue_indices', [])} "
+            f"subject={meta.get('subject', '')!r} time={meta.get('time', '')!r}"
+        )
+    return f"unit_type={unit_type}"
 
 
 def count_session_ids_across_keyword_hits(
@@ -91,6 +107,7 @@ def main():
         help="用于生成 query embedding 的模型名（需与 projector 输入维度匹配）。",
     )
     parser.add_argument("--top_k", type=int, nargs=4, default=[20, 15, 10, 8])
+    parser.add_argument("--memory_unit_mode", choices=["keyword", "fact"], default="keyword")
     parser.add_argument("--query_prefix", type=str, default=None,
                         help="v4_query_prefix: 可选的 query 前缀")
     args = parser.parse_args()
@@ -105,6 +122,7 @@ def main():
         projector_checkpoint_path=args.checkpoint,
         retriever_top_k=args.top_k,
         embedding_model=args.embedding_model,
+        memory_unit_mode=args.memory_unit_mode,
     )
 
     # v4 支持：构造后设置前缀
@@ -140,12 +158,13 @@ def main():
             parents = ",".join(h.node.parent_ids) if h.node.parent_ids else "(root)"
             print(f"  {h.node.id:<16}  score={h.score:.4f}  parents=[{parents[:40]}]  {content}")
             if lvl_res.level == HierarchyLevel.KEYWORD:
+                print(f"      {memory_unit_extra_text(h.node)}")
                 for sid in keyword_session_ids(h.node, store):
                     print(f"      session_id={sid}")
 
         if lvl_res.level == HierarchyLevel.KEYWORD and lvl_res.hits:
             agg = count_session_ids_across_keyword_hits(lvl_res.hits, store)
-            print(f"  [session_id, keyword_hit_count]: {agg}")
+            print(f"  [session_id, memory_unit_hit_count]: {agg}")
 
     print("=" * 80)
     # try_retriver2 的工具函数依赖模块级全局变量；被 import 使用时需要手动绑定。
@@ -177,6 +196,7 @@ def main():
             node_id=keyword, level=HierarchyLevel.KEYWORD
         )
         print(node_keyword.content)
+        print(memory_unit_extra_text(node_keyword))
         score1, score2 = tr2.score_query_against_node(
             node_keyword,
             query_embedding,

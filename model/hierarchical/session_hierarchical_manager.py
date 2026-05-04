@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import time
-from typing import Any, Dict, List, Optional, Set, Tuple
+from pathlib import Path
+from typing import Any, Dict, List, Literal, Optional, Set, Tuple
 
 from ..encoders import EmbeddingEncoder
 from ..encoders.session_llm_encoder import SessionLLMEncoder
@@ -18,11 +19,15 @@ class SessionHierarchicalMemoryManager:
         embedding_encoder: Optional[EmbeddingEncoder] = None,
         vector_store: Optional[HierarchicalVectorStore] = None,
         persist_directory: Optional[str] = None,
+        memory_unit_mode: Literal["keyword", "fact"] = "keyword",
     ) -> None:
+        if memory_unit_mode not in ("keyword", "fact"):
+            raise ValueError("memory_unit_mode must be 'keyword' or 'fact'")
         self.llm_encoder = llm_encoder
         self.embedding_encoder = embedding_encoder
         self.vector_store = vector_store
         self.persist_directory = persist_directory
+        self.memory_unit_mode = memory_unit_mode
         self._last_batch_perf: Dict[str, float] = {}
 
     def process_session(
@@ -124,7 +129,7 @@ class SessionHierarchicalMemoryManager:
             self.vector_store.add_node(domain_node)
 
         category_nodes: Dict[str, HierarchicalNode] = {}
-        keyword_nodes: Dict[Tuple[str, str], HierarchicalNode] = {}
+        memory_unit_nodes: Dict[Tuple[str, str], HierarchicalNode] = {}
         dialogue_parent_ids: Dict[int, Set[str]] = {idx: set() for idx in range(len(dialogues))}
 
         for category_item in analysis.get("categories", []):
@@ -148,33 +153,46 @@ class SessionHierarchicalMemoryManager:
             domain_node.add_child(category_node.id)
             category_nodes[category_name] = category_node
 
-            for keyword_item in category_item.get("keywords", []):
-                keyword_name = str(keyword_item.get("keyword", "")).strip()
-                if not keyword_name:
+            for memory_unit in self._iter_memory_units(category_item):
+                unit_text = str(memory_unit.get("content", "")).strip()
+                if not unit_text:
                     continue
-                key = (category_name, keyword_name)
-                keyword_node = keyword_nodes.get(key)
-                if keyword_node is None:
-                    keyword_node = self.vector_store.get_node_by_content(keyword_name, HierarchyLevel.KEYWORD)
-                    if keyword_node is None:
-                        keyword_node = HierarchicalNode(
-                            content=keyword_name,
+                key = (category_name, unit_text)
+                memory_unit_node = memory_unit_nodes.get(key)
+                if memory_unit_node is None:
+                    memory_unit_node = (
+                        None
+                        if self.memory_unit_mode == "fact"
+                        else self.vector_store.get_node_by_content(unit_text, HierarchyLevel.KEYWORD)
+                    )
+                    unit_metadata = {
+                        "memory_unit_mode": self.memory_unit_mode,
+                        "unit_type": self._memory_unit_label(),
+                        "session_category": category_name,
+                        "session_id": session_id or "",
+                        **memory_unit.get("metadata", {}),
+                    }
+                    if memory_unit_node is None:
+                        memory_unit_node = HierarchicalNode(
+                            content=unit_text,
                             level=HierarchyLevel.KEYWORD,
                             parent_ids=[category_node.id],
-                            embedding=self._get_embedding(keyword_name, embedding_cache),
+                            embedding=self._get_embedding(unit_text, embedding_cache),
                             level_embedding=self._get_level_embedding(
-                                HierarchyLevel.KEYWORD, keyword_name, embedding_cache
+                                HierarchyLevel.KEYWORD, unit_text, embedding_cache
                             ),
-                            metadata={"session_category": category_name},
+                            metadata=unit_metadata,
                         )
-                        self.vector_store.add_node(keyword_node)
-                    self._append_parent(keyword_node, category_node.id)
-                    category_node.add_child(keyword_node.id)
-                    keyword_nodes[key] = keyword_node
+                        self.vector_store.add_node(memory_unit_node)
+                    else:
+                        memory_unit_node.metadata.update(unit_metadata)
+                    self._append_parent(memory_unit_node, category_node.id)
+                    category_node.add_child(memory_unit_node.id)
+                    memory_unit_nodes[key] = memory_unit_node
 
-                for dialogue_idx in keyword_item.get("dialogue_indices", []):
+                for dialogue_idx in memory_unit.get("dialogue_indices", []):
                     if 0 <= dialogue_idx < len(dialogues):
-                        dialogue_parent_ids[dialogue_idx].add(keyword_node.id)
+                        dialogue_parent_ids[dialogue_idx].add(memory_unit_node.id)
 
         fallback_category = None
         if not category_nodes:
@@ -185,13 +203,21 @@ class SessionHierarchicalMemoryManager:
                 continue
             if fallback_category is None:
                 fallback_category = next(iter(category_nodes.values()))
-            fallback_keyword = self._get_or_create_keyword(
-                "general",
+            fallback_unit_text = dialogues[idx] if self.memory_unit_mode == "fact" else "general"
+            fallback_unit = self._get_or_create_memory_unit(
+                fallback_unit_text,
                 fallback_category,
                 embedding_cache,
-                keyword_nodes,
+                memory_unit_nodes,
+                metadata={
+                    "memory_unit_mode": self.memory_unit_mode,
+                    "unit_type": self._memory_unit_label(),
+                    "session_id": session_id or "",
+                    "dialogue_indices": [idx],
+                    "fact": fallback_unit_text if self.memory_unit_mode == "fact" else "",
+                },
             )
-            parent_ids.add(fallback_keyword.id)
+            parent_ids.add(fallback_unit.id)
 
         summary_map = {
             item.get("dialogue_index"): str(item.get("summary", "")).strip()
@@ -212,24 +238,27 @@ class SessionHierarchicalMemoryManager:
                     "summary": summary_map.get(idx, ""),
                     "session_id": session_id or "",
                     "dialogue_index": idx,
+                    "parent_unit_type": self._memory_unit_label(),
                 },
             )
             self.vector_store.add_node(dialogue_node)
-            for keyword_node in keyword_nodes.values():
-                if keyword_node.id in parent_ids:
-                    keyword_node.add_child(dialogue_node.id)
+            for memory_unit_node in memory_unit_nodes.values():
+                if memory_unit_node.id in parent_ids:
+                    memory_unit_node.add_child(dialogue_node.id)
             dialogue_nodes.append(dialogue_node)
 
         self.vector_store.update_node(domain_node)
         for node in category_nodes.values():
             self.vector_store.update_node(node)
-        for node in keyword_nodes.values():
+        for node in memory_unit_nodes.values():
             self.vector_store.update_node(node)
 
         return {
             "domain": domain_node,
             "categories": list(category_nodes.values()),
-            "keywords": list(keyword_nodes.values()),
+            "keywords": list(memory_unit_nodes.values()),
+            "memory_units": list(memory_unit_nodes.values()),
+            "memory_unit_mode": self.memory_unit_mode,
             "dialogues": dialogue_nodes,
         }, True
 
@@ -253,31 +282,39 @@ class SessionHierarchicalMemoryManager:
         domain_node.add_child(category_node.id)
         return category_node
 
-    def _get_or_create_keyword(
+    def _get_or_create_memory_unit(
         self,
-        keyword_name: str,
+        unit_text: str,
         category_node: HierarchicalNode,
         embedding_cache: Dict[str, List[float]],
-        keyword_nodes: Dict[Tuple[str, str], HierarchicalNode],
+        memory_unit_nodes: Dict[Tuple[str, str], HierarchicalNode],
+        metadata: Optional[Dict[str, Any]] = None,
     ) -> HierarchicalNode:
-        key = (category_node.content, keyword_name)
-        keyword_node = keyword_nodes.get(key)
-        if keyword_node is not None:
-            return keyword_node
-        keyword_node = self.vector_store.get_node_by_content(keyword_name, HierarchyLevel.KEYWORD)
-        if keyword_node is None:
-            keyword_node = HierarchicalNode(
-                content=keyword_name,
+        key = (category_node.content, unit_text)
+        memory_unit_node = memory_unit_nodes.get(key)
+        if memory_unit_node is not None:
+            return memory_unit_node
+        memory_unit_node = (
+            None
+            if self.memory_unit_mode == "fact"
+            else self.vector_store.get_node_by_content(unit_text, HierarchyLevel.KEYWORD)
+        )
+        if memory_unit_node is None:
+            memory_unit_node = HierarchicalNode(
+                content=unit_text,
                 level=HierarchyLevel.KEYWORD,
                 parent_ids=[category_node.id],
-                embedding=self._get_embedding(keyword_name, embedding_cache),
-                level_embedding=self._get_level_embedding(HierarchyLevel.KEYWORD, keyword_name, embedding_cache),
+                embedding=self._get_embedding(unit_text, embedding_cache),
+                level_embedding=self._get_level_embedding(HierarchyLevel.KEYWORD, unit_text, embedding_cache),
+                metadata=metadata or {},
             )
-            self.vector_store.add_node(keyword_node)
-        self._append_parent(keyword_node, category_node.id)
-        category_node.add_child(keyword_node.id)
-        keyword_nodes[key] = keyword_node
-        return keyword_node
+            self.vector_store.add_node(memory_unit_node)
+        elif metadata:
+            memory_unit_node.metadata.update(metadata)
+        self._append_parent(memory_unit_node, category_node.id)
+        category_node.add_child(memory_unit_node.id)
+        memory_unit_nodes[key] = memory_unit_node
+        return memory_unit_node
 
     def _collect_embedding_texts(self, analysis: Dict[str, Any], dialogues: List[str]) -> List[str]:
         texts: List[str] = []
@@ -294,14 +331,61 @@ class SessionHierarchicalMemoryManager:
             category_name = str(category_item.get("category", "")).strip()
             add(category_name)
             add(self._make_level_aware_text(HierarchyLevel.CATEGORY, category_name))
-            for keyword_item in category_item.get("keywords", []):
-                keyword_name = str(keyword_item.get("keyword", "")).strip()
-                add(keyword_name)
-                add(self._make_level_aware_text(HierarchyLevel.KEYWORD, keyword_name))
+            for memory_unit in self._iter_memory_units(category_item):
+                unit_text = str(memory_unit.get("content", "")).strip()
+                add(unit_text)
+                add(self._make_level_aware_text(HierarchyLevel.KEYWORD, unit_text))
         for dialogue in dialogues:
             add(dialogue)
             add(self._make_level_aware_text(HierarchyLevel.DIALOGUE, dialogue))
         return texts
+
+    def _iter_memory_units(self, category_item: Dict[str, Any]) -> List[Dict[str, Any]]:
+        if self.memory_unit_mode == "fact":
+            units: List[Dict[str, Any]] = []
+            for fact_item in category_item.get("facts", []):
+                if not isinstance(fact_item, dict):
+                    continue
+                fact_text = str(fact_item.get("fact", "")).strip()
+                if not fact_text:
+                    continue
+                dialogue_indices = fact_item.get("dialogue_indices", [])
+                if not isinstance(dialogue_indices, list):
+                    dialogue_indices = []
+                units.append(
+                    {
+                        "content": fact_text,
+                        "dialogue_indices": dialogue_indices,
+                        "metadata": {
+                            "fact": fact_text,
+                            "dialogue_indices": dialogue_indices,
+                            "subject": str(fact_item.get("subject", "")).strip(),
+                            "predicate": str(fact_item.get("predicate", "")).strip(),
+                            "object": str(fact_item.get("object", "")).strip(),
+                            "time": str(fact_item.get("time", "")).strip(),
+                        },
+                    }
+                )
+            return units
+
+        units = []
+        for keyword_item in category_item.get("keywords", []):
+            if not isinstance(keyword_item, dict):
+                continue
+            keyword_name = str(keyword_item.get("keyword", "")).strip()
+            if not keyword_name:
+                continue
+            units.append(
+                {
+                    "content": keyword_name,
+                    "dialogue_indices": keyword_item.get("dialogue_indices", []),
+                    "metadata": {"keyword": keyword_name},
+                }
+            )
+        return units
+
+    def _memory_unit_label(self) -> str:
+        return "fact" if self.memory_unit_mode == "fact" else "keyword"
 
     def _append_parent(self, node: HierarchicalNode, parent_id: str) -> None:
         if parent_id not in node.parent_ids:
@@ -324,6 +408,8 @@ class SessionHierarchicalMemoryManager:
         return self._get_embedding(text, embedding_cache)
 
     def _make_level_aware_text(self, level: HierarchyLevel, content: str) -> str:
+        if self.memory_unit_mode == "fact":
+            return content
         return f"{level.name}: {content}"
 
     def get_last_batch_perf(self) -> Dict[str, float]:
@@ -354,13 +440,20 @@ def create_session_hierarchical_manager(
     persist_directory: Optional[str] = None,
     device: str = "auto",
     delayed_write: bool = True,
+    memory_unit_mode: Literal["keyword", "fact"] = "keyword",
 ) -> SessionHierarchicalMemoryManager:
     llm_encoder = SessionLLMEncoder(
         model_path=llm_model_path,
         model_type="transformers" if llm_model_path else "ollama",
         device=device,
+        memory_unit_mode=memory_unit_mode,
     )
-    embedding_encoder = EmbeddingEncoder()
+    embedding_is_path = bool(embedding_model and Path(embedding_model).exists())
+    embedding_encoder = EmbeddingEncoder(
+        model_path=embedding_model if embedding_is_path else None,
+        model_name=None if embedding_is_path else embedding_model,
+        device=device,
+    )
     vector_store = HierarchicalVectorStore(
         persist_directory=persist_directory,
         embedding_function=embedding_encoder.generate_embedding,
@@ -371,4 +464,5 @@ def create_session_hierarchical_manager(
         embedding_encoder=embedding_encoder,
         vector_store=vector_store,
         persist_directory=persist_directory,
+        memory_unit_mode=memory_unit_mode,
     )

@@ -67,18 +67,32 @@ def get_session_numbers(conversation: Dict[str, Any]) -> List[int]:
 def session_to_text(session: List[Dict[str, Any]]) -> str:
     turns: List[str] = []
     for turn in session:
-        speaker = str(turn.get("speaker", "")).strip()
-        text = str(turn.get("text", "")).strip()
-        if speaker and text:
-            turns.append(f"{speaker}: {text}")
+        text = turn_to_text(turn)
+        if text:
+            turns.append(text)
     return "\n".join(turns)
+
+
+def image_context_text(turn: Dict[str, Any]) -> str:
+    parts: List[str] = []
+    caption = str(turn.get("blip_caption", "")).strip()
+    if caption:
+        parts.append(f"Image description: {caption}")
+    image_query = str(turn.get("query", "")).strip()
+    if image_query:
+        parts.append(f"Image query: {image_query}")
+    return "\n".join(parts)
 
 
 def turn_to_text(turn: Dict[str, Any]) -> str:
     speaker = str(turn.get("speaker", "")).strip()
     text = str(turn.get("text", "")).strip()
     if speaker and text:
-        return f"{speaker}: {text}"
+        parts = [f"{speaker}: {text}"]
+        image_context = image_context_text(turn)
+        if image_context:
+            parts.append(image_context)
+        return "\n".join(parts)
     return ""
 
 

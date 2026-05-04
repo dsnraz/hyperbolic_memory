@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+import argparse
 import json
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Literal, Optional
 
 from tqdm import tqdm
 
@@ -21,17 +22,22 @@ class SessionDataProcessor:
         manager: Optional[SessionHierarchicalMemoryManager] = None,
         datapath: Optional[str] = None,
         llm_model_path: Optional[str] = None,
+        embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2",
         persist_directory: Optional[str] = None,
         device: str = "auto",
         flush_interval: int = 128,
+        memory_unit_mode: Literal["keyword", "fact"] = "keyword",
     ) -> None:
         self.manager = manager or create_session_hierarchical_manager(
             llm_model_path=llm_model_path,
+            embedding_model=embedding_model,
             persist_directory=persist_directory,
             device=device,
+            memory_unit_mode=memory_unit_mode,
         )
         self.datapath = datapath
         self.flush_interval = flush_interval
+        self.memory_unit_mode = memory_unit_mode
         self.data = self.load_data() if datapath else None
 
     def load_data(self) -> List[Any]:
@@ -165,20 +171,34 @@ def main() -> None:
     LLM_MODEL_PATH = "/share/home/leiyh5/models/Qwen2.5-7B-Instruct"
     DATA_FILE = "/share/home/leiyh5/Memory/data/locomo/locomo10.json"
     PERSIST_DIR = "/share/home/leiyh5/Memory/data/hierarchical_memory_locomo_session_batch"
+    parser = argparse.ArgumentParser(description="Build session-level hierarchical memory")
+    parser.add_argument("--data-file", type=str, default=DATA_FILE)
+    parser.add_argument("--persist-directory", type=str, default=PERSIST_DIR)
+    parser.add_argument("--llm-model-path", type=str, default=LLM_MODEL_PATH)
+    parser.add_argument("--embedding-model", type=str, default="sentence-transformers/all-mpnet-base-v2")
+    parser.add_argument("--device", type=str, default="auto")
+    parser.add_argument("--dataset-name", type=str, default="locomo")
+    parser.add_argument("--process-batch-size", type=int, default=8)
+    parser.add_argument("--flush-interval", type=int, default=128)
+    parser.add_argument("--memory-unit-mode", choices=("keyword", "fact"), default="fact")
+    args = parser.parse_args()
 
     processor = SessionDataProcessor(
-        llm_model_path=LLM_MODEL_PATH,
-        persist_directory=PERSIST_DIR,
-        device="auto",
-        datapath=DATA_FILE,
-        flush_interval=128,
+        llm_model_path=args.llm_model_path,
+        embedding_model=args.embedding_model,
+        persist_directory=args.persist_directory,
+        device=args.device,
+        datapath=args.data_file,
+        flush_interval=args.flush_interval,
+        memory_unit_mode=args.memory_unit_mode,
     )
     print("SessionDataProcessor 创建成功")
+    print(f"Memory unit mode: {args.memory_unit_mode}")
 
     processor.process_file(
-        dataset_name="locomo",
+        dataset_name=args.dataset_name,
         show_progress=True,
-        process_batch_size=8,
+        process_batch_size=args.process_batch_size,
     )
 
     stats = processor.get_stats()
