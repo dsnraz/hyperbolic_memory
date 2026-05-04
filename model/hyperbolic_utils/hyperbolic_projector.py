@@ -10,6 +10,7 @@ class Hyperbolic_projector(nn.Module):
 
         # 将 c 注册为 buffer 或 parameter，防止设备不一致
         #self.register_buffer('c', torch.tensor([curvature]), persistent=False)
+        # initial_value = torch.log(torch.exp(torch.tensor(curvature)) - 1)
         self.c = nn.Parameter(torch.tensor([float(curvature)], dtype=torch.float32))
         self.alpha = alpha
         self.beta = beta

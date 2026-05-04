@@ -4,12 +4,17 @@
 #SBATCH -G 1
 #SBATCH -o job6.out
 #
-# 使用多父外角加权双曲检索（hyperbolic_angular）跑 model.llm_inference.run。
-# 路径默认值在 run.py 的 argparse 中；若需覆盖可追加参数，例如：
-#   --max-samples 2 --max-questions 5 --persist-directory /path/to/chroma
+# model.llm_inference.session_run 路径类参数（与 session_run.parse_args 默认一致，可删行或改值覆盖）
 #
 source ~/miniconda3/etc/profile.d/conda.sh
 conda activate memory
 cd /share/home/leiyh5/Memory
 
-python -m model.llm_inference.session_run
+python -m model.llm_inference.session_run \
+  --data-file /share/home/leiyh5/Memory/data/locomo/locomo_qa_test.json \
+  --persist-directory /share/home/leiyh5/Memory/data/memory_running_fact \
+  --llm-model-path /share/home/leiyh5/models/Qwen2.5-7B-Instruct \
+  --projector-checkpoint-path /share/home/leiyh5/Memory/checkpoints_locomo_fact/hyperbolic_projector_final.pt \
+  --embedding-model sentence-transformers/all-mpnet-base-v2 \
+  --out-file /share/home/leiyh5/Memory/data/locomo/locomo_qa_test_pred_fact.json \
+  --generation-model-path /share/home/leiyh5/models/Qwen2.5-7B-Instruct

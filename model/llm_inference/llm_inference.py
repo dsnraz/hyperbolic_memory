@@ -24,8 +24,8 @@ class MemoryAugmentedLLMInference:
         "Retrieved context from memory:\n"
         "{context}\n\n"
         "Question: {query}\n"
-        "Answer straightly based on the context above"
-        "If there is no relevant information in the context, please reject the question in one sentence."
+        "Answer straightly"
+        "If there is no relevant information in the context, output 'I don't know'."
         "Answer:"
     )
 

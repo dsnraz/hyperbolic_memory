@@ -3,7 +3,16 @@
 #SBATCH -n 1
 #SBATCH -G 1
 #SBATCH -o job_result.out
-source ~/miniconda3/etc/profile.d/conda.sh 
+#
+# scripts.eval.evaluate_locomo_predictions 路径类参数（与 parse_args 默认一致，可改值覆盖）
+#
+source ~/miniconda3/etc/profile.d/conda.sh
 conda activate memory
 cd //share/home/leiyh5/Memory
-python  -m scripts.eval.evaluate_locomo_predictions
+
+python -m scripts.eval.evaluate_locomo_predictions \
+  --ann-file /share/home/leiyh5/Memory/data/locomo/locomo_qa_test.json \
+  --pred-file /share/home/leiyh5/Memory/data/locomo/locomo_qa_test_pred_fact.json \
+  --locomo-root /share/home/leiyh5/locomo \
+  --scored-file /share/home/leiyh5/Memory/data/locomo/locomo_qa_test_pred_scored.json \
+  --stats-file /share/home/leiyh5/Memory/data/locomo/locomo_qa_test_pred_stats.json
