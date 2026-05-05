@@ -295,12 +295,20 @@ class SubtreeSampler:
         }
         
         parent_child_mask = torch.zeros(n_parent, n_child, dtype=torch.float32)
-        
+
         for local_parent_idx, global_child_idx in parent_child_relations:
             if global_child_idx in child_global_to_local:
                 local_child_idx = child_global_to_local[global_child_idx]
                 parent_child_mask[local_parent_idx, local_child_idx] = 1.0
-        
+
+        # 补齐 batch 内所有真实父子关系：多父场景下一个子节点可能被父节点 A 的
+        # 采样轮次选中但未被父节点 B 选中，不补齐会导致该子节点在 B 的 softmax
+        # 中被当作负样本推开。
+        for local_p_idx, global_p_idx in enumerate(selected_parent_indices):
+            for global_c_idx in self.parent_to_children.get(global_p_idx, []):
+                if global_c_idx in child_global_to_local:
+                    parent_child_mask[local_p_idx, child_global_to_local[global_c_idx]] = 1.0
+
         # 保留该字段仅用于兼容旧接口；多父训练语义以后续的 parent_child_mask 为准。
         parent_child_map = parent_child_mask.argmax(dim=0)
         

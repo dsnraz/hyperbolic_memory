@@ -239,14 +239,14 @@ def hyperbolic_law_of_cosines_cos(
     单位一致，即该模型下的弧长）。设所求**内角**的顶点为 b 与 c 的**公共**端点，**对边**为
     ``a``，则
 
-    .. math:: \\cos \\theta = \\frac{\\cosh a - \\cosh b\\,\\cosh c}{\\sinh b\\,\\sinh c} \\,.
+    .. math:: \\cos \\theta = \\frac{\\cosh b\\,\\cosh c - \\cosh a}{\\sinh b\\,\\sinh c} \\,.
 
     ``a, b, c`` 需同形状、逐元素一一对应。当 ``b`` 或 ``c`` 的 ``|sinh|`` 过小时分母
     会数值失稳，请改用 ``hyperbolic_law_of_cosines_angle`` 做退化与 NaN 处理。
     """
     if a.shape != b.shape or a.shape != c.shape:
         raise ValueError("a, b, c 必须同形状。")
-    return (torch.cosh(a) - torch.cosh(b) * torch.cosh(c)) / (torch.sinh(b) * torch.sinh(c))
+    return (torch.cosh(b) * torch.cosh(c) - torch.cosh(a)) / (torch.sinh(b) * torch.sinh(c))
 
 
 def hyperbolic_law_of_cosines_angle(
@@ -268,7 +268,7 @@ def hyperbolic_law_of_cosines_angle(
     good = (shb.abs() >= eps) & (shc.abs() >= eps) & torch.isfinite(a) & torch.isfinite(
         b
     ) & torch.isfinite(c)
-    cos_o = (torch.cosh(a) - torch.cosh(b) * torch.cosh(c)) / (shb * shc)
+    cos_o = (torch.cosh(b) * torch.cosh(c) - torch.cosh(a)) / (shb * shc)
     good = good & torch.isfinite(cos_o)
     cos_o = torch.clamp(cos_o, -1.0 + 1e-6, 1.0 - 1e-6)
     ang = torch.acos(cos_o)
