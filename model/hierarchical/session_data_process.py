@@ -12,6 +12,7 @@ from .session_hierarchical_manager import (
     SessionHierarchicalMemoryManager,
     create_session_hierarchical_manager,
 )
+from .hierarchy_types import HierarchyLevel
 
 
 class SessionDataProcessor:
@@ -100,6 +101,11 @@ class SessionDataProcessor:
             pbar.close()
 
         if self.manager.get_pending_dirty_count() > 0:
+            self.manager.flush()
+
+        domain_removed = self.manager.deduplicate_level(HierarchyLevel.DOMAIN)
+        if domain_removed > 0:
+            print(f"\nDomain 层语义去重完成: 合并删除 {domain_removed} 个节点")
             self.manager.flush()
 
         success_rate = (success_count / total_sessions * 100.0) if total_sessions > 0 else 0.0
