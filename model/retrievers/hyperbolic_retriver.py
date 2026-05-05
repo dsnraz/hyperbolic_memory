@@ -5,8 +5,9 @@
 1. `BaseHyperbolicRetriever`：双曲检索基类
 2. `GeodesicHyperbolicRetriever`：测地线距离检索（`MemoryAugmentedLLMInference` 中 `hyperbolic_geodesic`）
 3. `MultiParentAngularHyperbolicRetriever`：多父外角加权检索（`hyperbolic_angular`）
-4. `HybridHyperbolicRetriever`：按 query 深度定分界层，上外角/下测地线混合
-   （`MemoryAugmentedLLMInference` 中 `hyperbolic_angular_geodesic_hybrid`）
+4. `HybridHyperbolicRetriever`：按 query 深度或参数定分界层，上外角/下测地线混合
+   （`MemoryAugmentedLLMInference` 中 `hyperbolic_angular_geodesic_hybrid`）；
+   `retrieve` 的 `top_k` 与测地/角度基类相同，为四层列表 `[DOMAIN, CATEGORY, KEYWORD, DIALOGUE]`。
 
 检索流程与余弦检索器一致，采用自顶向下的层级收缩策略：
 1. 在起始层级的全部节点中检索 top-k
@@ -583,7 +584,7 @@ class MultiParentAngularHyperbolicRetriever(BaseHyperbolicRetriever):
         vector_store: HierarchicalVectorStore,
         checkpoint_path: Optional[str] = None,
         *,
-        angle_mode: Literal["origin", "exterior"] = "exterior",
+        angle_mode: Literal["origin", "exterior"] = "origin",
         **kwargs: Any,
     ) -> None:
         if angle_mode not in ("origin", "exterior"):
@@ -810,7 +811,6 @@ class HybridHyperbolicRetriever(GeodesicHyperbolicRetriever):
         b_idx = self.LEVEL_ORDER.index(boundary)
         n_idx = self.LEVEL_ORDER.index(node.level)
         if n_idx < b_idx:
-            print("使用多父外角检索")
             return self._angular._similarity(query_h, node)
         return GeodesicHyperbolicRetriever._similarity(self, query_h, node)
 
@@ -818,15 +818,17 @@ class HybridHyperbolicRetriever(GeodesicHyperbolicRetriever):
         self,
         query_text: Optional[str] = None,
         query_embedding: Optional[Sequence[float]] = None,
-        top_k: int = 5,
+        top_k: List[int] = [5, 5, 5, 5],
         start_level: HierarchyLevel = HierarchyLevel.DOMAIN,
         target_level: HierarchyLevel = HierarchyLevel.DIALOGUE,
         force_rebuild_cache: bool = False,
         adaptive_start_level: bool = False,
         hybrid_scoring_boundary: Optional[HierarchyLevel] = None,
     ) -> HyperbolicRetrievalResult:
-        if top_k <= 0:
-            raise ValueError("top_k 必须大于 0")
+        if len(top_k) != 4:
+            raise ValueError("top_k 必须是长度为 4 的列表: [DOMAIN, CATEGORY, KEYWORD, DIALOGUE]")
+        if any(k <= 0 for k in top_k):
+            raise ValueError("top_k 列表中的每个值都必须大于 0")
 
         self._validate_level_path(start_level, target_level)
 
@@ -852,12 +854,19 @@ class HybridHyperbolicRetriever(GeodesicHyperbolicRetriever):
             boundary = start_level
 
         self._hybrid_scoring_geodesic_from_level = boundary
+        top_k_map = {
+            HierarchyLevel.DOMAIN: top_k[0],
+            HierarchyLevel.CATEGORY: top_k[1],
+            HierarchyLevel.KEYWORD: top_k[2],
+            HierarchyLevel.DIALOGUE: top_k[3],
+        }
         level_results: List[HyperbolicLevelRetrievalResult] = []
         current_level = start_level
         current_candidates = self._get_nodes_by_level(current_level)
 
         while True:
-            ranked_hits = self._rank_nodes(query_h, current_candidates, top_k)
+            level_top_k = top_k_map[current_level]
+            ranked_hits = self._rank_nodes(query_h, current_candidates, level_top_k)
             print("检索完一层，当前层级为：", current_level)
             level_results.append(
                 HyperbolicLevelRetrievalResult(
@@ -877,6 +886,7 @@ class HybridHyperbolicRetriever(GeodesicHyperbolicRetriever):
             # fact → dialogue 层：按 fact 排序优先级组织 dialogue，
             # 每个 fact 内部按 dialogue 自身相似度排序。
             if child_level == HierarchyLevel.DIALOGUE:
+                dialogue_top_k = top_k_map[HierarchyLevel.DIALOGUE]
                 per_fact_dialogue_hits: List[HyperbolicRetrievalHit] = []
                 seen_ids: set = set()
                 total_candidates = 0
@@ -888,7 +898,7 @@ class HybridHyperbolicRetriever(GeodesicHyperbolicRetriever):
                         continue
                     for d in unique_dialogues:
                         seen_ids.add(d.id)
-                    dialogue_hits = self._rank_nodes(query_h, unique_dialogues, top_k)
+                    dialogue_hits = self._rank_nodes(query_h, unique_dialogues, dialogue_top_k)
                     per_fact_dialogue_hits.extend(dialogue_hits)
 
                 level_results.append(

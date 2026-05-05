@@ -19,6 +19,10 @@ from model.retrievers.no_category_hyperbolic_retriver import (
 class NoCategoryMemoryAugmentedLLMInference:
     DEFAULT_PROMPT_TEMPLATE = (
         "You are a helpful assistant that answers questions using retrieved memory.\n\n"
+        "How to read timestamps in the memory fragments below:\n"
+        "- The first line inside each fragment (often a clock/calendar line before 'Speaker: ...') is when that **chat turn was posted** in the conversation log, not necessarily when real-world events described in the words happened.\n"
+        "- Deictic time in the utterance ('yesterday', 'last year', 'next week', etc.) must be resolved **relative to that posting time** to infer calendar dates.\n"
+        "- Do not equate the posting timestamp with the date of an event inside the quote unless the question explicitly asks when the message was sent.\n\n"
         "Retrieved context from memory:\n"
         "{context}\n\n"
         "Question: {query}\n"
