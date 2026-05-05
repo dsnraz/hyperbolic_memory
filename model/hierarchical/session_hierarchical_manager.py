@@ -32,6 +32,8 @@ class SessionHierarchicalMemoryManager:
         self.persist_directory = persist_directory
         self.memory_unit_mode = memory_unit_mode
         self._last_batch_perf: Dict[str, float] = {}
+        self._last_batch_analyses: List[Optional[Dict[str, Any]]] = []
+        self._last_batch_parse_ok_list: List[bool] = []
 
     def process_session(
         self,
@@ -69,6 +71,8 @@ class SessionHierarchicalMemoryManager:
             sessions,
             show_progress=show_progress,
         )
+        self._last_batch_analyses = list(analyses)
+        self._last_batch_parse_ok_list = list(parse_ok_list)
         llm_seconds = time.perf_counter() - llm_start
 
         nodes_list: List[Optional[Dict[str, Any]]] = [None] * len(sessions)
@@ -165,6 +169,9 @@ class SessionHierarchicalMemoryManager:
                         HierarchyLevel.DOMAIN, domain_text, embedding_cache
                     ),
                 )
+                emb = self._get_embedding(domain_text, embedding_cache)
+                if emb is None:
+                    print(f"[WARN] domain '{domain_text}' embedding is None, cache_size={len(embedding_cache)}")
                 self.vector_store.add_node(domain_node)
             domain_nodes[domain_text] = domain_node
 
@@ -623,6 +630,12 @@ class SessionHierarchicalMemoryManager:
 
     def get_last_batch_perf(self) -> Dict[str, float]:
         return dict(self._last_batch_perf)
+
+    def get_last_batch_analyses(self) -> List[Optional[Dict[str, Any]]]:
+        return list(self._last_batch_analyses)
+
+    def get_last_batch_parse_ok_list(self) -> List[bool]:
+        return list(self._last_batch_parse_ok_list)
 
     def get_stats(self) -> HierarchicalMemoryStats:
         return self.vector_store.get_stats()

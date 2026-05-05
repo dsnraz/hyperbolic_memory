@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+from pathlib import Path
 from typing import Any, Dict, List, Literal, Optional
 
 from tqdm import tqdm
@@ -58,6 +59,7 @@ class SessionDataProcessor:
         max_items: Optional[int] = None,
         show_progress: bool = True,
         process_batch_size: int = 8,
+        llm_output_save_path: Optional[str] = None,
     ) -> None:
         if self.data is None:
             raise ValueError("data not loaded")
@@ -71,6 +73,7 @@ class SessionDataProcessor:
         processed_count = 0
         success_count = 0
         fail_count = 0
+        llm_output_entries: List[Dict[str, Any]] = []
 
         pbar = None
         if show_progress:
@@ -86,6 +89,14 @@ class SessionDataProcessor:
                 show_progress=False,
                 session_ids=session_ids,
             )
+            analyses = self.manager.get_last_batch_analyses()
+            for sid, analysis in zip(session_ids, analyses):
+                llm_output_entries.append(
+                    {
+                        "session_id": sid,
+                        "llm_output": analysis,
+                    }
+                )
             batch_success = sum(1 for ok in ok_list if ok)
             batch_fail = len(ok_list) - batch_success
             processed_count += len(ok_list)
@@ -93,7 +104,9 @@ class SessionDataProcessor:
             fail_count += batch_fail
 
             if processed_count > 0 and processed_count % self.flush_interval == 0:
+                print(f"[flush] 开始, pending={self.manager.get_pending_dirty_count()}", flush=True)
                 self.manager.flush()
+                print(f"[flush] 完成", flush=True)
             if pbar is not None:
                 pbar.update(len(ok_list))
 
@@ -103,6 +116,13 @@ class SessionDataProcessor:
         if self.manager.get_pending_dirty_count() > 0:
             self.manager.flush()
 
+        if llm_output_save_path:
+            self._save_llm_outputs_json(
+                output_path=llm_output_save_path,
+                dataset_name=dataset_name,
+                total_items=total_items,
+                entries=llm_output_entries,
+            )
         domain_removed = self.manager.deduplicate_level(HierarchyLevel.DOMAIN)
         if domain_removed > 0:
             print(f"\nDomain 层语义去重完成: 合并删除 {domain_removed} 个节点")
@@ -118,6 +138,43 @@ class SessionDataProcessor:
         print(f"  失败会话: {fail_count}")
         print(f"  成功率: {success_rate:.2f}%")
         print(f"{'=' * 50}")
+
+    def _save_llm_outputs_json(
+        self,
+        output_path: str,
+        dataset_name: Optional[str],
+        total_items: int,
+        entries: List[Dict[str, Any]],
+    ) -> None:
+        grouped: Dict[str, Dict[str, Any]] = {}
+        for entry in entries:
+            session_id = str(entry.get("session_id", ""))
+            sample_id = session_id.split("_session_", 1)[0] if "_session_" in session_id else session_id
+            sample_bucket = grouped.setdefault(
+                sample_id,
+                {
+                    "sample_id": sample_id,
+                    "sessions": [],
+                },
+            )
+            sample_bucket["sessions"].append(entry)
+
+        sample_outputs = sorted(
+            grouped.values(),
+            key=lambda item: int(item["sample_id"]) if str(item["sample_id"]).isdigit() else str(item["sample_id"]),
+        )
+        payload = {
+            "dataset_name": dataset_name,
+            "total_samples": total_items,
+            "total_sessions": len(entries),
+            "samples": sample_outputs,
+        }
+        output_file = Path(output_path)
+        output_file.parent.mkdir(parents=True, exist_ok=True)
+        with output_file.open("w", encoding="utf-8") as handle:
+            json.dump(payload, handle, ensure_ascii=False, indent=2)
+            handle.write("\n")
+        print(f"LLM 输出已写入: {output_file}")
 
     def _build_session_tasks(
         self,
@@ -175,8 +232,8 @@ class SessionDataProcessor:
 
 def main() -> None:
     LLM_MODEL_PATH = "/share/home/leiyh5/models/Qwen2.5-7B-Instruct"
-    DATA_FILE = "/share/home/leiyh5/Memory/data/locomo/locomo10.json"
-    PERSIST_DIR = "/share/home/leiyh5/Memory/data/hierarchical_memory_locomo_fact"
+    DATA_FILE = "/share/home/leiyh5/Memory/data/locomo/locomo_qa_test.json"
+    PERSIST_DIR = "/share/home/leiyh5/Memory/data/hierarchical_memory_locomo_category"
     parser = argparse.ArgumentParser(description="Build session-level hierarchical memory")
     parser.add_argument("--data-file", type=str, default=DATA_FILE)
     parser.add_argument("--persist-directory", type=str, default=PERSIST_DIR)
@@ -185,8 +242,14 @@ def main() -> None:
     parser.add_argument("--device", type=str, default="auto")
     parser.add_argument("--dataset-name", type=str, default="locomo")
     parser.add_argument("--process-batch-size", type=int, default=8)
-    parser.add_argument("--flush-interval", type=int, default=128)
+    parser.add_argument("--flush-interval", type=int, default=64)
     parser.add_argument("--memory-unit-mode", choices=("keyword", "fact"), default="fact")
+    parser.add_argument(
+        "--llm-output-save-path",
+        type=str,
+        default="/share/home/leiyh5/Memory/data/locomo/outpu1.json",
+        help="Save aggregated per-sample LLM outputs to a pretty-printed JSON file",
+    )
     args = parser.parse_args()
 
     processor = SessionDataProcessor(
@@ -205,6 +268,7 @@ def main() -> None:
         dataset_name=args.dataset_name,
         show_progress=True,
         process_batch_size=args.process_batch_size,
+        llm_output_save_path=args.llm_output_save_path or None,
     )
 
     stats = processor.get_stats()

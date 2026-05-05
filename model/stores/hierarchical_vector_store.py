@@ -9,6 +9,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from datetime import datetime
 import hashlib
 import json
+import numpy as np
 
 from ..hierarchical.hierarchy_types import (
     HierarchicalNode,
@@ -258,7 +259,7 @@ class HierarchicalVectorStore:
                 metadata = self._build_chroma_metadata(node, level)
                 collection.update(
                     ids=[node.id],
-                    embeddings=[node.embedding],
+                    embeddings=[np.array(node.embedding)],
                     documents=[node.content],
                     metadatas=[metadata]
                 )
@@ -288,7 +289,7 @@ class HierarchicalVectorStore:
         try:
             collection.update(
                 ids=[node.id for node in valid_nodes],
-                embeddings=[node.embedding for node in valid_nodes],
+                embeddings=[np.array(node.embedding) for node in valid_nodes],
                 documents=[node.content for node in valid_nodes],
                 metadatas=[self._build_chroma_metadata(node, level) for node in valid_nodes],
             )
@@ -318,6 +319,9 @@ class HierarchicalVectorStore:
         valid_nodes = [n for n in nodes if n.embedding is not None]
         if not valid_nodes:
             return 0
+        if len(valid_nodes) < len(nodes):
+            dropped = [n.id for n in nodes if n.embedding is None]
+            print(f"[WARN] {level.name} 层丢弃 {len(nodes)-len(valid_nodes)} 个无 embedding 节点: {dropped}")
         
         try:
             collection.add(
@@ -403,6 +407,7 @@ class HierarchicalVectorStore:
                 updated_count = self._update_nodes_in_chroma(dirty_nodes, level)
                 if updated_count > 0:
                     stats[f"{level.name}_updated"] = updated_count
+                    print(f"已批量更新 {updated_count} 个节点到 ChromaDB")
                 self._dirty_nodes[level] = {}
         
         self._pending_count = 0
@@ -410,6 +415,7 @@ class HierarchicalVectorStore:
         # 输出本轮统计
         if total_flushed > 0:
             print(f"已批量写入 {total_flushed} 个节点到 ChromaDB")
+            
         
         return stats
     

@@ -260,8 +260,8 @@ class TransformersModelHandler(BaseModelHandler):
             )
         
         input_lengths = inputs["input_ids"].shape[1]
-        print("输入长度")
-        print(input_lengths)
+        # print("输入长度")
+        # print(input_lengths)
         responses = []
         for output in outputs:
             generated_part = output[input_lengths:]

@@ -599,7 +599,7 @@ def parse_args() -> TrainConfig:
     parser = argparse.ArgumentParser(description="双曲投影器训练")
     
     # 数据参数
-    parser.add_argument('--vector_store_path', type=str, default='/share/home/leiyh5/Memory/data/hierarchical_memory_locomo_fact')
+    parser.add_argument('--vector_store_path', type=str, default='/share/home/leiyh5/Memory/data/hierarchical_memory_locomo_category2')
     parser.add_argument('--embedding_dim', type=int, default=768)
     parser.add_argument('--hidden_dim', type=int, default=2048)
     
@@ -632,7 +632,7 @@ def parse_args() -> TrainConfig:
     
     # 设备与输出
     parser.add_argument('--device', type=str, default='cuda')
-    parser.add_argument('--output_dir', type=str, default='./checkpoints_locomo_fact')
+    parser.add_argument('--output_dir', type=str, default='./checkpoints_locomo_category')
     parser.add_argument('--log_interval', type=int, default=100)
     parser.add_argument('--save_interval', type=int, default=500)
     
@@ -642,7 +642,7 @@ def parse_args() -> TrainConfig:
                              '2=CATEGORY→KEYWORD, 3=KEYWORD→DIALOGUE')
     
     # 恢复训练
-    parser.add_argument('--resume', type=str, default="/share/home/leiyh5/Memory/checkpoints_locomo_fact",
+    parser.add_argument('--resume', type=str, default="/share/home/leiyh5/Memory/checkpoints_locomo_category",
                         help='恢复训练的检查点路径')
     
     args = parser.parse_args()

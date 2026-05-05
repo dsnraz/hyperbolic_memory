@@ -1,583 +1,0 @@
-[计数器恢复] DOMAIN 层级: 已有 9 个节点，新节点 ID将从 9 开始
-[计数器恢复] CATEGORY 层级: 已有 10 个节点，新节点 ID将从 10 开始
-[计数器恢复] KEYWORD 层级: 已有 11 个节点，新节点 ID将从 11 开始
-[计数器恢复] DIALOGUE 层级: 已有 5882 个节点，新节点 ID将从 5882 开始
-SessionDataProcessor 创建成功
-session build:   0%|          | 0/272 [00:00<?, ?session/s]`torch_dtype` is deprecated! Use `dtype` instead!
-正在加载模型: /share/home/leiyh5/models/Qwen2.5-7B-Instruct
-检测到模型类型: qwen
-
-Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s][A
-Loading checkpoint shards:  25%|██▌       | 1/4 [00:04<00:13,  4.39s/it][A
-Loading checkpoint shards:  50%|█████     | 2/4 [00:09<00:09,  4.87s/it][A
-Loading checkpoint shards:  75%|███████▌  | 3/4 [00:14<00:04,  4.96s/it][A
-Loading checkpoint shards: 100%|██████████| 4/4 [00:18<00:00,  4.55s/it][ALoading checkpoint shards: 100%|██████████| 4/4 [00:18<00:00,  4.65s/it]
-The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
-session build:   0%|          | 1/272 [01:46<8:02:00, 106.72s/session]session build:   1%|          | 2/272 [01:53<3:36:49, 48.19s/session] session build:   1%|          | 3/272 [02:11<2:34:17, 34.41s/session]session build:   1%|▏         | 4/272 [02:17<1:43:11, 23.10s/session]session build:   2%|▏         | 5/272 [02:25<1:18:45, 17.70s/session]session build:   2%|▏         | 6/272 [02:36<1:07:15, 15.17s/session]session build:   3%|▎         | 7/272 [02:50<1:05:32, 14.84s/session]session build:   3%|▎         | 8/272 [03:00<58:17, 13.25s/session]  session build:   3%|▎         | 9/272 [03:07<49:27, 11.28s/session]session build:   4%|▎         | 10/272 [03:12<41:38,  9.53s/session]session build:   4%|▍         | 11/272 [03:19<38:18,  8.81s/session]session build:   4%|▍         | 12/272 [03:26<35:09,  8.11s/session]session build:   5%|▍         | 13/272 [03:36<38:11,  8.85s/session]session build:   5%|▌         | 14/272 [03:48<41:40,  9.69s/session]session build:   6%|▌         | 15/272 [03:57<41:10,  9.61s/session]session build:   6%|▌         | 16/272 [04:08<42:23,  9.94s/session]session build:   6%|▋         | 17/272 [04:19<42:47, 10.07s/session]session build:   7%|▋         | 18/272 [04:29<42:37, 10.07s/session]session build:   7%|▋         | 19/272 [04:38<42:06,  9.99s/session]session build:   7%|▋         | 20/272 [04:55<50:29, 12.02s/session]session build:   8%|▊         | 21/272 [05:05<47:35, 11.38s/session]session build:   8%|▊         | 22/272 [05:19<51:07, 12.27s/session]session build:   8%|▊         | 23/272 [05:27<45:09, 10.88s/session]session build:   9%|▉         | 24/272 [05:39<46:19, 11.21s/session]session build:   9%|▉         | 25/272 [05:47<41:34, 10.10s/session]session build:  10%|▉         | 26/272 [05:54<38:34,  9.41s/session]session build:  10%|▉         | 27/272 [06:05<39:31,  9.68s/session]session build:  10%|█         | 28/272 [06:17<42:20, 10.41s/session]session build:  11%|█         | 29/272 [06:25<39:21,  9.72s/session]session build:  11%|█         | 30/272 [06:35<39:41,  9.84s/session]session build:  11%|█▏        | 31/272 [06:41<34:26,  8.57s/session]session build:  12%|█▏        | 32/272 [06:48<33:01,  8.25s/session]session build:  12%|█▏        | 33/272 [07:05<43:19, 10.87s/session]session build:  12%|█▎        | 34/272 [07:12<38:35,  9.73s/session]session build:  13%|█▎        | 35/272 [07:19<35:32,  9.00s/session]session build:  13%|█▎        | 36/272 [07:27<33:30,  8.52s/session]session build:  14%|█▎        | 37/272 [07:39<37:35,  9.60s/session]session build:  14%|█▍        | 38/272 [07:46<34:47,  8.92s/session]session build:  14%|█▍        | 39/272 [07:57<37:14,  9.59s/session]session build:  15%|█▍        | 40/272 [08:07<36:59,  9.57s/session]session build:  15%|█▌        | 41/272 [08:16<36:11,  9.40s/session]session build:  15%|█▌        | 42/272 [08:26<37:07,  9.69s/session]session build:  16%|█▌        | 43/272 [08:34<34:35,  9.06s/session]session build:  16%|█▌        | 44/272 [08:45<36:10,  9.52s/session]session build:  17%|█▋        | 45/272 [08:59<42:08, 11.14s/session]session build:  17%|█▋        | 46/272 [09:19<52:00, 13.81s/session]session build:  17%|█▋        | 47/272 [09:27<45:10, 12.05s/session]session build:  18%|█▊        | 48/272 [09:37<42:42, 11.44s/session]session build:  18%|█▊        | 49/272 [09:45<38:32, 10.37s/session]session build:  18%|█▊        | 50/272 [09:53<35:28,  9.59s/session]session build:  19%|█▉        | 51/272 [09:59<31:14,  8.48s/session]session build:  19%|█▉        | 52/272 [10:10<34:13,  9.33s/session]session build:  19%|█▉        | 53/272 [10:17<31:02,  8.50s/session]session build:  20%|█▉        | 54/272 [10:21<26:10,  7.20s/session]session build:  20%|██        | 55/272 [10:30<28:13,  7.80s/session]session build:  21%|██        | 56/272 [10:37<26:28,  7.35s/session]session build:  21%|██        | 57/272 [10:45<27:30,  7.68s/session]session build:  21%|██▏       | 58/272 [10:53<27:39,  7.76s/session]session build:  22%|██▏       | 59/272 [11:03<29:48,  8.40s/session]session build:  22%|██▏       | 60/272 [11:13<31:38,  8.95s/session]session build:  22%|██▏       | 61/272 [11:22<31:13,  8.88s/session]session build:  23%|██▎       | 62/272 [11:29<29:32,  8.44s/session]session build:  23%|██▎       | 63/272 [11:48<39:52, 11.45s/session]session build:  24%|██▎       | 64/272 [11:55<35:32, 10.25s/session]session build:  24%|██▍       | 65/272 [12:07<37:32, 10.88s/session]session build:  24%|██▍       | 66/272 [12:13<31:57,  9.31s/session]session build:  25%|██▍       | 67/272 [12:19<28:17,  8.28s/session]session build:  25%|██▌       | 68/272 [12:27<27:30,  8.09s/session]session build:  25%|██▌       | 69/272 [12:45<37:27, 11.07s/session]session build:  26%|██▌       | 70/272 [12:53<34:23, 10.22s/session]session build:  26%|██▌       | 71/272 [13:04<34:48, 10.39s/session]session build:  26%|██▋       | 72/272 [13:15<35:39, 10.70s/session]session build:  27%|██▋       | 73/272 [13:23<32:34,  9.82s/session]session build:  27%|██▋       | 74/272 [13:28<27:20,  8.28s/session]session build:  28%|██▊       | 75/272 [13:34<25:18,  7.71s/session]session build:  28%|██▊       | 76/272 [13:47<30:17,  9.28s/session]session build:  28%|██▊       | 77/272 [13:53<26:49,  8.25s/session]session build:  29%|██▊       | 78/272 [14:02<28:05,  8.69s/session]session build:  29%|██▉       | 79/272 [14:08<25:22,  7.89s/session]session build:  29%|██▉       | 80/272 [14:14<23:23,  7.31s/session]session build:  30%|██▉       | 81/272 [14:23<24:14,  7.62s/session]session build:  30%|███       | 82/272 [14:30<23:48,  7.52s/session]session build:  31%|███       | 83/272 [14:38<24:19,  7.72s/session]session build:  31%|███       | 84/272 [14:45<23:43,  7.57s/session]session build:  31%|███▏      | 85/272 [14:53<23:30,  7.54s/session]session build:  32%|███▏      | 86/272 [14:59<22:22,  7.22s/session]session build:  32%|███▏      | 87/272 [15:06<21:46,  7.06s/session]session build:  32%|███▏      | 88/272 [15:15<23:26,  7.64s/session]session build:  33%|███▎      | 89/272 [15:26<26:10,  8.58s/session]session build:  33%|███▎      | 90/272 [15:36<27:14,  8.98s/session]session build:  33%|███▎      | 91/272 [15:45<27:37,  9.16s/session]session build:  34%|███▍      | 92/272 [15:54<27:03,  9.02s/session]session build:  34%|███▍      | 93/272 [16:02<26:02,  8.73s/session]session build:  35%|███▍      | 94/272 [16:08<23:16,  7.85s/session]session build:  35%|███▍      | 95/272 [16:17<24:33,  8.32s/session]session build:  35%|███▌      | 96/272 [16:27<25:41,  8.76s/session]session build:  36%|███▌      | 97/272 [16:33<23:07,  7.93s/session]session build:  36%|███▌      | 98/272 [16:41<23:24,  8.07s/session]session build:  36%|███▋      | 99/272 [16:48<21:55,  7.60s/session]session build:  37%|███▋      | 100/272 [16:57<22:54,  7.99s/session]session build:  37%|███▋      | 101/272 [17:04<21:52,  7.68s/session]session build:  38%|███▊      | 102/272 [17:11<21:29,  7.59s/session]session build:  38%|███▊      | 103/272 [17:19<21:12,  7.53s/session]session build:  38%|███▊      | 104/272 [17:34<27:43,  9.90s/session]session build:  39%|███▊      | 105/272 [17:52<34:05, 12.25s/session]session build:  39%|███▉      | 106/272 [18:01<31:35, 11.42s/session]session build:  39%|███▉      | 107/272 [18:13<31:50, 11.58s/session]session build:  40%|███▉      | 108/272 [18:19<27:17,  9.99s/session]session build:  40%|████      | 109/272 [18:29<26:31,  9.77s/session]session build:  40%|████      | 110/272 [18:43<29:39, 10.98s/session]session build:  41%|████      | 111/272 [18:55<30:34, 11.40s/session]session build:  41%|████      | 112/272 [19:05<29:30, 11.07s/session]session build:  42%|████▏     | 113/272 [19:13<26:45, 10.10s/session]session build:  42%|████▏     | 114/272 [19:30<32:03, 12.17s/session]session build:  42%|████▏     | 115/272 [19:41<31:14, 11.94s/session]session build:  43%|████▎     | 116/272 [19:47<26:21, 10.14s/session]session build:  43%|████▎     | 117/272 [20:01<28:52, 11.18s/session]session build:  43%|████▎     | 118/272 [20:10<27:10, 10.59s/session]session build:  44%|████▍     | 119/272 [20:21<26:52, 10.54s/session]session build:  44%|████▍     | 120/272 [20:31<26:25, 10.43s/session]session build:  44%|████▍     | 121/272 [20:40<25:25, 10.11s/session]session build:  45%|████▍     | 122/272 [20:46<21:47,  8.72s/session]session build:  45%|████▌     | 123/272 [20:52<19:56,  8.03s/session]session build:  46%|████▌     | 124/272 [20:58<18:05,  7.33s/session]session build:  46%|████▌     | 125/272 [21:10<21:31,  8.79s/session]session build:  46%|████▋     | 126/272 [21:30<29:28, 12.11s/session]session build:  47%|████▋     | 127/272 [21:37<26:02, 10.77s/session]session build:  47%|████▋     | 128/272 [21:51<28:12, 11.75s/session]session build:  47%|████▋     | 129/272 [22:09<32:13, 13.52s/session]session build:  48%|████▊     | 130/272 [22:17<28:19, 11.97s/session]session build:  48%|████▊     | 131/272 [22:32<29:53, 12.72s/session]session build:  49%|████▊     | 132/272 [22:42<27:40, 11.86s/session]session build:  49%|████▉     | 133/272 [22:51<25:23, 10.96s/session]session build:  49%|████▉     | 134/272 [22:57<22:13,  9.66s/session]session build:  50%|████▉     | 135/272 [23:03<19:15,  8.44s/session]session build:  50%|█████     | 136/272 [23:10<18:19,  8.09s/session]session build:  50%|█████     | 137/272 [23:18<18:15,  8.12s/session]session build:  51%|█████     | 138/272 [23:27<18:24,  8.24s/session]session build:  51%|█████     | 139/272 [23:36<18:42,  8.44s/session]session build:  51%|█████▏    | 140/272 [23:44<18:13,  8.29s/session]session build:  52%|█████▏    | 141/272 [23:50<16:40,  7.63s/session]session build:  52%|█████▏    | 142/272 [23:58<16:44,  7.73s/session]session build:  53%|█████▎    | 143/272 [24:07<17:35,  8.18s/session]session build:  53%|█████▎    | 144/272 [24:12<15:35,  7.31s/session]session build:  53%|█████▎    | 145/272 [24:28<20:55,  9.89s/session]session build:  54%|█████▎    | 146/272 [24:42<23:13, 11.06s/session]session build:  54%|█████▍    | 147/272 [24:59<26:31, 12.73s/session]session build:  54%|█████▍    | 148/272 [25:09<24:43, 11.96s/session]session build:  55%|█████▍    | 149/272 [25:18<23:06, 11.27s/session]session build:  55%|█████▌    | 150/272 [25:25<19:48,  9.74s/session]session build:  56%|█████▌    | 151/272 [25:35<19:52,  9.86s/session]session build:  56%|█████▌    | 152/272 [25:42<17:58,  8.99s/session]session build:  56%|█████▋    | 153/272 [25:49<16:40,  8.41s/session]session build:  57%|█████▋    | 154/272 [25:59<17:53,  9.10s/session]session build:  57%|█████▋    | 155/272 [26:12<19:51, 10.19s/session]session build:  57%|█████▋    | 156/272 [26:23<20:00, 10.35s/session]session build:  58%|█████▊    | 157/272 [26:30<17:42,  9.24s/session]session build:  58%|█████▊    | 158/272 [26:41<18:44,  9.86s/session]session build:  58%|█████▊    | 159/272 [26:51<18:42,  9.94s/session]session build:  59%|█████▉    | 160/272 [27:00<17:46,  9.52s/session]session build:  59%|█████▉    | 161/272 [27:06<15:58,  8.64s/session]session build:  60%|█████▉    | 162/272 [27:20<18:33, 10.12s/session]session build:  60%|█████▉    | 163/272 [27:37<22:25, 12.35s/session]session build:  60%|██████    | 164/272 [27:47<20:40, 11.48s/session]session build:  61%|██████    | 165/272 [27:58<20:13, 11.34s/session]session build:  61%|██████    | 166/272 [28:05<17:50, 10.10s/session]session build:  61%|██████▏   | 167/272 [28:14<17:14,  9.85s/session]session build:  62%|██████▏   | 168/272 [28:23<16:35,  9.58s/session]session build:  62%|██████▏   | 169/272 [28:30<14:52,  8.66s/session]session build:  62%|██████▎   | 170/272 [28:41<16:05,  9.47s/session]session build:  63%|██████▎   | 171/272 [28:47<14:17,  8.49s/session]session build:  63%|██████▎   | 172/272 [28:57<14:33,  8.74s/session]session build:  64%|██████▎   | 173/272 [29:08<15:52,  9.62s/session]session build:  64%|██████▍   | 174/272 [29:14<14:03,  8.61s/session]session build:  64%|██████▍   | 175/272 [29:29<16:58, 10.50s/session]session build:  65%|██████▍   | 176/272 [29:36<15:03,  9.41s/session]session build:  65%|██████▌   | 177/272 [29:44<14:16,  9.02s/session]session build:  65%|██████▌   | 178/272 [29:53<13:51,  8.84s/session]session build:  66%|██████▌   | 179/272 [30:02<13:57,  9.01s/session]session build:  66%|██████▌   | 180/272 [30:15<15:45, 10.28s/session]session build:  67%|██████▋   | 181/272 [30:25<15:20, 10.12s/session]session build:  67%|██████▋   | 182/272 [30:34<14:41,  9.80s/session]session build:  67%|██████▋   | 183/272 [30:40<12:37,  8.51s/session]session build:  68%|██████▊   | 184/272 [30:50<13:19,  9.09s/session]session build:  68%|██████▊   | 185/272 [30:56<11:55,  8.23s/session]session build:  68%|██████▊   | 186/272 [31:05<11:47,  8.23s/session]session build:  69%|██████▉   | 187/272 [31:15<12:30,  8.83s/session]session build:  69%|██████▉   | 188/272 [31:24<12:37,  9.02s/session]session build:  69%|██████▉   | 189/272 [31:33<12:26,  8.99s/session]session build:  70%|██████▉   | 190/272 [31:38<10:26,  7.64s/session]session build:  70%|███████   | 191/272 [31:46<10:30,  7.79s/session]session build:  71%|███████   | 192/272 [31:56<11:21,  8.52s/session]session build:  71%|███████   | 193/272 [32:02<10:08,  7.70s/session]session build:  71%|███████▏  | 194/272 [32:10<10:15,  7.89s/session]session build:  72%|███████▏  | 195/272 [32:23<12:02,  9.38s/session]session build:  72%|███████▏  | 196/272 [32:30<10:46,  8.51s/session]session build:  72%|███████▏  | 197/272 [32:38<10:35,  8.47s/session]session build:  73%|███████▎  | 198/272 [32:44<09:29,  7.70s/session]session build:  73%|███████▎  | 199/272 [32:53<09:58,  8.20s/session]session build:  74%|███████▎  | 200/272 [33:01<09:38,  8.03s/session]session build:  74%|███████▍  | 201/272 [33:11<10:13,  8.64s/session]session build:  74%|███████▍  | 202/272 [33:21<10:43,  9.19s/session]session build:  75%|███████▍  | 203/272 [33:39<13:20, 11.60s/session]session build:  75%|███████▌  | 204/272 [33:47<12:05, 10.67s/session]session build:  75%|███████▌  | 205/272 [33:54<10:39,  9.54s/session]session build:  76%|███████▌  | 206/272 [34:05<11:02, 10.03s/session]session build:  76%|███████▌  | 207/272 [34:15<10:46,  9.95s/session]session build:  76%|███████▋  | 208/272 [34:24<10:26,  9.79s/session]session build:  77%|███████▋  | 209/272 [34:42<12:45, 12.15s/session]session build:  77%|███████▋  | 210/272 [34:49<10:56, 10.59s/session]session build:  78%|███████▊  | 211/272 [34:57<10:03,  9.90s/session]session build:  78%|███████▊  | 212/272 [35:05<09:16,  9.27s/session]session build:  78%|███████▊  | 213/272 [35:12<08:32,  8.69s/session]session build:  79%|███████▊  | 214/272 [35:21<08:16,  8.57s/session]session build:  79%|███████▉  | 215/272 [35:29<07:58,  8.40s/session]session build:  79%|███████▉  | 216/272 [35:38<08:06,  8.70s/session]session build:  80%|███████▉  | 217/272 [35:54<10:05, 11.01s/session]session build:  80%|████████  | 218/272 [36:01<08:35,  9.56s/session]session build:  81%|████████  | 219/272 [36:09<08:09,  9.23s/session]session build:  81%|████████  | 220/272 [36:19<08:07,  9.37s/session]session build:  81%|████████▏ | 221/272 [36:26<07:23,  8.69s/session]session build:  82%|████████▏ | 222/272 [36:36<07:33,  9.06s/session]session build:  82%|████████▏ | 223/272 [36:45<07:28,  9.14s/session]session build:  82%|████████▏ | 224/272 [36:57<07:53,  9.87s/session]session build:  83%|████████▎ | 225/272 [37:04<07:10,  9.17s/session]session build:  83%|████████▎ | 226/272 [37:12<06:37,  8.64s/session]session build:  83%|████████▎ | 227/272 [37:24<07:18,  9.75s/session]session build:  84%|████████▍ | 228/272 [37:29<06:01,  8.22s/session]session build:  84%|████████▍ | 229/272 [37:35<05:31,  7.72s/session]session build:  85%|████████▍ | 230/272 [37:43<05:28,  7.83s/session]session build:  85%|████████▍ | 231/272 [37:54<05:55,  8.68s/session]session build:  85%|████████▌ | 232/272 [38:05<06:10,  9.26s/session]session build:  86%|████████▌ | 233/272 [38:13<05:56,  9.15s/session]session build:  86%|████████▌ | 234/272 [38:33<07:49, 12.37s/session]session build:  86%|████████▋ | 235/272 [38:42<06:58, 11.32s/session]session build:  87%|████████▋ | 236/272 [38:49<06:03, 10.10s/session]session build:  87%|████████▋ | 237/272 [38:58<05:36,  9.63s/session]session build:  88%|████████▊ | 238/272 [39:15<06:38, 11.73s/session]session build:  88%|████████▊ | 239/272 [39:21<05:32, 10.07s/session]session build:  88%|████████▊ | 240/272 [39:41<06:56, 13.02s/session]session build:  89%|████████▊ | 241/272 [39:49<06:02, 11.68s/session]session build:  89%|████████▉ | 242/272 [40:00<05:40, 11.35s/session]session build:  89%|████████▉ | 243/272 [40:06<04:43,  9.76s/session]session build:  90%|████████▉ | 244/272 [40:13<04:14,  9.10s/session]session build:  90%|█████████ | 245/272 [40:24<04:15,  9.45s/session]session build:  90%|█████████ | 246/272 [40:31<03:48,  8.78s/session]session build:  91%|█████████ | 247/272 [40:41<03:46,  9.07s/session]session build:  91%|█████████ | 248/272 [40:47<03:20,  8.37s/session]session build:  92%|█████████▏| 249/272 [40:53<02:53,  7.56s/session]session build:  92%|█████████▏| 250/272 [41:02<02:54,  7.94s/session]session build:  92%|█████████▏| 251/272 [41:14<03:12,  9.17s/session]session build:  93%|█████████▎| 252/272 [41:23<03:03,  9.18s/session]session build:  93%|█████████▎| 253/272 [41:29<02:37,  8.28s/session]session build:  93%|█████████▎| 254/272 [41:34<02:11,  7.29s/session]session build:  94%|█████████▍| 255/272 [41:41<01:59,  7.01s/session]session build:  94%|█████████▍| 256/272 [41:55<02:29,  9.33s/session]session build:  94%|█████████▍| 257/272 [42:01<02:04,  8.29s/session]session build:  95%|█████████▍| 258/272 [42:11<02:00,  8.61s/session]session build:  95%|█████████▌| 259/272 [42:16<01:37,  7.49s/session]session build:  96%|█████████▌| 260/272 [42:20<01:20,  6.70s/session]session build:  96%|█████████▌| 261/272 [42:27<01:14,  6.76s/session]session build:  96%|█████████▋| 262/272 [42:36<01:14,  7.44s/session]session build:  97%|█████████▋| 263/272 [42:46<01:12,  8.02s/session]session build:  97%|█████████▋| 264/272 [42:55<01:07,  8.39s/session]session build:  97%|█████████▋| 265/272 [43:05<01:02,  8.93s/session]session build:  98%|█████████▊| 266/272 [43:12<00:49,  8.20s/session]session build:  98%|█████████▊| 267/272 [43:23<00:46,  9.20s/session]session build:  99%|█████████▊| 268/272 [43:31<00:34,  8.72s/session]session build:  99%|█████████▉| 269/272 [43:38<00:25,  8.34s/session]session build:  99%|█████████▉| 270/272 [43:48<00:17,  8.89s/session]session build: 100%|█████████▉| 271/272 [43:55<00:08,  8.22s/session]session build: 100%|██████████| 272/272 [44:15<00:00, 11.72s/session]session build: 100%|██████████| 272/272 [44:15<00:00,  9.76s/session]
-模型加载完成
-输入长度
-1005
-正在加载嵌入模型(default_local): /share/home/leiyh5/.cache/huggingface/hub/models--sentence-transformers--all-mpnet-base-v2/snapshots/e8c3b32edf5434bc2275fc9bab85f82640a19130
-嵌入模型加载完成，维度: 768
-输入长度
-1207
-输入长度
-1712
-输入长度
-1333
-输入长度
-1076
-输入长度
-1079
-输入长度
-1711
-输入长度
-2188
-输入长度
-1085
-输入长度
-1575
-输入长度
-1232
-输入长度
-1356
-输入长度
-1263
-输入长度
-2130
-输入长度
-1717
-输入长度
-1542
-输入长度
-1768
-输入长度
-1431
-输入长度
-1113
-输入长度
-1543
-输入长度
-1158
-输入长度
-1035
-输入长度
-1158
-输入长度
-1636
-输入长度
-1172
-输入长度
-1058
-输入长度
-1576
-输入长度
-1032
-输入长度
-1096
-输入长度
-1320
-输入长度
-1122
-输入长度
-1252
-输入长度
-1228
-输入长度
-1217
-输入长度
-984
-输入长度
-1225
-输入长度
-1497
-输入长度
-874
-输入长度
-993
-输入长度
-1715
-输入长度
-1156
-输入长度
-1433
-输入长度
-1216
-输入长度
-1384
-输入长度
-1138
-输入长度
-1586
-输入长度
-1127
-输入长度
-1376
-输入长度
-1401
-输入长度
-1469
-输入长度
-2127
-输入长度
-1536
-输入长度
-1240
-输入长度
-1151
-输入长度
-1110
-输入长度
-1449
-输入长度
-1793
-输入长度
-1246
-输入长度
-1573
-输入长度
-1390
-输入长度
-968
-输入长度
-1109
-输入长度
-1230
-输入长度
-1186
-输入长度
-1028
-输入长度
-1162
-输入长度
-1219
-输入长度
-1503
-输入长度
-1368
-输入长度
-1137
-输入长度
-1177
-输入长度
-1645
-输入长度
-1369
-输入长度
-1130
-输入长度
-1361
-输入长度
-897
-输入长度
-797
-输入长度
-1352
-输入长度
-1269
-输入长度
-1065
-输入长度
-1152
-输入长度
-1219
-输入长度
-1340
-输入长度
-1429
-输入长度
-1094
-输入长度
-963
-输入长度
-1331
-输入长度
-1123
-输入长度
-1382
-输入长度
-1190
-输入长度
-1382
-输入长度
-1439
-输入长度
-1846
-输入长度
-1144
-输入长度
-1620
-输入长度
-1422
-输入长度
-2221
-输入长度
-1933
-输入长度
-1032
-输入长度
-1141
-输入长度
-1278
-输入长度
-1923
-输入长度
-887
-输入长度
-1258
-输入长度
-1629
-输入长度
-1221
-输入长度
-2264
-输入长度
-1037
-输入长度
-1059
-输入长度
-1788
-输入长度
-1660
-输入长度
-1272
-输入长度
-1388
-输入长度
-2277
-输入长度
-1303
-输入长度
-1204
-输入长度
-922
-输入长度
-1763
-输入长度
-2192
-输入长度
-1291
-输入长度
-1221
-输入长度
-1088
-输入长度
-1176
-输入长度
-1110
-输入长度
-2105
-输入长度
-2207
-输入长度
-1073
-输入长度
-1004
-已批量写入 3909 个节点到 ChromaDB
-输入长度
-1264
-输入长度
-1419
-输入长度
-1750
-输入长度
-1741
-输入长度
-1294
-输入长度
-1104
-输入长度
-927
-输入长度
-1676
-输入长度
-1566
-输入长度
-1898
-输入长度
-1996
-输入长度
-1129
-输入长度
-1297
-输入长度
-1711
-输入长度
-1218
-输入长度
-1201
-输入长度
-1310
-输入长度
-1394
-输入长度
-1743
-输入长度
-2175
-输入长度
-1049
-输入长度
-1118
-输入长度
-1753
-输入长度
-1265
-输入长度
-1144
-输入长度
-2404
-输入长度
-1212
-输入长度
-1292
-输入长度
-2089
-输入长度
-1310
-输入长度
-1404
-输入长度
-1397
-输入长度
-994
-输入长度
-1317
-输入长度
-1293
-输入长度
-2113
-输入长度
-1377
-输入长度
-969
-输入长度
-1255
-输入长度
-1016
-输入长度
-1177
-输入长度
-1857
-输入长度
-1198
-输入长度
-1011
-输入长度
-2000
-输入长度
-1177
-输入长度
-1027
-输入长度
-1534
-输入长度
-1116
-输入长度
-1236
-输入长度
-1304
-输入长度
-1294
-输入长度
-1539
-输入长度
-1004
-输入长度
-916
-输入长度
-1934
-输入长度
-1062
-输入长度
-1094
-输入长度
-1378
-输入长度
-1051
-输入长度
-1672
-输入长度
-875
-输入长度
-2510
-输入长度
-1053
-输入长度
-962
-输入长度
-1394
-输入长度
-1270
-输入长度
-1145
-输入长度
-1418
-输入长度
-969
-输入长度
-1025
-输入长度
-1445
-输入长度
-1223
-输入长度
-2233
-输入长度
-1223
-输入长度
-919
-输入长度
-1037
-输入长度
-1626
-输入长度
-1400
-输入长度
-1148
-输入长度
-1941
-输入长度
-1723
-输入长度
-1041
-输入长度
-1002
-输入长度
-1137
-输入长度
-997
-输入长度
-1648
-输入长度
-1840
-输入长度
-1222
-输入长度
-1188
-输入长度
-1176
-输入长度
-1151
-输入长度
-1221
-输入长度
-1419
-输入长度
-1274
-输入长度
-1177
-输入长度
-1840
-输入长度
-1341
-输入长度
-1036
-输入长度
-1383
-输入长度
-1099
-输入长度
-1038
-输入长度
-1186
-输入长度
-1058
-输入长度
-1589
-输入长度
-1561
-输入长度
-992
-输入长度
-1050
-输入长度
-1102
-输入长度
-1394
-输入长度
-1267
-输入长度
-1804
-输入长度
-1585
-输入长度
-1332
-输入长度
-1164
-输入长度
-1304
-输入长度
-1270
-输入长度
-1637
-输入长度
-1157
-输入长度
-1194
-输入长度
-1355
-输入长度
-1068
-输入长度
-1312
-输入长度
-1214
-输入长度
-1170
-输入长度
-1190
-输入长度
-1238
-输入长度
-1138
-已批量写入 3817 个节点到 ChromaDB
-输入长度
-1052
-输入长度
-1481
-输入长度
-769
-输入长度
-1160
-输入长度
-998
-输入长度
-1183
-输入长度
-1281
-输入长度
-1049
-输入长度
-1416
-输入长度
-1594
-输入长度
-2003
-输入长度
-1161
-输入长度
-987
-输入长度
-2390
-输入长度
-1272
-输入长度
-1561
-已批量写入 424 个节点到 ChromaDB
-
-==================================================
-Session 建库完成
-  输入样本数: 10
-  总会话数: 272
-  已处理会话: 272
-  成功会话: 272
-  失败会话: 0
-  成功率: 100.00%
-==================================================
-
-统计信息:
-  总节点数: 14062
-  领域数: 204
-  类别数: 625
-  关键词数: 1469
-  对话数: 11764
