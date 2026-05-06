@@ -190,7 +190,7 @@ def main():
         default="sentence-transformers/all-mpnet-base-v2",
         help="用于生成 query embedding 的模型名（需与 projector 输入维度匹配）。",
     )
-    parser.add_argument("--top_k", type=int, nargs=4, default=[20, 30, 10, 8])
+    parser.add_argument("--top_k", type=int, nargs=4, default=[20, 30, 15, 8])
     parser.add_argument("--memory_unit_mode", choices=["keyword", "fact"], default="fact")
     parser.add_argument("--query_prefix", type=str, default=None,
                         help="v4_query_prefix: 可选的 query 前缀")

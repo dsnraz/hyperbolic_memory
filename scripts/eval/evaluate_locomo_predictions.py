@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
@@ -65,6 +66,48 @@ def _dump_json(path: Path, payload: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
+
+
+def _print_category_stats(samples: list[dict[str, Any]], metric_key: str) -> None:
+    category_names = {
+        1: "multi-hop retrieval",
+        2: "temporal reasoning",
+        3: "open-domain knowledge",
+        4: "single-hop retrieval",
+        5: "adversarial",
+    }
+    score_sums: dict[int, float] = defaultdict(float)
+    counts: dict[int, int] = defaultdict(int)
+
+    for sample in samples:
+        for qa in sample.get("qa", []):
+            category = qa.get("category")
+            try:
+                category_int = int(category)
+            except (TypeError, ValueError):
+                continue
+            if category_int not in category_names:
+                continue
+            counts[category_int] += 1
+            if metric_key in qa:
+                score_sums[category_int] += float(qa[metric_key])
+
+    print("\nCategory stats (ordered 1 -> 5):")
+    total_count = 0
+    total_score = 0.0
+    for category in (1, 2, 3, 4, 5):
+        count = counts[category]
+        score_sum = score_sums[category]
+        avg = (score_sum / count) if count > 0 else 0.0
+        total_count += count
+        total_score += score_sum
+        print(
+            f"  {category}. {category_names[category]}: "
+            f"count={count}, avg_f1={avg:.3f}"
+        )
+
+    overall = (total_score / total_count) if total_count > 0 else 0.0
+    print(f"  overall: count={total_count}, avg_f1={overall:.3f}")
 
 
 def main() -> None:
@@ -171,6 +214,7 @@ def main() -> None:
         metric_key,
         rag=False,
     )
+    _print_category_stats(samples, metric_key)
 
     print("\nEvaluation completed.")
     print(f"Total QA evaluated: {total_qa}")
