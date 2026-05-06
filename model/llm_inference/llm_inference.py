@@ -22,13 +22,12 @@ class MemoryAugmentedLLMInference:
     DEFAULT_PROMPT_TEMPLATE = (
         "You are a helpful assistant that answers questions using retrieved memory.\n\n"
         "How to read timestamps in the memory fragments below:\n"
-        "- The first line inside each fragment (often a clock/calendar line before 'Speaker: ...') is when that **chat turn was posted** in the conversation log, not necessarily when real-world events described in the words happened.\n"
-        "- Deictic time in the utterance ('yesterday', 'last year', 'next week', 'two weeks ago', etc.) must be resolved **relative to that posting time** to infer calendar dates (e.g. 'last year' from a turn posted on 8 May 2023 means 2022 unless the speaker clearly anchors otherwise).\n"
-        "- Do not equate the posting timestamp with the date of an event inside the quote unless the question explicitly asks when the message was sent.\n\n"
+        "- The first line inside each fragment (often a clock/calendar line before 'Speaker: ...') is when that **chat turn was posted**, not necessarily when real-world events described in the words happened.\n"
+        "- Deictic time in the utterance ('yesterday', 'last year', 'next week', 'two weeks ago', etc.) must be resolved **relative to that posting time** to infer calendar dates.\n\n"
         "Retrieved context from memory:\n"
         "{context}\n\n"
         "Question: {query}\n"
-        "Answer clearly and concisely. If there is no relevant information in the context, output 'I don't know'.\n"
+        "Answer with the shortest factual answer possible. Output only the answer, no explanation, no reasoning, no full sentences unless the question explicitly asks for one. Prefer a single word, date, number, or short phrase. If the context provides multiple relevant pieces of information, pick the most direct one. If there is no relevant information in the context, output 'I don't know'.\n"
         "Answer:"
     )
 

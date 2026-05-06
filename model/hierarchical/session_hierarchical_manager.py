@@ -4,9 +4,6 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List, Literal, Optional, Set, Tuple
 
-import torch
-import torch.nn.functional as F
-
 from ..encoders import EmbeddingEncoder
 from ..encoders.session_llm_encoder import SessionLLMEncoder
 from ..stores import HierarchicalVectorStore
@@ -645,90 +642,6 @@ class SessionHierarchicalMemoryManager:
 
     def clear_memory(self) -> bool:
         return self.vector_store.clear_all()
-
-    def deduplicate_level(
-        self,
-        level: HierarchyLevel,
-        similarity_threshold: float = 0.85,
-    ) -> int:
-        """对指定层级的节点做语义去重，返回被合并删除的节点数。
-
-        同一层级内 content 的 embedding 余弦相似度超过阈值的节点对，
-        将后者合并到前者：转移 child_ids / parent_ids 并删除后者。
-        """
-        if self.embedding_encoder is None:
-            return 0
-
-        self.flush()
-        nodes = self.vector_store.get_nodes_by_level(level)
-        if len(nodes) <= 1:
-            return 0
-
-        # 收集 embedding —— 用 content 的原始 embedding（不加层级前缀）
-        valid_nodes: List[HierarchicalNode] = []
-        embeddings: List[List[float]] = []
-        for node in nodes:
-            emb = node.embedding
-            if emb is None:
-                emb = self.embedding_encoder.generate_embedding(node.content)
-                if emb is None:
-                    continue
-            valid_nodes.append(node)
-            embeddings.append(emb)
-
-        n = len(valid_nodes)
-        if n <= 1:
-            return 0
-
-        emb_tensor = torch.tensor(embeddings, dtype=torch.float32)
-        emb_norm = F.normalize(emb_tensor, p=2, dim=1)
-        sim = emb_norm @ emb_norm.T  # (n, n)
-
-        parent_level = level.get_parent_level()
-        child_level = level.get_child_level()
-
-        merged: Set[int] = set()
-        for i in range(n):
-            if i in merged:
-                continue
-            for j in range(i + 1, n):
-                if j in merged:
-                    continue
-                if float(sim[i, j].item()) <= similarity_threshold:
-                    continue
-
-                keeper = valid_nodes[i]
-                removed = valid_nodes[j]
-
-                # 转移 child_ids
-                for child_id in removed.child_ids:
-                    keeper.add_child(child_id)
-                    if child_level is not None:
-                        child = self.vector_store.get_node(child_id, child_level)
-                        if child is not None:
-                            if removed.id in child.parent_ids:
-                                child.parent_ids.remove(removed.id)
-                            if keeper.id not in child.parent_ids:
-                                child.parent_ids.append(keeper.id)
-                            self.vector_store.update_node(child)
-
-                # 转移 parent_ids
-                for parent_id in removed.parent_ids:
-                    self._append_parent(keeper, parent_id)
-                    if parent_level is not None:
-                        parent = self.vector_store.get_node(parent_id, parent_level)
-                        if parent is not None:
-                            if removed.id in parent.child_ids:
-                                parent.child_ids.remove(removed.id)
-                            if keeper.id not in parent.child_ids:
-                                parent.child_ids.append(keeper.id)
-                            self.vector_store.update_node(parent)
-
-                self.vector_store.update_node(keeper)
-                self.vector_store.delete_node(removed.id, level)
-                merged.add(j)
-
-        return len(merged)
 
     def get_pending_dirty_count(self) -> int:
         return self.vector_store.get_pending_dirty_count()

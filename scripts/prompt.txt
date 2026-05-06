@@ -1,0 +1,34 @@
+DEFAULT_PROMPT_TEMPLATE = (
+    "You are a helpful assistant that answers questions using retrieved memory.\n\n"
+    "How to read timestamps in the memory fragments below:\n"
+    "- The first line inside each fragment (often a clock/calendar line before 'Speaker: ...') is when that **chat turn was posted**, not necessarily when real-world events described in the words happened.\n"
+    "- Deictic time in the utterance ('yesterday', 'last year', 'next week', 'two weeks ago', etc.) must be resolved **relative to that posting time** to infer calendar dates.\n\n"
+    "Retrieved context from memory:\n"
+    "{context}\n\n"
+    "Question: {query}\n"
+    "Answer with the shortest factual answer possible. Output only the answer, no explanation, no reasoning, no full sentences unless the question explicitly asks for one. Prefer a single word, date, number, or short phrase. If the context provides multiple relevant pieces of information, pick the most direct one. If there is no relevant information in the context, output 'I don't know'.\n"
+    "Answer:"
+)
+
+现存问题：
+1.对于正确答案输出句子过多，导致token重叠少，虽然答案正确，但f1分数很低。
+例子：
+{
+    "question": "When did Caroline go to the LGBTQ support group?",
+    "answer": "7 May 2023",
+    "memory_prediction": "Caroline went to the LGBTQ support group on 8 May, 2023, ...",
+    "memory_f1": 0.118  ← 期望: "7 May 2023"
+},
+{
+    "question": "When did Melanie paint a sunrise?",
+    "answer": 2022,
+    "memory_prediction": "Melanie painted a sunrise last year, ...",
+    "memory_f1": 0.087  ← 期望: "2022"
+},
+2.回答不够精炼
+{
+    "question": "What fields would Caroline be likely to pursue in her educaton?",
+    "answer": "Psychology, counseling certification",
+    "memory_prediction": "Based on the context provided, Caroline would likely pursue...",
+    "memory_f1": 0.065  ← 期望: "Psychology, counseling certification"
+},
