@@ -178,11 +178,11 @@ def main():
         default=str(Path(__file__).resolve().parent.parent / "data/locomo/locomo_qa_test.json"),
         help="LoCoMo QA+conversation，用于按 question 匹配 evidence 并生成与 store 一致的参考文本",
     )
-    parser.add_argument("--retriever_type", type=str, default="hyperbolic_angular_geodesic_hybrid",
+    parser.add_argument("--retriever_type", type=str, default="hyperbolic_geodesic",
                         choices=["cosine", "hyperbolic_geodesic", "hyperbolic_angular",
                                  "hyperbolic_angular_geodesic_hybrid"])
-    parser.add_argument("--checkpoint", type=str, required=False, default="/share/home/leiyh5/Memory/checkpoints_locomo_fact/hyperbolic_projector_final.pt")
-    parser.add_argument("--persist_dir", type=str, default="/share/home/leiyh5/Memory/data/memory_running_fact/round_1_conv-26",
+    parser.add_argument("--checkpoint", type=str, required=False, default="/share/home/leiyh5/Memory/checkpoints_locomo_category/hyperbolic_projector_final.pt")
+    parser.add_argument("--persist_dir", type=str, default="/share/home/leiyh5/Memory/data/memory_running_category/round_1_conv-26",
                         help="vector store 持久化目录")
     parser.add_argument(
         "--embedding_model",
@@ -218,7 +218,7 @@ def main():
         top_k=args.top_k,
         start_level=HierarchyLevel.DOMAIN,
         target_level=HierarchyLevel.DIALOGUE,
-        hybrid_scoring_boundary = HierarchyLevel.KEYWORD
+        # hybrid_scoring_boundary = HierarchyLevel.KEYWORD
     )
 
     store = inf.manager.vector_store

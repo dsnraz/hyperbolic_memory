@@ -12,9 +12,9 @@ cd /share/home/leiyh5/Memory
 
 python -m model.llm_inference.session_run \
   --data-file /share/home/leiyh5/Memory/data/locomo/locomo_qa_test.json \
-  --persist-directory /share/home/leiyh5/Memory/data/memory_running_fact \
+  --persist-directory /share/home/leiyh5/Memory/data/memory_running_category \
   --llm-model-path /share/home/leiyh5/models/Qwen2.5-7B-Instruct \
-  --projector-checkpoint-path /share/home/leiyh5/Memory/checkpoints_locomo_fact/hyperbolic_projector_final.pt \
+  --projector-checkpoint-path /share/home/leiyh5/Memory/checkpoints_locomo_category/hyperbolic_projector_final.pt \
   --embedding-model sentence-transformers/all-mpnet-base-v2 \
-  --out-file /share/home/leiyh5/Memory/data/locomo/locomo_qa_test_pred_fact.json \
+  --out-file /share/home/leiyh5/Memory/data/locomo/locomo_qa_test_pred_category.json \
   --generation-model-path /share/home/leiyh5/models/Qwen2.5-7B-Instruct

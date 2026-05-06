@@ -97,8 +97,6 @@ class HierarchicalRetrieverBase(ABC):
         # print(f"节点{memory_idx}分数：",hit.score)
         return (
             f"[记忆片段 #{memory_idx}]\n"
-            "(Time: if the text begins with a date/time line, that line is when the message was posted; "
-            "interpret 'yesterday' / 'last year' / etc. relative to it, not as vague English defaults.)\n"
             # f"相关领域/父节点：{parent_context}\n"
             # f"置信度：{confidence}\n"
             f"{hit.node.content}"
