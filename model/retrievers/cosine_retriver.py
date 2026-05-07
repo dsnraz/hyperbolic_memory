@@ -111,6 +111,38 @@ class CosineRetriever(HierarchicalRetrieverBase):
             if child_level is None:
                 break
 
+            # fact → dialogue 层：按 fact 排序优先级组织 dialogue，
+            # 每个 fact 内部按 dialogue 自身相似度排序，避免全局混排。
+            if child_level == HierarchyLevel.DIALOGUE:
+                dialogue_top_k = top_k_map[HierarchyLevel.DIALOGUE]
+                per_fact_dialogue_hits: List[RetrievalHit] = []
+                seen_ids: set[str] = set()
+                total_candidates = 0
+                for fact_hit in ranked_hits:
+                    fact_dialogues = self._collect_children([fact_hit.node])
+                    total_candidates += len(fact_dialogues)
+                    unique_dialogues = [d for d in fact_dialogues if d.id not in seen_ids]
+                    if not unique_dialogues:
+                        continue
+                    for dialogue in unique_dialogues:
+                        seen_ids.add(dialogue.id)
+                    dialogue_hits = self._rank_nodes(
+                        prepared_query_embedding,
+                        unique_dialogues,
+                        dialogue_top_k,
+                    )
+                    per_fact_dialogue_hits.extend(dialogue_hits)
+
+                level_results.append(
+                    LevelRetrievalResult(
+                        level=child_level,
+                        hits=per_fact_dialogue_hits,
+                        candidate_count=total_candidates,
+                    )
+                )
+                current_level = child_level
+                break
+
             current_candidates = self._collect_children([hit.node for hit in ranked_hits])
             current_level = child_level
 
