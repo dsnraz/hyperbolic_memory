@@ -6,6 +6,8 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 from typing import Any
+from nltk.translate.bleu_score import SmoothingFunction, sentence_bleu
+import nltk
 
 
 def parse_args() -> argparse.Namespace:
@@ -110,6 +112,74 @@ def _print_category_stats(samples: list[dict[str, Any]], metric_key: str) -> Non
     print(f"  overall: count={total_count}, avg_f1={overall:.3f}")
 
 
+def _calculate_bleu_scores(prediction: Any, reference: Any) -> dict[str, float]:
+    pred_tokens = nltk.word_tokenize(str(prediction).lower())
+    ref_tokens = [nltk.word_tokenize(str(reference).lower())]
+    if not pred_tokens or not ref_tokens[0]:
+        return {"bleu1": 0.0, "bleu2": 0.0, "bleu3": 0.0, "bleu4": 0.0}
+
+    weights_list = [
+        (1.0, 0.0, 0.0, 0.0),
+        (0.5, 0.5, 0.0, 0.0),
+        (0.33, 0.33, 0.33, 0.0),
+        (0.25, 0.25, 0.25, 0.25),
+    ]
+    smooth = SmoothingFunction().method1
+    scores: dict[str, float] = {}
+    for n, weights in enumerate(weights_list, start=1):
+        try:
+            value = sentence_bleu(
+                ref_tokens,
+                pred_tokens,
+                weights=weights,
+                smoothing_function=smooth,
+            )
+        except Exception:
+            value = 0.0
+        scores[f"bleu{n}"] = float(value)
+    return scores
+
+
+def _print_category_metric_stats(samples: list[dict[str, Any]], metric_key: str, label: str) -> None:
+    category_names = {
+        1: "multi-hop retrieval",
+        2: "temporal reasoning",
+        3: "open-domain knowledge",
+        4: "single-hop retrieval",
+        5: "adversarial",
+    }
+    score_sums: dict[int, float] = defaultdict(float)
+    counts: dict[int, int] = defaultdict(int)
+
+    for sample in samples:
+        for qa in sample.get("qa", []):
+            category = qa.get("category")
+            try:
+                category_int = int(category)
+            except (TypeError, ValueError):
+                continue
+            if category_int not in category_names:
+                continue
+            counts[category_int] += 1
+            score_sums[category_int] += float(qa.get(metric_key, 0.0))
+
+    print(f"\nCategory {label} stats (ordered 1 -> 5):")
+    total_count = 0
+    total_score = 0.0
+    for category in (1, 2, 3, 4, 5):
+        count = counts[category]
+        score_sum = score_sums[category]
+        avg = (score_sum / count) if count > 0 else 0.0
+        total_count += count
+        total_score += score_sum
+        print(
+            f"  {category}. {category_names[category]}: "
+            f"count={count}, avg_{label}={avg:.3f}"
+        )
+    overall = (total_score / total_count) if total_count > 0 else 0.0
+    print(f"  overall: count={total_count}, avg_{label}={overall:.3f}")
+
+
 def main() -> None:
     args = parse_args()
 
@@ -203,6 +273,14 @@ def main() -> None:
         scores, _, _ = eval_question_answering(qas, prediction_key)
         for i, score in enumerate(scores):
             qas[i][metric_key] = round(float(score), 3)
+            bleu_scores = _calculate_bleu_scores(
+                qas[i].get(prediction_key, ""),
+                qas[i].get("answer", ""),
+            )
+            qas[i][f"{model_key}_bleu1"] = round(bleu_scores["bleu1"], 3)
+            qas[i][f"{model_key}_bleu2"] = round(bleu_scores["bleu2"], 3)
+            qas[i][f"{model_key}_bleu3"] = round(bleu_scores["bleu3"], 3)
+            qas[i][f"{model_key}_bleu4"] = round(bleu_scores["bleu4"], 3)
 
     _dump_json(scored_path, samples)
 
@@ -215,6 +293,10 @@ def main() -> None:
         rag=False,
     )
     _print_category_stats(samples, metric_key)
+    _print_category_metric_stats(samples, f"{model_key}_bleu1", "bleu1")
+    _print_category_metric_stats(samples, f"{model_key}_bleu2", "bleu2")
+    _print_category_metric_stats(samples, f"{model_key}_bleu3", "bleu3")
+    _print_category_metric_stats(samples, f"{model_key}_bleu4", "bleu4")
 
     print("\nEvaluation completed.")
     print(f"Total QA evaluated: {total_qa}")
