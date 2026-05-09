@@ -169,7 +169,7 @@ def main():
     parser.add_argument(
         "--query",
         type=str,
-        default="When is Melanie planning on going camping?",
+        default="How long has Caroline had her current group of friends for?",
         help="查询文本（与 locomo_qa_test.json 中某条 question 一致时可自动拼 gold evidence）",
     )
     parser.add_argument(

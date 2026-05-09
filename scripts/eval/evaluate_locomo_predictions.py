@@ -112,32 +112,24 @@ def _print_category_stats(samples: list[dict[str, Any]], metric_key: str) -> Non
     print(f"  overall: count={total_count}, avg_f1={overall:.3f}")
 
 
-def _calculate_bleu_scores(prediction: Any, reference: Any) -> dict[str, float]:
+def _calculate_bleu1_score(prediction: Any, reference: Any) -> float:
     pred_tokens = nltk.word_tokenize(str(prediction).lower())
     ref_tokens = [nltk.word_tokenize(str(reference).lower())]
     if not pred_tokens or not ref_tokens[0]:
-        return {"bleu1": 0.0, "bleu2": 0.0, "bleu3": 0.0, "bleu4": 0.0}
+        return 0.0
 
-    weights_list = [
-        (1.0, 0.0, 0.0, 0.0),
-        (0.5, 0.5, 0.0, 0.0),
-        (0.33, 0.33, 0.33, 0.0),
-        (0.25, 0.25, 0.25, 0.25),
-    ]
     smooth = SmoothingFunction().method1
-    scores: dict[str, float] = {}
-    for n, weights in enumerate(weights_list, start=1):
-        try:
-            value = sentence_bleu(
+    try:
+        return float(
+            sentence_bleu(
                 ref_tokens,
                 pred_tokens,
-                weights=weights,
+                weights=(1.0, 0.0, 0.0, 0.0),
                 smoothing_function=smooth,
             )
-        except Exception:
-            value = 0.0
-        scores[f"bleu{n}"] = float(value)
-    return scores
+        )
+    except Exception:
+        return 0.0
 
 
 def _print_category_metric_stats(samples: list[dict[str, Any]], metric_key: str, label: str) -> None:
@@ -273,14 +265,11 @@ def main() -> None:
         scores, _, _ = eval_question_answering(qas, prediction_key)
         for i, score in enumerate(scores):
             qas[i][metric_key] = round(float(score), 3)
-            bleu_scores = _calculate_bleu_scores(
+            bleu1 = _calculate_bleu1_score(
                 qas[i].get(prediction_key, ""),
                 qas[i].get("answer", ""),
             )
-            qas[i][f"{model_key}_bleu1"] = round(bleu_scores["bleu1"], 3)
-            qas[i][f"{model_key}_bleu2"] = round(bleu_scores["bleu2"], 3)
-            qas[i][f"{model_key}_bleu3"] = round(bleu_scores["bleu3"], 3)
-            qas[i][f"{model_key}_bleu4"] = round(bleu_scores["bleu4"], 3)
+            qas[i][f"{model_key}_bleu1"] = round(bleu1, 3)
 
     _dump_json(scored_path, samples)
 
@@ -294,9 +283,6 @@ def main() -> None:
     )
     _print_category_stats(samples, metric_key)
     _print_category_metric_stats(samples, f"{model_key}_bleu1", "bleu1")
-    _print_category_metric_stats(samples, f"{model_key}_bleu2", "bleu2")
-    _print_category_metric_stats(samples, f"{model_key}_bleu3", "bleu3")
-    _print_category_metric_stats(samples, f"{model_key}_bleu4", "bleu4")
 
     print("\nEvaluation completed.")
     print(f"Total QA evaluated: {total_qa}")

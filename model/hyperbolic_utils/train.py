@@ -632,7 +632,7 @@ def parse_args() -> TrainConfig:
     
     # 设备与输出
     parser.add_argument('--device', type=str, default='cuda')
-    parser.add_argument('--output_dir', type=str, default='./checkpoints_locomo_category')
+    parser.add_argument('--output_dir', type=str, default='./checkpoints_locomo_category_c0p1')
     parser.add_argument('--log_interval', type=int, default=100)
     parser.add_argument('--save_interval', type=int, default=500)
     
@@ -642,7 +642,7 @@ def parse_args() -> TrainConfig:
                              '2=CATEGORY→KEYWORD, 3=KEYWORD→DIALOGUE')
     
     # 恢复训练
-    parser.add_argument('--resume', type=str, default="/share/home/leiyh5/Memory/checkpoints_locomo_category",
+    parser.add_argument('--resume', type=str, default="/share/home/leiyh5/Memory/checkpoints_locomo_category_c0p1",
                         help='恢复训练的检查点路径')
     
     args = parser.parse_args()

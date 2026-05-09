@@ -16,5 +16,6 @@ python -m model.llm_inference.session_run \
   --llm-model-path /share/home/leiyh5/models/Qwen2.5-7B-Instruct \
   --projector-checkpoint-path /share/home/leiyh5/Memory/checkpoints_locomo_category/hyperbolic_projector_final.pt \
   --embedding-model sentence-transformers/all-mpnet-base-v2 \
-  --out-file /share/home/leiyh5/Memory/data/locomo/locomo10_auglar.json \
-  --generation-model-path /share/home/leiyh5/models/Qwen2.5-7B-Instruct
+  --out-file /share/home/leiyh5/Memory/data/locomo/locomo10_category.json \
+  --generation-model-path /share/home/leiyh5/models/Qwen2.5-7B-Instruct \
+  "$@"

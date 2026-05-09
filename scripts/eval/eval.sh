@@ -11,8 +11,9 @@ conda activate memory
 cd //share/home/leiyh5/Memory
 
 python -m scripts.eval.evaluate_locomo_predictions \
-  --ann-file /share/home/leiyh5/Memory/data/locomo/locomo_qa_test.json \
-  --pred-file /share/home/leiyh5/Memory/data/locomo/locomo_qa_test_pred_category_auglar2.json \
+  --ann-file /share/home/leiyh5/Memory/data/locomo/locomo10.json \
+  --pred-file /share/home/leiyh5/Memory/data/locomo/locomo10_category.json \
   --locomo-root /share/home/leiyh5/locomo \
-  --scored-file /share/home/leiyh5/Memory/data/locomo/locomo_qa_test_pred_scored.json \
-  --stats-file /share/home/leiyh5/Memory/data/locomo/locomo_qa_test_pred_stats.json
+  --scored-file /share/home/leiyh5/Memory/data/locomo/locomo10_category_scored.json \
+  --stats-file /share/home/leiyh5/Memory/data/locomo/locomo10_category_stats.json \
+  "$@"

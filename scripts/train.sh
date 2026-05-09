@@ -3,11 +3,13 @@
 #SBATCH -n 1
 #SBATCH -G 1
 #SBATCH -o job.out
-source ~/miniconda3/etc/profile.d/conda.sh 
+source ~/miniconda3/etc/profile.d/conda.sh
 conda activate memory
 cd //share/home/leiyh5/Memory
-python -m model.hyperbolic_utils.train \
-    # --mixed_training \
-    # --output_dir ./checkpoints_v2 \
-    # --mixed_total_iterations 50000 \
-    # --chain_training
+
+# Optional examples:
+#   --mixed_training
+#   --output_dir ./checkpoints_v2
+#   --mixed_total_iterations 50000
+#   --chain_training
+python -m model.hyperbolic_utils.train "$@"

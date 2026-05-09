@@ -93,7 +93,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--max-questions", type=int, default=100000000)
     p.add_argument("--memory-llm-batch-size", type=int, default=8)
     p.add_argument("--device", type=str, default="auto")
-    p.add_argument("--retriever-top-k", type=int, nargs=4, default=[20, 20, 15, 8],
+    p.add_argument("--retriever-top-k", type=int, nargs=4, default=[20, 15, 10, 8],
                    help="四层 top-k: [DOMAIN CATEGORY KEYWORD DIALOGUE]")
     p.add_argument("--generation-handler-type", type=str, default="transformers")
     p.add_argument("--generation-model-name", type=str, default=None)
