@@ -146,8 +146,12 @@ def compute_rankings(
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--persist_dir", required=True)
-    parser.add_argument("--checkpoint", required=True)
+    parser.add_argument("--persist_dir", 
+                        default = "/share/home/leiyh5/Memory/data/memory_running_category/round_1_conv-26",
+                        )
+    parser.add_argument("--checkpoint", 
+                        default = "/share/home/leiyh5/Memory/checkpoints_locomo_category_c0p1/hyperbolic_projector_final.pt",
+                        )
     parser.add_argument("--query", default="What did Caroline research?")
     parser.add_argument("--embedding_model", default="sentence-transformers/all-mpnet-base-v2")
     parser.add_argument("--top_k", type=int, default=20)
