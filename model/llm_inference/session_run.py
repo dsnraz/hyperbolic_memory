@@ -76,7 +76,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         "--retriever-type",
         type=str,
-        default="hyperbolic_angular",
+        default="hyperbolic_geodesic",
         choices=(
             "cosine",
             "hyperbolic_geodesic",

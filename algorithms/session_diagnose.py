@@ -20,7 +20,7 @@ import argparse
 import sys
 from collections import Counter
 from pathlib import Path
-from typing import List
+from typing import Callable, List
 
 import model.retrievers.try_retriver2 as tr2
 from algorithms.locomo_qa_evidence import reference_dialogues_for_query
@@ -84,8 +84,8 @@ def count_session_ids_across_keyword_hits(
 def print_ancestor_chain(
     store: HierarchicalVectorStore,
     node: HierarchicalNode,
-    query_embedding: list,
-    query_embedding_hyperbolic,
+    score_fn: Callable[[HierarchicalNode], tuple[float, float]],
+    compare_label: str,
     label: str,
 ) -> None:
     """与 diagnose.py 一致：gold dialogue → keyword 得分 → 原句得分 → category/domain 回溯。"""
@@ -99,23 +99,15 @@ def print_ancestor_chain(
             node_id=keyword, level=HierarchyLevel.KEYWORD
         )
         print(node_keyword.content)
-        score1, score2 = tr2.score_query_against_node(
-            node_keyword,
-            query_embedding,
-            query_embedding_hyperbolic,
-        )
+        score1, score2 = score_fn(node_keyword)
         print("关于", keyword, node_keyword.content, "的得分")
         print("欧式检索得分：", score1)
-        print("双曲检索得分：", score2)
+        print(f"{compare_label}检索得分：", score2)
 
-    score1, score2 = tr2.score_query_against_node(
-        node,
-        query_embedding,
-        query_embedding_hyperbolic,
-    )
+    score1, score2 = score_fn(node)
     print(f"关于原句的得分{node.id,node.content}")
     print("欧式检索得分：", score1)
-    print("双曲检索得分：", score2)
+    print(f"{compare_label}检索得分：", score2)
 
     category_ids: List[str] = []
     seen_category_ids: set[str] = set()
@@ -137,14 +129,10 @@ def print_ancestor_chain(
         _, _, node_category = tr2.load_node_embedding(
             node_id=category_id, level=HierarchyLevel.CATEGORY
         )
-        score_c_e, score_c_h = tr2.score_query_against_node(
-            node_category,
-            query_embedding,
-            query_embedding_hyperbolic,
-        )
+        score_c_e, score_c_h = score_fn(node_category)
         print(f"关于{category_id}({node_category.content})的得分")
         print("欧式检索得分：", score_c_e)
-        print("双曲检索得分：", score_c_h)
+        print(f"{compare_label}检索得分：", score_c_h)
         print(f"{category_id} 的 domain 父节点: {node_category.parent_ids}")
 
         for domain_id in node_category.parent_ids:
@@ -154,14 +142,10 @@ def print_ancestor_chain(
             _, _, node_domain = tr2.load_node_embedding(
                 node_id=domain_id, level=HierarchyLevel.DOMAIN
             )
-            score_d_e, score_d_h = tr2.score_query_against_node(
-                node_domain,
-                query_embedding,
-                query_embedding_hyperbolic,
-            )
+            score_d_e, score_d_h = score_fn(node_domain)
             print(f"关于{category_id}的父节点{node_domain.content}({domain_id})的得分")
             print("欧式检索得分：", score_d_e)
-            print("双曲检索得分：", score_d_h)
+            print(f"{compare_label}检索得分：", score_d_h)
 
 
 def main():
@@ -178,10 +162,17 @@ def main():
         default=str(Path(__file__).resolve().parent.parent / "data/locomo/locomo_qa_test.json"),
         help="LoCoMo QA+conversation，用于按 question 匹配 evidence 并生成与 store 一致的参考文本",
     )
-    parser.add_argument("--retriever_type", type=str, default="hyperbolic_angular",
+    parser.add_argument("--retriever_type", type=str, default="cosine",
                         choices=["cosine", "hyperbolic_geodesic", "hyperbolic_angular",
                                  "hyperbolic_angular_geodesic_hybrid"])
-    parser.add_argument("--checkpoint", type=str, required=False, default="/share/home/leiyh5/Memory/checkpoints_locomo_category/hyperbolic_projector_final.pt")
+    parser.add_argument(
+        "--retriever_type2",
+        type=str,
+        default="hyperbolic_angular",
+        choices=["cosine", "hyperbolic_geodesic", "hyperbolic_angular", "hyperbolic_angular_geodesic_hybrid"],
+        help="用于回溯对比分数的检索器类型；默认与 retriever_type 相同。",
+    )
+    parser.add_argument("--checkpoint", type=str, required=False, default="/share/home/leiyh5/Memory/checkpoints_locomo_category_c0p1/hyperbolic_projector_final.pt")
     parser.add_argument("--persist_dir", type=str, default="/share/home/leiyh5/Memory/data/memory_running_category/round_1_conv-26",
                         help="vector store 持久化目录")
     parser.add_argument(
@@ -190,7 +181,7 @@ def main():
         default="sentence-transformers/all-mpnet-base-v2",
         help="用于生成 query embedding 的模型名（需与 projector 输入维度匹配）。",
     )
-    parser.add_argument("--top_k", type=int, nargs=4, default=[20, 30, 15, 8])
+    parser.add_argument("--top_k", type=int, nargs=4, default=[20, 15, 10, 8])
     parser.add_argument("--memory_unit_mode", choices=["keyword", "fact"], default="fact")
     parser.add_argument("--query_prefix", type=str, default=None,
                         help="v4_query_prefix: 可选的 query 前缀")
@@ -212,6 +203,28 @@ def main():
     # v4 支持：构造后设置前缀
     if args.query_prefix is not None and hasattr(inf.retriever, "query_prefix"):
         inf.retriever.query_prefix = args.query_prefix
+
+    retriever_type2 = args.retriever_type2 or args.retriever_type
+
+    def build_retriever_by_type(kind: str):
+        if kind == "cosine":
+            return tr2.CosineRetriever(vector_store=inf.manager.vector_store)
+        if kind == "hyperbolic_geodesic":
+            return tr2.GeodesicHyperbolicRetriever(
+                vector_store=inf.manager.vector_store,
+                checkpoint_path=args.checkpoint,
+            )
+        if kind == "hyperbolic_angular":
+            return tr2.MultiParentAngularHyperbolicRetriever(
+                vector_store=inf.manager.vector_store,
+                checkpoint_path=args.checkpoint,
+            )
+        if kind == "hyperbolic_angular_geodesic_hybrid":
+            return tr2.HybridHyperbolicRetriever(
+                vector_store=inf.manager.vector_store,
+                checkpoint_path=args.checkpoint,
+            )
+        raise ValueError(f"unsupported retriever type: {kind}")
 
     result = inf.retriever.retrieve(
         query_text=args.query,
@@ -254,12 +267,24 @@ def main():
     print("=" * 80)
     # try_retriver2 的工具函数依赖模块级全局变量；被 import 使用时需要手动绑定。
     tr2.store = store
-    if getattr(inf, "retriever", None) is not None:
-        tr2.retriever_hyperbolic = inf.retriever
     tr2.retriever_euclidean = tr2.CosineRetriever(vector_store=store)
+    retriever_compare = build_retriever_by_type(retriever_type2)
 
-    query_embedding = tr2.retriever_hyperbolic._prepare_query_embedding(args.query, None)
-    query_embedding_hyperbolic = tr2.retriever_hyperbolic.project_query(query_embedding)
+    query_embedding = tr2.retriever_euclidean._prepare_query_embedding(args.query, None)
+    if retriever_type2 == "cosine":
+        compare_label = "余弦(对比)"
+        query_embedding_compare = query_embedding
+    else:
+        compare_label = f"{retriever_type2}(对比)"
+        query_embedding_compare = retriever_compare.project_query(query_embedding)
+
+    def score_fn(node: HierarchicalNode) -> tuple[float, float]:
+        score_e = tr2.retriever_euclidean._cosine_similarity(query_embedding, node.embedding)
+        if retriever_type2 == "cosine":
+            score_cmp = retriever_compare._cosine_similarity(query_embedding_compare, node.embedding)
+        else:
+            score_cmp, _ = retriever_compare._similarity(query_embedding_compare, node)
+        return score_e, score_cmp
 
     # ---- gold evidence: 逐条独立格式化，支持多 evidence 和含图像 turn ----
     try:
@@ -296,8 +321,8 @@ def main():
         print_ancestor_chain(
             store,
             node,
-            query_embedding,
-            query_embedding_hyperbolic,
+            score_fn,
+            compare_label,
             label=f"evidence[{ev_idx}] {ev_id}",
         )
 
