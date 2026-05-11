@@ -83,6 +83,7 @@ class TrainConfig:
     entailment_weight: float = 0
     contrastive_weight: float = 0
     angular_weight: float = 1
+    lambda_centroid: float = 0.3
     
     # 训练相关
     learning_rate: float = 1e-4
@@ -163,7 +164,7 @@ class HyperbolicTrainer:
         ).to(self.device)
         
         self.angular_loss = HierarchicalAngularContrastiveLoss(
-            lambda_centroid=0.3
+            lambda_centroid=self.config.lambda_centroid,
         ).to(self.device)
         
         
@@ -621,6 +622,8 @@ def parse_args() -> TrainConfig:
     parser.add_argument('--entailment_weight', type=float, default=0)
     parser.add_argument('--contrastive_weight', type=float, default=0)
     parser.add_argument('--angular_weight', type=float, default=1)
+    parser.add_argument('--lambda_centroid', type=float, default=0.3,
+                        help='centroid depth regularization weight')
     
     # 训练参数
     parser.add_argument('--learning_rate', type=float, default=1e-6)
@@ -662,6 +665,7 @@ def parse_args() -> TrainConfig:
         entailment_weight=args.entailment_weight,
         contrastive_weight=args.contrastive_weight,
         angular_weight=args.angular_weight,
+        lambda_centroid=args.lambda_centroid,
         learning_rate=args.learning_rate,
         weight_decay=args.weight_decay,
         logit_scale=args.logit_scale,
