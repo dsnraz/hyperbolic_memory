@@ -13,7 +13,7 @@ set -euo pipefail
 ROOT_DIR="/share/home/leiyh5/Memory"
 SCRIPT_DIR="${ROOT_DIR}/scripts"
 
-CURVATURES=("0.05" "0.5" "5")
+CURVATURES=("0.2" "0.5" "0.8")
 
 for CURV in "${CURVATURES[@]}"; do
   SAFE_CURV="${CURV/./p}"

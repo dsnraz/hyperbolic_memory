@@ -16,7 +16,7 @@ python -m model.llm_inference.session_run \
   --llm-model-path /share/home/leiyh5/models/Qwen2.5-7B-Instruct \
   --projector-checkpoint-path /share/home/leiyh5/Memory/checkpoints_locomo_category_c0p1/hyperbolic_projector_final.pt \
   --embedding-model sentence-transformers/all-mpnet-base-v2 \
-  --out-file /share/home/leiyh5/Memory/data/locomo/locomo10_hy_c0p1_geodesic.json \
+  --out-file /share/home/leiyh5/Memory/data/locomo/locomo10_hyhyibd_c0p1.json \
   --generation-model-path /share/home/leiyh5/models/Qwen2.5-7B-Instruct \
-  --retriever-type hyperbolic_geodesic \
+  --retriever-type hyperbolic_angular_geodesic_hybrid \
   "$@"

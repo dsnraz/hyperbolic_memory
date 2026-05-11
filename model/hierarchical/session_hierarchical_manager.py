@@ -128,7 +128,7 @@ class SessionHierarchicalMemoryManager:
         predicate = str(fact_item.get("predicate", "")).strip()
         object_ = str(fact_item.get("object", "")).strip()
         if predicate and object_:
-            return f"{predicate} {object_}"
+            return f"{predicate}"
         if predicate:
             return predicate
         return str(fact_item.get("fact", ""))[:60].strip()

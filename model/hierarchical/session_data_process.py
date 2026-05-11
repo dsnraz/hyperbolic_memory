@@ -227,8 +227,8 @@ class SessionDataProcessor:
 
 def main() -> None:
     LLM_MODEL_PATH = "/share/home/leiyh5/models/Qwen2.5-7B-Instruct"
-    DATA_FILE = "/share/home/leiyh5/Memory/data/locomo/locomo_qa_test.json"
-    PERSIST_DIR = "/share/home/leiyh5/Memory/data/hierarchical_memory_locomo_category"
+    DATA_FILE = "/share/home/leiyh5/Memory/data/locomo/locomo10.json"
+    PERSIST_DIR = "/share/home/leiyh5/Memory/data/hierarchical_memory_locomo_morefact"
     parser = argparse.ArgumentParser(description="Build session-level hierarchical memory")
     parser.add_argument("--data-file", type=str, default=DATA_FILE)
     parser.add_argument("--persist-directory", type=str, default=PERSIST_DIR)

@@ -12,7 +12,7 @@ SCRIPT_DIR="${ROOT_DIR}/scripts"
 DATA_FILE="${ROOT_DIR}/data/locomo/locomo10.json"
 PERSIST_DIR_SHARED="${ROOT_DIR}/data/memory_running_category"
 
-CURVATURES=("0.05" "0.5" "5")
+CURVATURES=("0.2" "0.5" "0.8")
 
 for CURV in "${CURVATURES[@]}"; do
   SAFE_CURV="${CURV/./p}"
