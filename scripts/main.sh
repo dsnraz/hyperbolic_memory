@@ -12,11 +12,11 @@ cd /share/home/leiyh5/Memory
 
 python -m model.llm_inference.session_run \
   --data-file /share/home/leiyh5/Memory/data/locomo/locomo10.json \
-  --persist-directory /share/home/leiyh5/Memory/data/memory_running_category_morefact \
+  --persist-directory /share/home/leiyh5/Memory/data/memory_running_category \
   --llm-model-path /share/home/leiyh5/models/Qwen2.5-7B-Instruct \
-  --projector-checkpoint-path /share/home/leiyh5/Memory/checkpoints_locomo_categorymorefact_c0p1_la0p3/hyperbolic_projector_final.pt \
+  --projector-checkpoint-path /share/home/leiyh5/Memory/checkpoints_locomo_category_c0p1_la0p3/hyperbolic_projector_final.pt \
   --embedding-model sentence-transformers/all-mpnet-base-v2 \
-  --out-file /share/home/leiyh5/Memory/data/locomo/locomo10_hyhyibd_c0p1_morefact.json \
+  --out-file /share/home/leiyh5/Memory/data/locomo/locomo10_cosine.json \
   --generation-model-path /share/home/leiyh5/models/Qwen2.5-7B-Instruct \
-  --retriever-type hyperbolic_angular \
+  --retriever-type cosine \
   "$@"

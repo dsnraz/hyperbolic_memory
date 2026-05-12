@@ -14,7 +14,7 @@ set -euo pipefail
 ROOT_DIR="/share/home/leiyh5/Memory"
 SCRIPT_DIR="${ROOT_DIR}/scripts"
 DATA_FILE="${ROOT_DIR}/data/locomo/locomo10.json"
-PERSIST_DIR_SHARED="${ROOT_DIR}/data/memory_running_category_morefact"
+PERSIST_DIR_SHARED="${ROOT_DIR}/data/memory_running_category"
 
 # ---------------------------------------------------------------------------
 # Grid definition — MUST match the train grid
