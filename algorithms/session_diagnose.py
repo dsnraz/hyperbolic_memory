@@ -181,13 +181,13 @@ def main():
     parser.add_argument(
         "--query",
         type=str,
-        default="How long has Caroline had her current group of friends for?",
+        default="What did Caroline research?",
         help="查询文本（与 locomo_qa_test.json 中某条 question 一致时可自动拼 gold evidence）",
     )
     parser.add_argument(
         "--qa_json",
         type=str,
-        default=str(Path(__file__).resolve().parent.parent / "data/locomo/locomo_qa_test.json"),
+        default=str(Path(__file__).resolve().parent.parent / "data/locomo/locomo1_10.json"),
         help="LoCoMo QA+conversation，用于按 question 匹配 evidence 并生成与 store 一致的参考文本",
     )
     parser.add_argument(
@@ -195,7 +195,7 @@ def main():
         "--retriever_type",
         dest="retriever1",
         type=str,
-        default="hyperbolic_angular",
+        default="cosine",
         choices=RETRIEVER_CHOICES,
         help="主检索器类型（分层 retrieve）；别名 --retriever_type",
     )
@@ -211,15 +211,15 @@ def main():
         ),
     )
     parser.add_argument("--checkpoint", type=str, required=False, default="/share/home/leiyh5/Memory/checkpoints_locomo_category_c0p1/hyperbolic_projector_final.pt")
-    parser.add_argument("--persist_dir", type=str, default="/share/home/leiyh5/Memory/data/memory_running_category/round_1_conv-26",
+    parser.add_argument("--persist_dir", type=str, default="/share/home/leiyh5/Memory/data/memory_running_category_384/round_1_conv-26",
                         help="vector store 持久化目录")
     parser.add_argument(
         "--embedding_model",
         type=str,
-        default="sentence-transformers/all-mpnet-base-v2",
+        default="sentence-transformers/all-MiniLM-L6-v2",
         help="用于生成 query embedding 的模型名（需与 projector 输入维度匹配）。",
     )
-    parser.add_argument("--top_k", type=int, nargs=4, default=[20, 15, 10, 8])
+    parser.add_argument("--top_k", type=int, nargs=4, default=[20, 20, 15, 8])
     parser.add_argument("--memory_unit_mode", choices=["keyword", "fact"], default="fact")
     parser.add_argument("--query_prefix", type=str, default=None,
                         help="v4_query_prefix: 可选的 query 前缀")

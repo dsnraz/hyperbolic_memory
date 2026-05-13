@@ -125,10 +125,11 @@ class SessionHierarchicalMemoryManager:
 
     @staticmethod
     def _derive_category_name(fact_item: Dict[str, Any]) -> str:
+        subject = str(fact_item.get("subject", "")).strip()
         predicate = str(fact_item.get("predicate", "")).strip()
         object_ = str(fact_item.get("object", "")).strip()
         if predicate and object_:
-            return f"{predicate} {object_}"
+            return f"{subject} {predicate}"
         if predicate:
             return predicate
         return str(fact_item.get("fact", ""))[:60].strip()
