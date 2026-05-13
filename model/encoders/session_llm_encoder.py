@@ -186,8 +186,6 @@ JSON OUTPUT:
 
     def _session_prompt_template(self) -> str:
         if self.memory_unit_mode == "fact":
-            if self.extraction_mode == "two_stage":
-                return self.SESSION_FACT_ONLY_PROMPT
             return self.SESSION_FACT_ANALYSIS_PROMPT
         return self.SESSION_ANALYSIS_PROMPT
 
