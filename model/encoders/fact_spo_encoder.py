@@ -68,8 +68,29 @@ JSON OUTPUT:"""
         responses = self._handler.batch_generate(prompts, **kwargs)
 
         results: List[Dict[str, str]] = []
-        for response in responses:
-            results.append(self._parse_spo_response(response))
+        if show_progress:
+            try:
+                from tqdm import tqdm
+                iterator: Any = tqdm(
+                    zip(fact_texts, responses),
+                    total=len(fact_texts),
+                    desc="  SPO extraction",
+                    unit="fact",
+                )
+            except ImportError:
+                iterator = zip(fact_texts, responses)
+        else:
+            iterator = zip(fact_texts, responses)
+
+        for fact_text, response in iterator:
+            spo = self._parse_spo_response(response)
+            results.append(spo)
+            if not show_progress:
+                preview = fact_text[:60] + ("..." if len(fact_text) > 60 else "")
+                print(f"  [{len(results)}/{len(fact_texts)}] {preview}")
+                print(f"    → {spo['subject']} | {spo['predicate']} | {spo['object']}"
+                      f" | time={spo['time']}")
+
         return results
 
     def _parse_spo_response(self, response: str) -> Dict[str, str]:

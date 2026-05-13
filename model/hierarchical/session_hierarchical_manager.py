@@ -137,7 +137,7 @@ class SessionHierarchicalMemoryManager:
         predicate = str(fact_item.get("predicate", "")).strip()
         object_ = str(fact_item.get("object", "")).strip()
         if predicate and object_:
-            return f"{subject} {predicate}"
+            return f"{subject} {predicate} {object_}"
         if predicate:
             return predicate
         return str(fact_item.get("fact", ""))[:60].strip()
@@ -159,8 +159,10 @@ class SessionHierarchicalMemoryManager:
         if self.extraction_mode == "two_stage" and self.fact_spo_encoder is not None \
                 and facts and self.fact_spo_encoder._init_handler():
             fact_texts = [str(f.get("fact", "")).strip() for f in facts]
+            print(f"\n[Stage 2] 正在对 {len(fact_texts)} 条 fact 进行 SPO 字段提取 ...",
+                  flush=True)
             spo_results = self.fact_spo_encoder.batch_extract_spo(
-                fact_texts, show_progress=False
+                fact_texts, show_progress=True
             )
             for fi, spo in enumerate(spo_results):
                 if fi < len(facts):
@@ -168,6 +170,7 @@ class SessionHierarchicalMemoryManager:
                     facts[fi]["predicate"] = spo.get("predicate", "")
                     facts[fi]["object"] = spo.get("object", "")
                     facts[fi]["time"] = spo.get("time", "")
+            print(f"[Stage 2] SPO 提取完成，{len(spo_results)} 条已处理\n", flush=True)
 
         embedding_cache: Dict[str, List[float]] = {}
         if generate_embedding and self.embedding_encoder is not None:
