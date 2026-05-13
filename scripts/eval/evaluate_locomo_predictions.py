@@ -265,9 +265,12 @@ def main() -> None:
         scores, _, _ = eval_question_answering(qas, prediction_key)
         for i, score in enumerate(scores):
             qas[i][metric_key] = round(float(score), 3)
+             # category 5 (adversarial): reference = adversarial_answer (same as A-mem)
+            is_adversarial = int(qas[i].get("category", 0)) == 5
+            reference_key = "adversarial_answer" if (is_adversarial and "adversarial_answer" in qas[i]) else "answer"
             bleu1 = _calculate_bleu1_score(
                 qas[i].get(prediction_key, ""),
-                qas[i].get("answer", ""),
+                qas[i].get(reference_key, ""),
             )
             qas[i][f"{model_key}_bleu1"] = round(bleu1, 3)
 
