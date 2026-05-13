@@ -200,6 +200,12 @@ def parse_args() -> argparse.Namespace:
         default="fact",
         help="session third layer mode: keyword keeps old behavior; fact stores factual statements in the third layer.",
     )
+    p.add_argument(
+        "--extraction-mode",
+        choices=("single", "two_stage"),
+        default="single",
+        help="single: one-shot LLM extraction (fact + SPO); two_stage: stage1=fact only, stage2=per-fact SPO.",
+    )
     return p.parse_args()
 
 
@@ -224,6 +230,7 @@ def main() -> None:
         generation_model_path=args.generation_model_path,
         generation_api_base=args.generation_api_base,
         memory_unit_mode=args.memory_unit_mode,
+        extraction_mode=args.extraction_mode,
     )
     if args.retriever_type in (
         "hyperbolic_geodesic",
@@ -306,7 +313,11 @@ def main() -> None:
             if build_marker.exists():
                 try:
                     with open(build_marker, encoding="utf-8") as f:
-                        marker_matches_mode = json.load(f).get("memory_unit_mode", "keyword") == args.memory_unit_mode
+                        marker_data = json.load(f)
+                        marker_matches_mode = (
+                            marker_data.get("memory_unit_mode", "keyword") == args.memory_unit_mode
+                            and marker_data.get("extraction_mode", "single") == args.extraction_mode
+                        )
                 except (OSError, json.JSONDecodeError):
                     marker_matches_mode = False
 
@@ -356,6 +367,7 @@ def main() -> None:
                     "round_index": si + 1,
                     "persist_directory": str(round_dir),
                     "memory_unit_mode": args.memory_unit_mode,
+                    "extraction_mode": args.extraction_mode,
                 }
                 with open(build_marker, "w", encoding="utf-8") as f:
                     json.dump(marker_payload, f, ensure_ascii=False, indent=2)

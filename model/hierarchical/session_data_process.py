@@ -28,6 +28,7 @@ class SessionDataProcessor:
         device: str = "auto",
         flush_interval: int = 128,
         memory_unit_mode: Literal["keyword", "fact"] = "keyword",
+        extraction_mode: Literal["single", "two_stage"] = "single",
     ) -> None:
         self.manager = manager or create_session_hierarchical_manager(
             llm_model_path=llm_model_path,
@@ -35,10 +36,12 @@ class SessionDataProcessor:
             persist_directory=persist_directory,
             device=device,
             memory_unit_mode=memory_unit_mode,
+            extraction_mode=extraction_mode,
         )
         self.datapath = datapath
         self.flush_interval = flush_interval
         self.memory_unit_mode = memory_unit_mode
+        self.extraction_mode = extraction_mode
         self.data = self.load_data() if datapath else None
 
     def load_data(self) -> List[Any]:
@@ -240,6 +243,12 @@ def main() -> None:
     parser.add_argument("--flush-interval", type=int, default=64)
     parser.add_argument("--memory-unit-mode", choices=("keyword", "fact"), default="fact")
     parser.add_argument(
+        "--extraction-mode",
+        choices=("single", "two_stage"),
+        default="single",
+        help="single: one-shot LLM extraction; two_stage: stage1=fact only, stage2=per-fact SPO.",
+    )
+    parser.add_argument(
         "--llm-output-save-path",
         type=str,
         default="/share/home/leiyh5/Memory/data/locomo/outpu1.json",
@@ -255,9 +264,11 @@ def main() -> None:
         datapath=args.data_file,
         flush_interval=args.flush_interval,
         memory_unit_mode=args.memory_unit_mode,
+        extraction_mode=args.extraction_mode,
     )
     print("SessionDataProcessor 创建成功")
     print(f"Memory unit mode: {args.memory_unit_mode}")
+    print(f"Extraction mode: {args.extraction_mode}")
 
     processor.process_file(
         dataset_name=args.dataset_name,

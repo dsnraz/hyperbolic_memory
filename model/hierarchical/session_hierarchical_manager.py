@@ -20,14 +20,22 @@ class SessionHierarchicalMemoryManager:
         vector_store: Optional[HierarchicalVectorStore] = None,
         persist_directory: Optional[str] = None,
         memory_unit_mode: Literal["keyword", "fact"] = "keyword",
+        extraction_mode: Literal["single", "two_stage"] = "single",
+        fact_spo_encoder: Optional[Any] = None,
     ) -> None:
         if memory_unit_mode not in ("keyword", "fact"):
             raise ValueError("memory_unit_mode must be 'keyword' or 'fact'")
+        if extraction_mode not in ("single", "two_stage"):
+            raise ValueError("extraction_mode must be 'single' or 'two_stage'")
+        if extraction_mode == "two_stage" and memory_unit_mode != "fact":
+            raise ValueError("two_stage extraction is only supported with memory_unit_mode='fact'")
         self.llm_encoder = llm_encoder
         self.embedding_encoder = embedding_encoder
         self.vector_store = vector_store
         self.persist_directory = persist_directory
         self.memory_unit_mode = memory_unit_mode
+        self.extraction_mode = extraction_mode
+        self.fact_spo_encoder = fact_spo_encoder
         self._last_batch_perf: Dict[str, float] = {}
         self._last_batch_analyses: List[Optional[Dict[str, Any]]] = []
         self._last_batch_parse_ok_list: List[bool] = []
@@ -146,6 +154,20 @@ class SessionHierarchicalMemoryManager:
 
         domains: List[str] = analysis.get("domains", ["general"])
         facts: List[Dict[str, Any]] = analysis.get("facts", [])
+
+        # --- two-stage: enrich facts with SPO via FactSPOEncoder ---
+        if self.extraction_mode == "two_stage" and self.fact_spo_encoder is not None \
+                and facts and self.fact_spo_encoder._init_handler():
+            fact_texts = [str(f.get("fact", "")).strip() for f in facts]
+            spo_results = self.fact_spo_encoder.batch_extract_spo(
+                fact_texts, show_progress=False
+            )
+            for fi, spo in enumerate(spo_results):
+                if fi < len(facts):
+                    facts[fi]["subject"] = spo.get("subject", "")
+                    facts[fi]["predicate"] = spo.get("predicate", "")
+                    facts[fi]["object"] = spo.get("object", "")
+                    facts[fi]["time"] = spo.get("time", "")
 
         embedding_cache: Dict[str, List[float]] = {}
         if generate_embedding and self.embedding_encoder is not None:
@@ -661,13 +683,24 @@ def create_session_hierarchical_manager(
     device: str = "auto",
     delayed_write: bool = True,
     memory_unit_mode: Literal["keyword", "fact"] = "keyword",
+    extraction_mode: Literal["single", "two_stage"] = "single",
 ) -> SessionHierarchicalMemoryManager:
     llm_encoder = SessionLLMEncoder(
         model_path=llm_model_path,
         model_type="transformers" if llm_model_path else "ollama",
         device=device,
         memory_unit_mode=memory_unit_mode,
+        extraction_mode=extraction_mode,
     )
+    fact_spo_encoder = None
+    if extraction_mode == "two_stage" and memory_unit_mode == "fact" and llm_model_path:
+        from ..encoders.fact_spo_encoder import FactSPOEncoder
+
+        fact_spo_encoder = FactSPOEncoder(
+            model_path=llm_model_path,
+            model_type="transformers" if llm_model_path else "ollama",
+            device=device,
+        )
     embedding_is_path = bool(embedding_model and Path(embedding_model).exists())
     embedding_encoder = EmbeddingEncoder(
         model_path=embedding_model if embedding_is_path else None,
@@ -685,4 +718,6 @@ def create_session_hierarchical_manager(
         vector_store=vector_store,
         persist_directory=persist_directory,
         memory_unit_mode=memory_unit_mode,
+        extraction_mode=extraction_mode,
+        fact_spo_encoder=fact_spo_encoder,
     )

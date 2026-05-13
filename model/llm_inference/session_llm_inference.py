@@ -16,6 +16,7 @@ class SessionMemoryAugmentedLLMInference(MemoryAugmentedLLMInference):
         persist_directory: Optional[str] = None,
         device: str = "auto",
         memory_unit_mode: Literal["keyword", "fact"] = "keyword",
+        extraction_mode: Literal["single", "two_stage"] = "single",
         **kwargs,
     ) -> None:
         manager = create_session_hierarchical_manager(
@@ -25,6 +26,7 @@ class SessionMemoryAugmentedLLMInference(MemoryAugmentedLLMInference):
             device=device,
             delayed_write=False,
             memory_unit_mode=memory_unit_mode,
+            extraction_mode=extraction_mode,
         )
         super().__init__(
             manager=manager,

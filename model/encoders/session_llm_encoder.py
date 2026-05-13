@@ -12,6 +12,42 @@ class SessionLLMEncoder(LLMEncoder):
     """LLM encoder that extracts one four-level tree for a whole session."""
 
     MEMORY_UNIT_MODES = ("keyword", "fact")
+    EXTRACTION_MODES = ("single", "two_stage")
+
+    SESSION_FACT_ONLY_PROMPT = """
+[INST]
+You are a precise dialogue fact transcriber. Extract EVERY concrete piece of information — do NOT summarize or judge importance.
+You ONLY output STANDARD JSON.
+You DO NOT output any extra words.
+
+Return JSON with this schema:
+{{
+  "domains": ["domain A", "domain B"],
+  "facts": [
+    {{
+      "fact": "one piece of concrete information using original wording",
+      "dialogue_indices": [0]
+    }}
+  ],
+}}
+
+Rules:
+1. Read the full session before extracting.
+2. For EVERY dialogue turn, extract ALL concrete pieces of information as separate facts. One fact = one piece of information. Do NOT summarize or merge.
+3. Numbers, dates, durations, ages, counts, and ANY temporal expression are MANDATORY. They MUST appear in at least one fact. Examples: "4 years", "last week", "2022", "three children", "twice a month". NEVER drop these.
+4. Names of people, places, organizations must be preserved. Use the original wording where possible — do not abstract.
+5. Replace pronouns with entity names so each fact is self-contained.
+6. A fact may be supported by multiple dialogues; a dialogue can support multiple facts.
+7. dialogue_indices are zero-based and point to the input dialogue list. A fact can have ANY number of supporting dialogues — one, two, or more. Let the fact content determine which dialogues support it. Do NOT force two indices per fact.
+8. domains: list 2-3 macro-level labels (e.g. "personal life", "career", "health").
+9. Output JSON only.
+[/INST]
+
+Session dialogues:
+{session_text}
+
+JSON OUTPUT:
+"""
 
     SESSION_ANALYSIS_PROMPT = """
 [INST]
@@ -90,11 +126,20 @@ Session dialogues:
 JSON OUTPUT:
 """
 
-    def __init__(self, *args: Any, memory_unit_mode: Literal["keyword", "fact"] = "keyword", **kwargs: Any) -> None:
+    def __init__(
+        self,
+        *args: Any,
+        memory_unit_mode: Literal["keyword", "fact"] = "keyword",
+        extraction_mode: Literal["single", "two_stage"] = "single",
+        **kwargs: Any,
+    ) -> None:
         super().__init__(*args, **kwargs)
         if memory_unit_mode not in self.MEMORY_UNIT_MODES:
             raise ValueError(f"memory_unit_mode must be one of {self.MEMORY_UNIT_MODES}")
+        if extraction_mode not in self.EXTRACTION_MODES:
+            raise ValueError(f"extraction_mode must be one of {self.EXTRACTION_MODES}")
         self.memory_unit_mode = memory_unit_mode
+        self.extraction_mode = extraction_mode
 
     def analyze_session(self, dialogues: List[str], **kwargs: Any) -> Tuple[Dict[str, Any], bool]:
         if not self._init_handler():
@@ -140,6 +185,8 @@ JSON OUTPUT:
 
     def _session_prompt_template(self) -> str:
         if self.memory_unit_mode == "fact":
+            if self.extraction_mode == "two_stage":
+                return self.SESSION_FACT_ONLY_PROMPT
             return self.SESSION_FACT_ANALYSIS_PROMPT
         return self.SESSION_ANALYSIS_PROMPT
 
