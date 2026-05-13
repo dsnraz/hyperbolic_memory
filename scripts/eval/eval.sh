@@ -12,7 +12,7 @@ cd //share/home/leiyh5/Memory
 
 python -m scripts.eval.evaluate_locomo_predictions \
   --ann-file /share/home/leiyh5/Memory/data/locomo/locomo10.json \
-  --pred-file /share/home/leiyh5/Memory/data/locomo/locomo10_cosine.json \
+  --pred-file /share/home/leiyh5/Memory/data/locomo/locomo10_hy_c0p1_laop3.json \
   --locomo-root /share/home/leiyh5/locomo \
   --scored-file /share/home/leiyh5/Memory/data/locomo/locomo10_cosine_scored.json \
   --stats-file /share/home/leiyh5/Memory/data/locomo/locomo10_cosine_stats.json \

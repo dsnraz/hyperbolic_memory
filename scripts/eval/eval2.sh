@@ -13,7 +13,7 @@ cd /share/home/leiyh5/Memory
 
 python -m scripts.eval.evaluate_locomo_predictions_amem_style \
   --ann-file /share/home/leiyh5/Memory/data/locomo/locomo10.json \
-  --pred-file /share/home/leiyh5/Memory/data/locomo/locomo10_cosine.json \
+  --pred-file /share/home/leiyh5/Memory/data/locomo/locomo10_hy_c0p1_laop3.json\
   --prediction-key memory_prediction \
   --model-key memory \
   --scored-file /share/home/leiyh5/Memory/data/locomo/locomo10_cosine_amem_style_scored.json \
