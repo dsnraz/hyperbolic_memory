@@ -391,7 +391,7 @@ def main() -> None:
                     out.get("retrieval_result"),
                     inference.manager.vector_store,
                 )
-                print_readable_context(context)
+                # print_readable_context(context)
                 print(f"问题: {question}")
                 print(f"生成: {gen!r}")
 

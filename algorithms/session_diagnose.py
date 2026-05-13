@@ -181,7 +181,7 @@ def main():
     parser.add_argument(
         "--query",
         type=str,
-        default="What did Caroline research?",
+        default="What is Caroline's identity?",
         help="查询文本（与 locomo_qa_test.json 中某条 question 一致时可自动拼 gold evidence）",
     )
     parser.add_argument(
@@ -211,7 +211,7 @@ def main():
         ),
     )
     parser.add_argument("--checkpoint", type=str, required=False, default="/share/home/leiyh5/Memory/checkpoints_locomo_category_c0p1/hyperbolic_projector_final.pt")
-    parser.add_argument("--persist_dir", type=str, default="/share/home/leiyh5/Memory/data/memory_running_category_384/round_1_conv-26",
+    parser.add_argument("--persist_dir", type=str, default="/share/home/leiyh5/Memory/data/memory_running_category_384_2stage/round_1_conv-26",
                         help="vector store 持久化目录")
     parser.add_argument(
         "--embedding_model",

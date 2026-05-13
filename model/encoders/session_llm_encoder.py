@@ -34,13 +34,14 @@ Return JSON with this schema:
 Rules:
 1. Read the full session before extracting.
 2. For EVERY dialogue turn, extract ALL concrete pieces of information as separate facts. One fact = one piece of information. Do NOT summarize or merge.
-3. Numbers, dates, durations, ages, counts, and ANY temporal expression are MANDATORY. They MUST appear in at least one fact. Examples: "4 years", "last week", "2022", "three children", "twice a month". NEVER drop these.
+3. Numbers, dates, durations, ages, counts, and ANY temporal expression are MANDATORY. NEVER drop these.
 4. Names of people, places, organizations must be preserved. Use the original wording where possible — do not abstract.
 5. Replace pronouns with entity names so each fact is self-contained.
 6. A fact may be supported by multiple dialogues; a dialogue can support multiple facts.
-7. dialogue_indices are zero-based and point to the input dialogue list. A fact can have ANY number of supporting dialogues — one, two, or more. Let the fact content determine which dialogues support it. Do NOT force two indices per fact.
+7. dialogue_indices can't be empty, includes ALL the supporting input dialogues. Let the fact content determine which dialogues support it.
 8. domains: list 2-3 macro-level labels (e.g. "personal life", "career", "health").
 9. Output JSON only.
+10. All the dialogues should be coveraged to support the facts.
 [/INST]
 
 Session dialogues:
@@ -203,8 +204,12 @@ JSON OUTPUT:
                 if start >= 0 and end > start:
                     response = response[start : end + 1]
             data = json_repair.loads(response)
-            return self._normalize_session_payload(data, dialogues), True
-        except Exception:
+            result = self._normalize_session_payload(data, dialogues)
+            # print(f"[parse] OK, facts={len(result.get('facts', []))}", flush=True)
+            return result, True
+        except Exception as e:
+            print(f"[parse] FAILED, exception={e}", flush=True)         # ← 加异常类型
+            print(f"[parse] len={len(response)}, tail: {response[-100:]}", flush=True)
             return self._fallback_session_payload(dialogues), False
 
     def _normalize_session_payload(self, data: Any, dialogues: List[str]) -> Dict[str, Any]:
