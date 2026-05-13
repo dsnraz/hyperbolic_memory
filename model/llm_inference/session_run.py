@@ -41,6 +41,74 @@ def print_readable_context(context: Any) -> None:
     print(context_text)
 
 
+def print_fact_dialogue_tree(retrieval_result: Any, vector_store: Any) -> None:
+    """打印检索到的 fact 节点及其子 dialogue 节点，展示层级检索路径。"""
+    from model.hierarchical.hierarchy_types import HierarchyLevel
+
+    print("\n" + "=" * 70)
+    print("检索事实-对话树 (Fact → Dialogue)")
+    print("=" * 70)
+
+    # 找到 FACT (KEYWORD) 层的结果
+    fact_results = None
+    dialogue_results = None
+    for lr in (retrieval_result.level_results or []):
+        if lr.level == HierarchyLevel.KEYWORD:
+            fact_results = lr
+        elif lr.level == HierarchyLevel.DIALOGUE:
+            dialogue_results = lr
+
+    if fact_results is None or not fact_results.hits:
+        print("(未检索到 fact 节点)")
+        return
+
+    # 构建 dialogue hit 的索引（按 node.id）
+    dialogue_hit_by_id = {}
+    if dialogue_results is not None:
+        for dh in dialogue_results.hits:
+            dialogue_hit_by_id[dh.node.id] = dh
+
+    for fi, fact_hit in enumerate(fact_results.hits):
+        fact_node = fact_hit.node
+        print(f"\n{'─' * 60}")
+        print(f"[Fact #{fi + 1}]  score={fact_hit.score:.4f}")
+        print(f"  {fact_node.content}")
+
+        # 打印元数据
+        meta = fact_node.metadata or {}
+        if meta.get("subject"):
+            print(f"  subject={meta['subject']}  predicate={meta.get('predicate', '')}"
+                  f"  time={meta.get('time', '')}")
+
+        # 获取 fact 的子 dialogue 节点
+        child_ids = fact_node.child_ids or []
+        if not child_ids:
+            print(f"  (无子节点)")
+            continue
+
+        print(f"  子节点 ({len(child_ids)} 个):")
+        shown_children = 0
+        for child_id in child_ids:
+            child_node = vector_store.get_node(child_id, HierarchyLevel.DIALOGUE)
+            if child_node is None:
+                child_node = vector_store.get_node(child_id)
+            if child_node is None:
+                continue
+
+            shown_children += 1
+            # 检查这个 dialogue 是否在检索结果中
+            dh = dialogue_hit_by_id.get(child_id)
+            score_str = f"score={dh.score:.4f}" if dh else "not in top-k"
+
+            content_preview = (child_node.content or "").replace("\n", " ")
+            if len(content_preview) > 120:
+                content_preview = content_preview[:120] + "..."
+
+            print(f"    [{shown_children}] {score_str}  {content_preview}")
+
+    print("=" * 70 + "\n")
+
+
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="LoCoMo QA + 分层记忆检索/生成（打印）")
     p.add_argument(
@@ -211,6 +279,10 @@ def main() -> None:
                 context = out.get("context")
                 gen = out.get("answer")
                 item[args.prediction_key] = "" if gen is None else str(gen).strip()
+                print_fact_dialogue_tree(
+                    out.get("retrieval_result"),
+                    inference.manager.vector_store,
+                )
                 print_readable_context(context)
                 print(f"问题: {question}")
                 print(f"生成: {gen!r}")
@@ -303,6 +375,10 @@ def main() -> None:
                 context = out.get("context")
                 gen = out.get("answer")
                 item[args.prediction_key] = "" if gen is None else str(gen).strip()
+                print_fact_dialogue_tree(
+                    out.get("retrieval_result"),
+                    inference.manager.vector_store,
+                )
                 print_readable_context(context)
                 print(f"问题: {question}")
                 print(f"生成: {gen!r}")
