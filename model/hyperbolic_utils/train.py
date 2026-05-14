@@ -600,7 +600,7 @@ def parse_args() -> TrainConfig:
     parser = argparse.ArgumentParser(description="双曲投影器训练")
     
     # 数据参数
-    parser.add_argument('--vector_store_path', type=str, default='/share/home/leiyh5/Memory/data/hierarchical_memory_locomo_category')
+    parser.add_argument('--vector_store_path', type=str, default='/share/home/leiyh5/Memory/data/hierarchical_memory_locomo_category2')
     parser.add_argument('--embedding_dim', type=int, default=384)
     parser.add_argument('--hidden_dim', type=int, default=1024)
     

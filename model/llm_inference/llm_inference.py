@@ -31,7 +31,7 @@ class MemoryAugmentedLLMInference:
         "Retrieved context from memory:\n"
         "{context}\n\n"
         "Question: {query}\n"
-        "Answer with the shortest factual answer possible. Output only the answer, no explanation, no reasoning, no full sentences unless the question explicitly asks for one. Prefer a single word, date, number, or short phrase. If there is no relevant information in the context, output 'no information available'.\n"
+        "Answer the question using the shortest complete answer. Output only the answer, no explanation, no reasoning, no full sentences unless the question explicitly asks for one. Prefer a single word, date, number, or short phrase. If there is no relevant information in the context, output 'no information available'.\n"
         "Answer:"
     )
 

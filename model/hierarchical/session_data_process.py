@@ -229,9 +229,9 @@ class SessionDataProcessor:
 
 
 def main() -> None:
-    LLM_MODEL_PATH = "/share/home/leiyh5/.cache/modelscope/hub/models/Qwen/Qwen2___5-3B-Instruct"
+    LLM_MODEL_PATH = "/share/home/leiyh5/models/Qwen2.5-7B-Instruct"
     DATA_FILE = "/share/home/leiyh5/Memory/data/locomo/locomo10.json"
-    PERSIST_DIR = "/share/home/leiyh5/Memory/data/hierarchical_memory_locomo_category_2stage"
+    PERSIST_DIR = "/share/home/leiyh5/Memory/data/hierarchical_memory_locomo_7b"
     parser = argparse.ArgumentParser(description="Build session-level hierarchical memory")
     parser.add_argument("--data-file", type=str, default=DATA_FILE)
     parser.add_argument("--persist-directory", type=str, default=PERSIST_DIR)
@@ -245,7 +245,7 @@ def main() -> None:
     parser.add_argument(
         "--extraction-mode",
         choices=("single", "two_stage"),
-        default="two_stage",
+        default="single",
         help="single: one-shot LLM extraction; two_stage: stage1=fact only, stage2=per-fact SPO.",
     )
     parser.add_argument(

@@ -205,73 +205,55 @@ def main() -> None:
     metric_key = f"{model_key}_f1"
 
     samples = _load_json(pred_path)
-    ann_samples = _load_json(ann_path)
     if not isinstance(samples, list):
         raise ValueError("Prediction file must be a JSON list of samples.")
-    if not isinstance(ann_samples, list):
-        raise ValueError("Annotation file must be a JSON list of samples.")
-
-    ann_by_id: dict[str, dict[str, Any]] = {}
-    for ann_sample in ann_samples:
-        sid = str(ann_sample.get("sample_id", ""))
-        if sid:
-            ann_by_id[sid] = ann_sample
 
     total_qa = 0
     missing_pred = 0
-    filled_required = 0
-    filled_from_adversarial = 0
     for sample in samples:
-        sid = str(sample.get("sample_id", ""))
         qas = sample.get("qa", [])
         total_qa += len(qas)
-        ann_qas = ann_by_id.get(sid, {}).get("qa", []) if sid else []
-        for i, qa in enumerate(qas):
-            # LoCoMo category-5 items in released data often use `adversarial_answer`
-            # instead of `answer`, while official evaluator expects `answer`.
-            if "answer" not in qa and "adversarial_answer" in qa:
-                qa["answer"] = ann_qas[i].get("adversarial_answer", qa["adversarial_answer"]) if i < len(ann_qas) else qa["adversarial_answer"]
-                filled_from_adversarial += 1
-
-            # Backfill required keys from annotation data if missing.
-            if i < len(ann_qas):
-                ann_qa = ann_qas[i]
-                for required_key in ("answer", "category", "evidence"):
-                    if required_key not in qa:
-                        if required_key == "answer" and "adversarial_answer" in ann_qa:
-                            qa[required_key] = ann_qa["adversarial_answer"]
-                        else:
-                            qa[required_key] = ann_qa.get(required_key)
-                        filled_required += 1
-
+        for qa in qas:
             if prediction_key not in qa:
                 missing_pred += 1
                 qa[prediction_key] = ""
 
     if missing_pred > 0:
         print(f"[warning] {missing_pred} QA items missing `{prediction_key}`. Filled with empty strings.")
-    if filled_required > 0:
-        print(
-            f"[warning] Backfilled {filled_required} missing required fields "
-            f"(`answer`/`category`/`evidence`) from annotation file."
-        )
-    if filled_from_adversarial > 0:
-        print(
-            f"[info] Filled {filled_from_adversarial} missing `answer` fields from `adversarial_answer`."
-        )
+
+    # LoCoMo eval_question_answering always reads line["answer"] before branching by category;
+    # category-5 rows in some JSON only have adversarial_answer. Add empty answer so F1 path
+    # does not KeyError. Category-5 "bleu1" is stored as 0/1 matching the same adversarial rule as F1
+    # (not NLTK BLEU), so long paraphrases are not penalized for output style.
+    for sample in samples:
+        for qa in sample.get("qa", []):
+            try:
+                cat = int(qa.get("category", 0))
+            except (TypeError, ValueError):
+                continue
+            if cat == 5 and "answer" not in qa:
+                qa["answer"] = ""
 
     for sample in samples:
         qas = sample.get("qa", [])
         scores, _, _ = eval_question_answering(qas, prediction_key)
         for i, score in enumerate(scores):
             qas[i][metric_key] = round(float(score), 3)
-             # category 5 (adversarial): reference = adversarial_answer (same as A-mem)
+            pred_text = qas[i].get(prediction_key, "")
             is_adversarial = int(qas[i].get("category", 0)) == 5
-            reference_key = "adversarial_answer" if (is_adversarial and "adversarial_answer" in qas[i]) else "answer"
-            bleu1 = _calculate_bleu1_score(
-                qas[i].get(prediction_key, ""),
-                qas[i].get(reference_key, ""),
-            )
+            if is_adversarial:
+                # Same 0/1 rule as locomo/task_eval/evaluation.py eval_question_answering for category 5.
+                out_lower = str(pred_text).lower()
+                bleu1 = (
+                    1.0
+                    if (
+                        "no information available" in out_lower
+                        or "not mentioned" in out_lower
+                    )
+                    else 0.0
+                )
+            else:
+                bleu1 = _calculate_bleu1_score(pred_text, qas[i].get("answer", ""))
             qas[i][f"{model_key}_bleu1"] = round(bleu1, 3)
 
     _dump_json(scored_path, samples)

@@ -110,12 +110,12 @@ Return JSON with this schema:
 
 Rules:
 1. Read the full session before extracting.
-2. For EVERY dialogue turn, extract ALL concrete pieces of information as separate facts. One fact = one piece of information. Do NOT summarize or merge.
+2. For EVERY dialogue turn, extract ALL concrete pieces of information as SEPERATE facts. One fact = one piece of information. Do NOT summarize or merge.
 3. Numbers, dates, durations, ages, counts, and ANY temporal expression are MANDATORY. They MUST appear in at least one fact. Examples: "4 years", "last week", "2022", "three children", "twice a month". NEVER drop these.
 4. Names of people, places, organizations must be preserved. Use the original wording where possible — do not abstract. If the speaker says "I've known them for 4 years", write "Caroline has known her friends for 4 years", NOT "Caroline has a support system".
 5. Replace pronouns with entity names so each fact is self-contained.
 6. A fact may be supported by multiple dialogues; a dialogue can support multiple facts.
-7. dialogue_indices are zero-based and point to the input dialogue list.
+7. dialogue_indices are zero-based and point to the input dialogue list, every fact should has at least 2-3 supporting dialogue_indices.
 8. predicate must be a concise verb phrase (e.g. "has known", "working at", "attended", "planning to"). object must be the target.
 9. domains: list 2-3 macro-level labels (e.g. "personal life", "career", "health").
 10. Output JSON only.

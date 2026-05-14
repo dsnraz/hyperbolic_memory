@@ -12,12 +12,12 @@ cd /share/home/leiyh5/Memory
 
 python -m model.llm_inference.session_run \
   --data-file /share/home/leiyh5/Memory/data/locomo/locomo10.json \
-  --persist-directory /share/home/leiyh5/Memory/data/memory_running_category_384_2stage \
-  --llm-model-path /share/home/leiyh5/.cache/modelscope/hub/models/Qwen/Qwen2___5-3B-Instruct \
+  --persist-directory /share/home/leiyh5/Memory/data/memory_running_category_old_embedding_prompt \
+  --llm-model-path /share/home/leiyh5/models/Qwen2.5-7B-Instruct \
   --projector-checkpoint-path /share/home/leiyh5/Memory/checkpoints_locomo_category_c0p1_la0p3/hyperbolic_projector_final.pt \
-  --embedding-model sentence-transformers/all-MiniLM-L6-v2 \
-  --out-file /share/home/leiyh5/Memory/data/locomo/locomo10_cosine_subject_2stage.json \
-  --generation-model-path /share/home/leiyh5/.cache/modelscope/hub/models/Qwen/Qwen2___5-3B-Instruct \
+  --embedding-model sentence-transformers/all-mpnet-base-v2 \
+  --out-file /share/home/leiyh5/Memory/data/locomo/locomo10_cosine_7b7b_old_embedding_prompt.json \
+  --generation-model-path /share/home/leiyh5/models/Qwen2.5-7B-Instruct \
   --retriever-type cosine \
-  --extraction-mode two_stage \
+  # --extraction-mode two_stage \
   "$@"
