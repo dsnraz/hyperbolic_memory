@@ -42,6 +42,34 @@ Fact:
 
 JSON OUTPUT:"""
 
+    DIALOGUE_FACT_PROMPT = """[INST]
+You are a precise fact extractor. Extract ONE self-contained fact from the dialogue below.
+You ONLY output STANDARD JSON.
+You DO NOT output any extra words.
+
+Return JSON with this schema:
+{{
+  "fact": "one self-contained factual statement using original wording",
+  "subject": "main person or entity",
+  "predicate": "relation or action",
+  "object": "object or complement",
+  "time": "time expression if present, else empty string"
+}}
+
+Rules:
+1. Write the fact as a concise, self-contained declarative sentence. NEVER copy the dialogue verbatim. Strip timestamps, speaker names, and conversational filler.
+2. Replace pronouns with entity names so the fact is self-contained.
+3. subject: main person/entity. predicate: concise verb phrase. object: target/complement.
+4. TIME RESOLUTION: The dialogue starts with a posting timestamp. Resolve relative times ("yesterday", "last week") to absolute dates using that timestamp. NEVER output relative expressions like "yesterday" as the time value.
+5. If no time expression is present, use empty string for time. Do NOT invent or guess.
+6. Output JSON only.
+[/INST]
+
+Dialogue:
+{dialogue_text}
+
+JSON OUTPUT:"""
+
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
 
@@ -106,6 +134,56 @@ JSON OUTPUT:"""
             if not isinstance(data, dict):
                 return fallback
             return {
+                "subject": str(data.get("subject", "")).strip(),
+                "predicate": str(data.get("predicate", "")).strip(),
+                "object": str(data.get("object", "")).strip(),
+                "time": str(data.get("time", "")).strip(),
+            }
+        except Exception:
+            return fallback
+
+    # ------------------------------------------------------------------
+    # Stage 3: extract fact + SPO from an orphan dialogue
+    # ------------------------------------------------------------------
+
+    def extract_fact_from_dialogue(self, dialogue_text: str, **kwargs: Any) -> Dict[str, Any]:
+        """Extract a fact with SPO from a single orphan dialogue."""
+        if not self._init_handler():
+            raise RuntimeError("model init failed")
+        prompt = self.DIALOGUE_FACT_PROMPT.format(dialogue_text=dialogue_text)
+        response = self._handler.generate(prompt, **kwargs)
+        return self._parse_dialogue_fact_response(response)
+
+    def batch_extract_facts_from_dialogues(
+        self,
+        dialogue_texts: List[str],
+        show_progress: bool = True,
+        **kwargs: Any,
+    ) -> List[Dict[str, Any]]:
+        """Batch extract facts from orphan dialogues."""
+        if not self._init_handler():
+            raise RuntimeError("model init failed")
+        prompts = [self.DIALOGUE_FACT_PROMPT.format(dialogue_text=dt) for dt in dialogue_texts]
+        responses = self._handler.batch_generate(prompts, **kwargs)
+        results: List[Dict[str, Any]] = []
+        for response in responses:
+            results.append(self._parse_dialogue_fact_response(response))
+        return results
+
+    def _parse_dialogue_fact_response(self, response: str) -> Dict[str, Any]:
+        fallback = {"fact": "", "subject": "", "predicate": "", "object": "", "time": ""}
+        try:
+            response = self._sanitize_json_response(response.strip())
+            if not response.startswith("{"):
+                start = response.find("{")
+                end = response.rfind("}")
+                if start >= 0 and end > start:
+                    response = response[start : end + 1]
+            data = json_repair.loads(response)
+            if not isinstance(data, dict):
+                return fallback
+            return {
+                "fact": str(data.get("fact", "")).strip(),
                 "subject": str(data.get("subject", "")).strip(),
                 "predicate": str(data.get("predicate", "")).strip(),
                 "object": str(data.get("object", "")).strip(),

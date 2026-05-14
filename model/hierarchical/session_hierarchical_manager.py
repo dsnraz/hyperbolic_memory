@@ -260,23 +260,75 @@ class SessionHierarchicalMemoryManager:
                     dialogue_parent_ids[dialogue_idx].add(fact_node.id)
 
         # --- fallback for orphan dialogues ---
-        if not category_nodes:
-            fallback_cat = self._get_or_create_category(
-                "general", next(iter(domain_nodes.values())), embedding_cache
-            )
-            category_nodes["general"] = fallback_cat
-        fallback_category = next(iter(category_nodes.values()))
-        for idx, parent_ids in dialogue_parent_ids.items():
-            if parent_ids:
-                continue
-            fallback_fact = self._get_or_create_fact(
-                dialogues[idx],
-                fallback_category,
-                embedding_cache,
-                session_id=session_id,
-                dialogue_indices=[idx],
-            )
-            parent_ids.add(fallback_fact.id)
+        orphan_indices: List[int] = [
+            idx for idx, pids in dialogue_parent_ids.items() if not pids
+        ]
+        if orphan_indices:
+            # Try per-dialogue LLM extraction first (two_stage mode)
+            extracted_orphan_facts: List[Dict[str, Any]] = []
+            if self.extraction_mode == "two_stage" and self.fact_spo_encoder is not None \
+                    and self.fact_spo_encoder._init_handler():
+                orphan_texts = [dialogues[idx] for idx in orphan_indices]
+                print(f"\n[Stage 3] 逐对话提取 {len(orphan_texts)} 条孤儿 fact ...", flush=True)
+                extracted_orphan_facts = self.fact_spo_encoder.batch_extract_facts_from_dialogues(
+                    orphan_texts, show_progress=True
+                )
+                print(f"[Stage 3] 孤儿 fact 提取完成\n", flush=True)
+
+            if not category_nodes:
+                fallback_cat = self._get_or_create_category(
+                    "general", next(iter(domain_nodes.values())), embedding_cache
+                )
+                category_nodes["general"] = fallback_cat
+            fallback_category = next(iter(category_nodes.values()))
+
+            for i, idx in enumerate(orphan_indices):
+                if i < len(extracted_orphan_facts) and extracted_orphan_facts[i].get("fact"):
+                    # Use LLM-extracted fact with proper SPO
+                    ef = extracted_orphan_facts[i]
+                    fact_text = ef["fact"]
+                    cat_name = self._derive_category_name(ef)
+                    if cat_name not in category_nodes:
+                        cat_node_new = self._get_or_create_category(
+                            cat_name, next(iter(domain_nodes.values())), embedding_cache
+                        )
+                        category_nodes[cat_name] = cat_node_new
+                    cat_node = category_nodes[cat_name]
+                    fact_node = HierarchicalNode(
+                        content=fact_text,
+                        level=HierarchyLevel.KEYWORD,
+                        parent_ids=[cat_node.id],
+                        embedding=self._get_embedding(fact_text, embedding_cache),
+                        level_embedding=self._get_level_embedding(
+                            HierarchyLevel.KEYWORD, fact_text, embedding_cache
+                        ),
+                        metadata={
+                            "memory_unit_mode": "fact",
+                            "unit_type": "fact",
+                            "session_id": session_id or "",
+                            "derived_category": cat_name,
+                            "subject": ef.get("subject", ""),
+                            "predicate": ef.get("predicate", ""),
+                            "object": ef.get("object", ""),
+                            "time": ef.get("time", ""),
+                            "dialogue_indices": [idx],
+                        },
+                    )
+                    self.vector_store.add_node(fact_node)
+                    cat_node.add_child(fact_node.id)
+                    fact_nodes[fact_node.id] = fact_node
+                    dialogue_parent_ids[idx].add(fact_node.id)
+                else:
+                    # Raw fallback: dialogue text as fact
+                    fallback_fact = self._get_or_create_fact(
+                        dialogues[idx],
+                        fallback_category,
+                        embedding_cache,
+                        session_id=session_id,
+                        dialogue_indices=[idx],
+                        fact_nodes=fact_nodes,
+                    )
+                    dialogue_parent_ids[idx].add(fallback_fact.id)
 
         # --- dialogue nodes ---
         dialogue_nodes: List[HierarchicalNode] = []
@@ -326,6 +378,7 @@ class SessionHierarchicalMemoryManager:
         embedding_cache: Dict[str, List[float]],
         session_id: Optional[str] = None,
         dialogue_indices: Optional[List[int]] = None,
+        fact_nodes: Optional[Dict[str, HierarchicalNode]] = None,
     ) -> HierarchicalNode:
         fact_node = HierarchicalNode(
             content=fact_text,
@@ -344,6 +397,8 @@ class SessionHierarchicalMemoryManager:
         )
         self.vector_store.add_node(fact_node)
         category_node.add_child(fact_node.id)
+        if fact_nodes is not None:
+            fact_nodes[fact_node.id] = fact_node
         return fact_node
 
     def _collect_fact_embedding_texts(
