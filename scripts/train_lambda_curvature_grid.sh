@@ -33,7 +33,7 @@ LAMBDAS=("0.1" "0.3" "0.5" "1.0")
 # CURVATURES=("0.01" "0.1" "1.0")
 # LAMBDAS=("0.1" "0.3" "1.0")
 
-BATCH_SIZE=3   # submit N jobs per round, wait, then next batch
+BATCH_SIZE=2   # submit N jobs per round, wait, then next batch
 
 # ---------------------------------------------------------------------------
 # Build job list
