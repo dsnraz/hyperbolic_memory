@@ -274,9 +274,8 @@ class TransformersModelHandler(BaseModelHandler):
     def _clean_response(self, response: str) -> str:
         """清理响应中的特殊标记。"""
         # DeepSeek-R1: strip <｜end▁of▁thinking｜>think  response... <｜end▁of▁thinking｜>/think  response
-        if self._model_type == "deepseek":
-            import re
-            response = re.sub(r"<think>.*?</think>", "", response, flags=re.DOTALL).strip()
+        if self._model_type == "deepseek" and "</think>" in response:
+            response = response.rsplit("</think>", 1)[-1]
         if self._model_type == "qwen" and "<|im_end|>" in response:
             response = response.split("<|im_end|>")[0].strip()
         return response.strip()
