@@ -231,12 +231,12 @@ class SessionDataProcessor:
 def main() -> None:
     LLM_MODEL_PATH = "/share/home/leiyh5/models/Qwen2.5-7B-Instruct"
     DATA_FILE = "/share/home/leiyh5/Memory/data/locomo/locomo10.json"
-    PERSIST_DIR = "/share/home/leiyh5/Memory/data/hierarchical_memory_locomo_7b"
+    PERSIST_DIR = "/share/home/leiyh5/Memory/data/hierarchical_memory_locomo_7b_mpnet2"
     parser = argparse.ArgumentParser(description="Build session-level hierarchical memory")
     parser.add_argument("--data-file", type=str, default=DATA_FILE)
     parser.add_argument("--persist-directory", type=str, default=PERSIST_DIR)
     parser.add_argument("--llm-model-path", type=str, default=LLM_MODEL_PATH)
-    parser.add_argument("--embedding-model", type=str, default="sentence-transformers/all-MiniLM-L6-v2")
+    parser.add_argument("--embedding-model", type=str, default="sentence-transformers/all-mpnet-base-v2")
     parser.add_argument("--device", type=str, default="auto")
     parser.add_argument("--dataset-name", type=str, default="locomo")
     parser.add_argument("--process-batch-size", type=int, default=8)
