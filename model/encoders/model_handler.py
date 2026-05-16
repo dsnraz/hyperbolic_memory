@@ -45,6 +45,7 @@ class TransformersModelHandler(BaseModelHandler):
         "baichuan": ["baichuan"],
         "internlm": ["internlm"],
         "mistral": ["mistral"],
+        "deepseek": ["deepseek"],
     }
     
     def __init__(self):
@@ -110,7 +111,7 @@ class TransformersModelHandler(BaseModelHandler):
             "use_fast": False,
         }
         # Decoder-only 模型都需要 left padding 才能正确进行批量推理
-        decoder_only_types = ["qwen", "llama", "mistral", "baichuan", "internlm"]
+        decoder_only_types = ["qwen", "llama", "mistral", "baichuan", "internlm", "deepseek"]
         
         if self._model_type in decoder_only_types:
             tokenizer_kwargs["padding_side"] = "left"
@@ -149,7 +150,7 @@ class TransformersModelHandler(BaseModelHandler):
     
     def build_prompt(self, user_prompt: str) -> str:
         """根据模型类型构建格式化的 prompt。"""
-        if self._model_type == "qwen":
+        if self._model_type == "qwen" or self._model_type == "deepseek":
             messages = [{"role": "user", "content": user_prompt}]
             return self._tokenizer.apply_chat_template(
                 messages, tokenize=False, add_generation_prompt=True
@@ -272,6 +273,10 @@ class TransformersModelHandler(BaseModelHandler):
     
     def _clean_response(self, response: str) -> str:
         """清理响应中的特殊标记。"""
+        # DeepSeek-R1: strip <｜end▁of▁thinking｜>think  response... <｜end▁of▁thinking｜>/think  response
+        if self._model_type == "deepseek":
+            import re
+            response = re.sub(r"<think>.*?</think>", "", response, flags=re.DOTALL).strip()
         if self._model_type == "qwen" and "<|im_end|>" in response:
             response = response.split("<|im_end|>")[0].strip()
         return response.strip()

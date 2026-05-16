@@ -126,8 +126,27 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         "--llm-model-path",
         type=str,
-        default="/share/home/leiyh5/models/Qwen2.5-7B-Instruct",
-        help="建库用 DialogueAnalyzer",
+        default=None,
+        help="建库 LLM 本地权重路径（transformers 类型）",
+    )
+    p.add_argument(
+        "--llm-model-name",
+        type=str,
+        default=None,
+        help="建库 LLM 模型名（ollama/openai 类型）",
+    )
+    p.add_argument(
+        "--llm-handler-type",
+        type=str,
+        default="transformers",
+        choices=("transformers", "ollama", "openai"),
+        help="建库 LLM 后端类型",
+    )
+    p.add_argument(
+        "--llm-api-base",
+        type=str,
+        default="http://localhost:11434",
+        help="建库 LLM API 地址（openai 类型时用）",
     )
     p.add_argument(
         "--projector-checkpoint-path",
@@ -220,6 +239,7 @@ def main() -> None:
 
     infer_kw: Dict[str, Any] = dict(
         llm_model_path=args.llm_model_path,
+        llm_model_name=args.llm_model_name,
         persist_directory=args.persist_directory,
         embedding_model=args.embedding_model,
         device=args.device,
@@ -231,6 +251,8 @@ def main() -> None:
         generation_api_base=args.generation_api_base,
         memory_unit_mode=args.memory_unit_mode,
         extraction_mode=args.extraction_mode,
+        llm_handler_type=args.llm_handler_type,
+        llm_api_base=args.llm_api_base,
     )
     if args.retriever_type in (
         "hyperbolic_geodesic",
@@ -330,6 +352,7 @@ def main() -> None:
             # 已有缓存时无需加载建库 LLM（节省启动与显存）
             if marker_matches_mode:
                 round_infer_kw["llm_model_path"] = None
+                round_infer_kw["llm_model_name"] = None
 
             # 复用生成器，避免每轮重复加载生成模型
             if shared_generation_handler is not None:

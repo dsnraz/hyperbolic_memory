@@ -736,16 +736,24 @@ class SessionHierarchicalMemoryManager:
 
 def create_session_hierarchical_manager(
     llm_model_path: Optional[str] = None,
+    llm_model_name: Optional[str] = None,
     embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2",
     persist_directory: Optional[str] = None,
     device: str = "auto",
     delayed_write: bool = True,
     memory_unit_mode: Literal["keyword", "fact"] = "keyword",
     extraction_mode: Literal["single", "two_stage"] = "single",
+    llm_handler_type: str = "transformers",
+    llm_api_base: str = "http://localhost:11434",
 ) -> SessionHierarchicalMemoryManager:
+    _model_type = llm_handler_type
+    if _model_type == "transformers" and not llm_model_path:
+        _model_type = "ollama"
     llm_encoder = SessionLLMEncoder(
         model_path=llm_model_path,
-        model_type="transformers" if llm_model_path else "ollama",
+        model_name=llm_model_name or "",
+        model_type=_model_type,
+        api_base=llm_api_base,
         device=device,
         memory_unit_mode=memory_unit_mode,
         extraction_mode=extraction_mode,

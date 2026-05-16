@@ -23,20 +23,26 @@ class SessionDataProcessor:
         manager: Optional[SessionHierarchicalMemoryManager] = None,
         datapath: Optional[str] = None,
         llm_model_path: Optional[str] = None,
+        llm_model_name: Optional[str] = None,
         embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2",
         persist_directory: Optional[str] = None,
         device: str = "auto",
         flush_interval: int = 128,
         memory_unit_mode: Literal["keyword", "fact"] = "keyword",
         extraction_mode: Literal["single", "two_stage"] = "single",
+        llm_handler_type: str = "transformers",
+        llm_api_base: Optional[str] = None,
     ) -> None:
         self.manager = manager or create_session_hierarchical_manager(
             llm_model_path=llm_model_path,
+            llm_model_name=llm_model_name,
             embedding_model=embedding_model,
             persist_directory=persist_directory,
             device=device,
             memory_unit_mode=memory_unit_mode,
             extraction_mode=extraction_mode,
+            llm_handler_type=llm_handler_type,
+            llm_api_base=llm_api_base or "http://localhost:11434",
         )
         self.datapath = datapath
         self.flush_interval = flush_interval
@@ -236,6 +242,10 @@ def main() -> None:
     parser.add_argument("--data-file", type=str, default=DATA_FILE)
     parser.add_argument("--persist-directory", type=str, default=PERSIST_DIR)
     parser.add_argument("--llm-model-path", type=str, default=LLM_MODEL_PATH)
+    parser.add_argument("--llm-model-name", type=str, default=None)
+    parser.add_argument("--llm-handler-type", type=str, default="transformers",
+                        choices=("transformers", "ollama", "openai"))
+    parser.add_argument("--llm-api-base", type=str, default=None)
     parser.add_argument("--embedding-model", type=str, default="sentence-transformers/all-mpnet-base-v2")
     parser.add_argument("--device", type=str, default="auto")
     parser.add_argument("--dataset-name", type=str, default="locomo")
@@ -258,6 +268,7 @@ def main() -> None:
 
     processor = SessionDataProcessor(
         llm_model_path=args.llm_model_path,
+        llm_model_name=args.llm_model_name,
         embedding_model=args.embedding_model,
         persist_directory=args.persist_directory,
         device=args.device,
@@ -265,6 +276,8 @@ def main() -> None:
         flush_interval=args.flush_interval,
         memory_unit_mode=args.memory_unit_mode,
         extraction_mode=args.extraction_mode,
+        llm_handler_type=args.llm_handler_type,
+        llm_api_base=args.llm_api_base,
     )
     print("SessionDataProcessor 创建成功")
     print(f"Memory unit mode: {args.memory_unit_mode}")
