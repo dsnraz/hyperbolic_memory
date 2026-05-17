@@ -215,7 +215,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         "--generation-model-path",
         type=str,
-        default="/share/home/leiyh5/models/Qwen2.5-7B-Instruct",
+        default=None,
         help="本地生成权重绝对路径，仅在与 --generation-handler-type 同用时生效",
     )
     p.add_argument("--generation-api-base", type=str, default="http://localhost:11434")
