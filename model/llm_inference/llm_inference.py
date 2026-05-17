@@ -49,6 +49,7 @@ class MemoryAugmentedLLMInference:
         generation_model_name: Optional[str] = None,
         generation_model_path: Optional[str] = None,
         generation_api_base: str = "http://localhost:11434",
+        generation_api_key: Optional[str] = None,
         retriever_top_k: List[int] = [5, 5, 5, 5],
         start_level: HierarchyLevel = HierarchyLevel.DOMAIN,
         target_level: HierarchyLevel = HierarchyLevel.DIALOGUE,
@@ -113,7 +114,9 @@ class MemoryAugmentedLLMInference:
                 generation_handler_type,
                 api_base=generation_api_base,
             )
-            if not self.generation_handler.load(model_source, device=device):
+            if not self.generation_handler.load(
+                model_source, device=device, api_key=generation_api_key,
+            ):
                 raise RuntimeError("生成模型初始化失败")
         else:
             print("未加载推理模型")

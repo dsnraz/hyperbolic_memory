@@ -341,9 +341,10 @@ class OpenAICompatibleHandler(BaseModelHandler):
     def load(self, model_name: str, device: str = "auto", **kwargs) -> bool:
         try:
             import openai
+            api_key = kwargs.get("api_key") or None  # None lets SDK read OPENAI_API_KEY env var
             self._client = openai.OpenAI(
                 base_url=self._api_base,
-                api_key=kwargs.get("api_key", "dummy")
+                api_key=api_key,
             )
             self._model_name = model_name
             return True

@@ -149,6 +149,12 @@ def parse_args() -> argparse.Namespace:
         help="建库 LLM API 地址（openai 类型时用）",
     )
     p.add_argument(
+        "--llm-api-key",
+        type=str,
+        default=None,
+        help="建库 LLM API key（openai 类型时用，默认读 OPENAI_API_KEY 环境变量）",
+    )
+    p.add_argument(
         "--projector-checkpoint-path",
         type=str,
         default="/share/home/leiyh5/Memory/checkpoints_locomo_fact/hyperbolic_projector_final.pt",
@@ -214,6 +220,12 @@ def parse_args() -> argparse.Namespace:
     )
     p.add_argument("--generation-api-base", type=str, default="http://localhost:11434")
     p.add_argument(
+        "--generation-api-key",
+        type=str,
+        default=None,
+        help="生成 LLM API key（openai 类型时用，默认读 OPENAI_API_KEY 环境变量）",
+    )
+    p.add_argument(
         "--memory-unit-mode",
         choices=("keyword", "fact"),
         default="fact",
@@ -249,10 +261,12 @@ def main() -> None:
         generation_model_name=args.generation_model_name,
         generation_model_path=args.generation_model_path,
         generation_api_base=args.generation_api_base,
+        generation_api_key=args.generation_api_key,
         memory_unit_mode=args.memory_unit_mode,
         extraction_mode=args.extraction_mode,
         llm_handler_type=args.llm_handler_type,
         llm_api_base=args.llm_api_base,
+        llm_api_key=args.llm_api_key,
     )
     if args.retriever_type in (
         "hyperbolic_geodesic",

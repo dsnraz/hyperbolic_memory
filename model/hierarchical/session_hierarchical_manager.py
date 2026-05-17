@@ -745,6 +745,7 @@ def create_session_hierarchical_manager(
     extraction_mode: Literal["single", "two_stage"] = "single",
     llm_handler_type: str = "transformers",
     llm_api_base: str = "http://localhost:11434",
+    llm_api_key: Optional[str] = None,
 ) -> SessionHierarchicalMemoryManager:
     _model_type = llm_handler_type
     if _model_type == "transformers" and not llm_model_path:
@@ -754,6 +755,7 @@ def create_session_hierarchical_manager(
         model_name=llm_model_name or "",
         model_type=_model_type,
         api_base=llm_api_base,
+        api_key=llm_api_key,
         device=device,
         memory_unit_mode=memory_unit_mode,
         extraction_mode=extraction_mode,

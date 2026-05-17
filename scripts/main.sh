@@ -17,6 +17,7 @@ python -m model.llm_inference.session_run \
   --llm-model-name "" \
   --llm-handler-type transformers \
   --llm-api-base "" \
+  --llm-api-key "" \
   --projector-checkpoint-path /share/home/leiyh5/Memory/checkpoints_locomo_category_c0p1_la0p15/hyperbolic_projector_final.pt \
   --embedding-model sentence-transformers/all-mpnet-base-v2 \
   --out-file /share/home/leiyh5/Memory/data/locomo/locomo10_hy_7b7b_old_embedding_prompt_ds.json \
@@ -24,6 +25,7 @@ python -m model.llm_inference.session_run \
   --generation-model-name "" \
   --generation-handler-type transformers \
   --generation-api-base "" \
+  --generation-api-key "" \
   --retriever-type hyperbolic_angular \
   "$@"
 # To enable two-stage extraction, add: --extraction-mode two_stage (before "$@")

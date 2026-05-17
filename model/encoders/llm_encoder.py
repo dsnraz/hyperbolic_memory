@@ -65,27 +65,31 @@ JSON OUTPUT:
         model_name: str = "qwen2.5:7b",
         model_path: Optional[str] = None,
         api_base: str = "http://localhost:11434",
+        api_key: Optional[str] = None,
         model_type: str = "ollama",
         device: str = "auto",
         **kwargs
     ):
         super().__init__(embedding_model=None, embedding_dim=768, **kwargs)
-        
+
         self.model_name = model_name
         self.model_path = model_path
         self.api_base = api_base
+        self.api_key = api_key
         self.model_type = model_type
         self.device = device
-        
+
         self._handler: BaseModelHandler = None
-    
+
     def _init_handler(self) -> bool:
         """初始化模型处理器。"""
         if self._handler is not None and self._handler.is_loaded():
             return True
-        
+
         handler_kwargs = {"api_base": self.api_base}
-        
+        if self.api_key:
+            handler_kwargs["api_key"] = self.api_key
+
         if self.model_type == "transformers":
             self._handler = create_model_handler("transformers", **handler_kwargs)
             model_source = self.model_path or self.model_name

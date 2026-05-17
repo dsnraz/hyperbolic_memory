@@ -20,6 +20,7 @@ class SessionMemoryAugmentedLLMInference(MemoryAugmentedLLMInference):
         extraction_mode: Literal["single", "two_stage"] = "single",
         llm_handler_type: str = "transformers",
         llm_api_base: str = "http://localhost:11434",
+        llm_api_key: Optional[str] = None,
         **kwargs,
     ) -> None:
         manager = create_session_hierarchical_manager(
@@ -33,6 +34,7 @@ class SessionMemoryAugmentedLLMInference(MemoryAugmentedLLMInference):
             extraction_mode=extraction_mode,
             llm_handler_type=llm_handler_type,
             llm_api_base=llm_api_base,
+            llm_api_key=llm_api_key,
         )
         super().__init__(
             manager=manager,
