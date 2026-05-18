@@ -150,17 +150,10 @@ class TransformersModelHandler(BaseModelHandler):
     
     def build_prompt(self, user_prompt: str) -> str:
         """根据模型类型构建格式化的 prompt。"""
-        if self._model_type == "qwen" or self._model_type == "deepseek":
+        if self._model_type in ("qwen", "deepseek", "llama"):
             messages = [{"role": "user", "content": user_prompt}]
             return self._tokenizer.apply_chat_template(
                 messages, tokenize=False, add_generation_prompt=True
-            )
-        elif self._model_type == "llama":
-            return (
-                "A chat between a curious user and an artificial intelligence "
-                "assistant. The assistant gives helpful, detailed, and polite "
-                "answers to the user's questions.\n\n"
-                f"USER: {user_prompt}\n\nASSISTANT:"
             )
         elif self._model_type == "chatglm":
             return f"[Round 0]\n问：{user_prompt}\n答："
