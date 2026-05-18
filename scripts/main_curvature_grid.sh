@@ -10,9 +10,9 @@ set -euo pipefail
 ROOT_DIR="/share/home/leiyh5/Memory"
 SCRIPT_DIR="${ROOT_DIR}/scripts"
 DATA_FILE="${ROOT_DIR}/data/locomo/locomo10.json"
-PERSIST_DIR_SHARED="${ROOT_DIR}/data/memory_running_category"
+PERSIST_DIR_SHARED="${ROOT_DIR}/data/memory_running_category_old_embedding_prompt"
 
-CURVATURES=("0.2" "0.5" "0.8")
+CURVATURES=("0.01" "1" "10")
 
 for CURV in "${CURVATURES[@]}"; do
   SAFE_CURV="${CURV/./p}"

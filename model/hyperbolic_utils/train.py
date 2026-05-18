@@ -600,7 +600,7 @@ def parse_args() -> TrainConfig:
     parser = argparse.ArgumentParser(description="双曲投影器训练")
     
     # 数据参数
-    parser.add_argument('--vector_store_path', type=str, default='/share/home/leiyh5/Memory/data/hierarchical_memory_locomo_7b_category2')
+    parser.add_argument('--vector_store_path', type=str, default='/share/home/leiyh5/Memory/data/hierarchical_memory_locomo_7b_mpnet2')
     parser.add_argument('--embedding_dim', type=int, default=768)
     parser.add_argument('--hidden_dim', type=int, default=1024)
     
@@ -622,7 +622,7 @@ def parse_args() -> TrainConfig:
     parser.add_argument('--entailment_weight', type=float, default=0)
     parser.add_argument('--contrastive_weight', type=float, default=0)
     parser.add_argument('--angular_weight', type=float, default=1)
-    parser.add_argument('--lambda_centroid', type=float, default=0.3,
+    parser.add_argument('--lambda_centroid', type=float, default=0.15,
                         help='centroid depth regularization weight')
     
     # 训练参数
